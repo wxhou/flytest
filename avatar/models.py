@@ -20,8 +20,8 @@ class User(BaseModel, UserMixin):
     nickname = db.Column(db.String(10))
     email = db.Column(db.String(128), unique=True)
     password_hash = db.Column(db.String(128))
-    products = db.relationship('Product', backref='auth', lazy=True)  # pass
-    apitests = db.relationship('ApiTest', backref='auth', lazy=True)
+    products = db.relationship('Product', backref='user', lazy=True)  # pass
+    apitests = db.relationship('Apitest', backref='user', lazy=True)
 
     @property
     def password(self):
@@ -46,7 +46,7 @@ class Product(BaseModel):
     desc = db.Column(db.Text)
     tag = db.Column(db.String(32))
     user_id = db.Column(db.Integer, db.ForeignKey(
-        'auth.id'), nullable=False)  # pass
+        'user.id'), nullable=False)  # pass
     apiurls = db.relationship('Apiurl', backref='product', lazy=True)  # pass
     apitests = db.relationship('Apitest', backref='product', lazy=True)  # pass
 
@@ -62,7 +62,7 @@ class Apiurl(BaseModel):
         'product.id'), nullable=False)  # pass
     name = db.Column(db.String(128), unique=True)
     url = db.Column(db.String(512))
-    apisteps = db.relationship("ApiStep", backref='apiurl', lazy=True)  # pass
+    apisteps = db.relationship("Apistep", backref='apiurl', lazy=True)  # pass
 
     def __repr__(self) -> str:
         return '<Url %s>' % self.name
@@ -73,10 +73,10 @@ class Apitest(BaseModel):
     # __tablename__ = 'tp_apitest'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
-    user_id = db.Column(db.Integer, db.ForeignKey('auth.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey(
         'product.id'), nullable=False)  # pass
-    apisteps = db.relationship("ApiStep", backref='apitest', lazy=True)  # pass
+    apisteps = db.relationship("Apistep", backref='apitest', lazy=True)  # pass
     results = db.Column(db.Text)
 
     def __repr__(self):

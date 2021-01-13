@@ -1,6 +1,6 @@
-{% load staticfiles %}
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,9 +9,9 @@
     <meta name="generator" content="Jekyll v3.8.5">
     <title>wftest{% block title %}
         首页
-    {% endblock %}</title>
+        {% endblock %}</title>
     <!-- Bootstrap core CSS -->
-    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
     <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
@@ -36,22 +36,24 @@
 
     {% endblock %}
     <!-- Custom styles for this template -->
-    <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/dashboard.css') }}" rel="stylesheet">
 </head>
 {% block body %}
-    <body>
+<!--  -->
+
+<body>
 
     {#导航栏#}
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">测试平台</a>
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
         <ul class="navbar-nav px-3">
-            <img src="{{ request.user.avatar_30_30_url }}">
+            <img src="#">
         </ul>
-        <span style="color: white">{{ request.user.username }}</span>
+        <span style="color: white">#</span>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="{% url 'user:logout' %}">Sign out</a>
+                <a class="nav-link" href="#">Sign out</a>
             </li>
         </ul>
     </nav>
@@ -63,56 +65,56 @@
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'homepage' %}active{% endif %}"
-                               href="{% url 'user:index' %}">
+                            <a class="nav-link {% if page_name == 'homepage' %}active{% endif %}" href="#">
                                 <span data-feather="home"></span>
                                 控制台 <span class="sr-only">(current)</span>
                             </a>
                         </li>
-                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <h6
+                            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                             <span>质量管理</span>
-                            {#                    <a class="d-flex align-items-center text-muted" href="#">#}
-                            {#                        <span data-feather="plus-circle"></span>#}
-                            {#                    </a>#}
+                            {# <a class="d-flex align-items-center text-muted" href="#">#}
+                                {# <span data-feather="plus-circle"></span>#}
+                                {# </a>#}
                         </h6>
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'productpage' %}active{% endif %}"
-                               href="{% url 'product:index' %}">
+                            <a class="nav-link {% if page_name == 'productpage' %}active{% endif %}" href="#">
                                 <span data-feather="shopping-cart"></span>
                                 项目管理
                             </a>
                         </li>
                         {% if page_name == 'envpage' %}
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#">
-                                    <span data-feather="cloud"></span>
-                                    环境配置
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <span data-feather="cloud"></span>
+                                环境配置
+                            </a>
+                        </li>
                         {% endif %}
                         {% if page_name == 'testpage' %}
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#">
-                                    <i data-feather="send"></i>
-                                    测试管理
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i data-feather="send"></i>
+                                测试管理
+                            </a>
+                        </li>
                         {% endif %}
                         {% if page_name == 'userpage' %}
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#">
-                                    <i data-feather="users"></i>
-                                    人员管理
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i data-feather="users"></i>
+                                人员管理
+                            </a>
+                        </li>
                         {% endif %}
                     </ul>
 
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <h6
+                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                         <span>任务管理</span>
-                        {#                    <a class="d-flex align-items-center text-muted" href="#">#}
-                        {#                        <span data-feather="plus-circle"></span>#}
-                        {#                    </a>#}
+                        {# <a class="d-flex align-items-center text-muted" href="#">#}
+                            {# <span data-feather="plus-circle"></span>#}
+                            {# </a>#}
                     </h6>
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
@@ -123,7 +125,7 @@
                         </li>
                     </ul>
                     <h6
-                            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                         <span>报告管理</span>
                         <!-- <a class="link-secondary" href="#" aria-label="Add a new report">
                             <span data-feather="plus-circle"></span>
@@ -150,194 +152,193 @@
                         </li>
                     </ul>
                     <h6
-                            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
                         <span>最新的消息</span>
                         <!-- <a class="link-secondary" href="#" aria-label="Add a new report">
                             <span data-feather="plus-circle"></span>
                         </a> -->
                     </h6>
                     {% if messages %}
-                        {% for message in messages %}
-                            <ul class="nav flex-column mb-2">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">
-                                        <span data-feather="message-circle"></span>
-                                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                            {{ message }}
-                                        </div>
-                                    </a>
-                                </li>
-                            </ul>
-                        {% endfor %}
+                    {% for message in messages %}
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="message-circle"></span>
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                    {{ message }}
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                    {% endfor %}
                     {% else %}
-                        <ul class="nav flex-column mb-2">
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <span data-feather="message-square"></span>
-                                    没有新的消息
-                                </a>
-                            </li>
-                        </ul>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="message-square"></span>
+                                没有新的消息
+                            </a>
+                        </li>
+                    </ul>
                     {% endif %}
                 </div>
             </nav>
 
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-                {#            <h2>Section title</h2>#}
-                {#            <div class="table-responsive">#}
-                {#                <table class="table table-striped table-sm">#}
-                {#                    <thead>#}
-                {#                    <tr>#}
-                {#                        <th>#</th>#}
-                {#                        <th>Header</th>#}
-                {#                        <th>Header</th>#}
-                {#                        <th>Header</th>#}
-                {#                        <th>Header</th>#}
-                {#                    </tr>#}
-                {#                    </thead>#}
-                {#                    <tbody>#}
-                {#                    <tr>#}
-                {#                        <td>1,001</td>#}
-                {#                        <td>Lorem</td>#}
-                {#                        <td>ipsum</td>#}
-                {#                        <td>dolor</td>#}
-                {#                        <td>sit</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,002</td>#}
-                {#                        <td>amet</td>#}
-                {#                        <td>consectetur</td>#}
-                {#                        <td>adipiscing</td>#}
-                {#                        <td>elit</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,003</td>#}
-                {#                        <td>Integer</td>#}
-                {#                        <td>nec</td>#}
-                {#                        <td>odio</td>#}
-                {#                        <td>Praesent</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,003</td>#}
-                {#                        <td>libero</td>#}
-                {#                        <td>Sed</td>#}
-                {#                        <td>cursus</td>#}
-                {#                        <td>ante</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,004</td>#}
-                {#                        <td>dapibus</td>#}
-                {#                        <td>diam</td>#}
-                {#                        <td>Sed</td>#}
-                {#                        <td>nisi</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,005</td>#}
-                {#                        <td>Nulla</td>#}
-                {#                        <td>quis</td>#}
-                {#                        <td>sem</td>#}
-                {#                        <td>at</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,006</td>#}
-                {#                        <td>nibh</td>#}
-                {#                        <td>elementum</td>#}
-                {#                        <td>imperdiet</td>#}
-                {#                        <td>Duis</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,007</td>#}
-                {#                        <td>sagittis</td>#}
-                {#                        <td>ipsum</td>#}
-                {#                        <td>Praesent</td>#}
-                {#                        <td>mauris</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,008</td>#}
-                {#                        <td>Fusce</td>#}
-                {#                        <td>nec</td>#}
-                {#                        <td>tellus</td>#}
-                {#                        <td>sed</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,009</td>#}
-                {#                        <td>augue</td>#}
-                {#                        <td>semper</td>#}
-                {#                        <td>porta</td>#}
-                {#                        <td>Mauris</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,010</td>#}
-                {#                        <td>massa</td>#}
-                {#                        <td>Vestibulum</td>#}
-                {#                        <td>lacinia</td>#}
-                {#                        <td>arcu</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,011</td>#}
-                {#                        <td>eget</td>#}
-                {#                        <td>nulla</td>#}
-                {#                        <td>Class</td>#}
-                {#                        <td>aptent</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,012</td>#}
-                {#                        <td>taciti</td>#}
-                {#                        <td>sociosqu</td>#}
-                {#                        <td>ad</td>#}
-                {#                        <td>litora</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,013</td>#}
-                {#                        <td>torquent</td>#}
-                {#                        <td>per</td>#}
-                {#                        <td>conubia</td>#}
-                {#                        <td>nostra</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,014</td>#}
-                {#                        <td>per</td>#}
-                {#                        <td>inceptos</td>#}
-                {#                        <td>himenaeos</td>#}
-                {#                        <td>Curabitur</td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td>1,015</td>#}
-                {#                        <td>sodales</td>#}
-                {#                        <td>ligula</td>#}
-                {#                        <td>in</td>#}
-                {#                        <td>libero</td>#}
-                {#                    </tr>#}
-                {#                    </tbody>#}
-                {#                </table>#}
-                {#            </div>#}
+                {# <h2>Section title</h2>#}
+                {# <div class="table-responsive">#}
+                    {# <table class="table table-striped table-sm">#}
+                        {# <thead>#}
+                            {# <tr>#}
+                                {# <th>#</th>#}
+                                {# <th>Header</th>#}
+                                {# <th>Header</th>#}
+                                {# <th>Header</th>#}
+                                {# <th>Header</th>#}
+                                {# </tr>#}
+                            {# </thead>#}
+                        {# <tbody>#}
+                            {# <tr>#}
+                                {# <td>1,001</td>#}
+                                {# <td>Lorem</td>#}
+                                {# <td>ipsum</td>#}
+                                {# <td>dolor</td>#}
+                                {# <td>sit</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,002</td>#}
+                                {# <td>amet</td>#}
+                                {# <td>consectetur</td>#}
+                                {# <td>adipiscing</td>#}
+                                {# <td>elit</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,003</td>#}
+                                {# <td>Integer</td>#}
+                                {# <td>nec</td>#}
+                                {# <td>odio</td>#}
+                                {# <td>Praesent</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,003</td>#}
+                                {# <td>libero</td>#}
+                                {# <td>Sed</td>#}
+                                {# <td>cursus</td>#}
+                                {# <td>ante</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,004</td>#}
+                                {# <td>dapibus</td>#}
+                                {# <td>diam</td>#}
+                                {# <td>Sed</td>#}
+                                {# <td>nisi</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,005</td>#}
+                                {# <td>Nulla</td>#}
+                                {# <td>quis</td>#}
+                                {# <td>sem</td>#}
+                                {# <td>at</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,006</td>#}
+                                {# <td>nibh</td>#}
+                                {# <td>elementum</td>#}
+                                {# <td>imperdiet</td>#}
+                                {# <td>Duis</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,007</td>#}
+                                {# <td>sagittis</td>#}
+                                {# <td>ipsum</td>#}
+                                {# <td>Praesent</td>#}
+                                {# <td>mauris</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,008</td>#}
+                                {# <td>Fusce</td>#}
+                                {# <td>nec</td>#}
+                                {# <td>tellus</td>#}
+                                {# <td>sed</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,009</td>#}
+                                {# <td>augue</td>#}
+                                {# <td>semper</td>#}
+                                {# <td>porta</td>#}
+                                {# <td>Mauris</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,010</td>#}
+                                {# <td>massa</td>#}
+                                {# <td>Vestibulum</td>#}
+                                {# <td>lacinia</td>#}
+                                {# <td>arcu</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,011</td>#}
+                                {# <td>eget</td>#}
+                                {# <td>nulla</td>#}
+                                {# <td>Class</td>#}
+                                {# <td>aptent</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,012</td>#}
+                                {# <td>taciti</td>#}
+                                {# <td>sociosqu</td>#}
+                                {# <td>ad</td>#}
+                                {# <td>litora</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,013</td>#}
+                                {# <td>torquent</td>#}
+                                {# <td>per</td>#}
+                                {# <td>conubia</td>#}
+                                {# <td>nostra</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,014</td>#}
+                                {# <td>per</td>#}
+                                {# <td>inceptos</td>#}
+                                {# <td>himenaeos</td>#}
+                                {# <td>Curabitur</td>#}
+                                {# </tr>#}
+                            {# <tr>#}
+                                {# <td>1,015</td>#}
+                                {# <td>sodales</td>#}
+                                {# <td>ligula</td>#}
+                                {# <td>in</td>#}
+                                {# <td>libero</td>#}
+                                {# </tr>#}
+                            {# </tbody>#}
+                        {# </table>#}
+                    {# </div>#}
                 {% block content %}
                 {% endblock content %}
                 {% if page_obj %}
-                    <nav class="navbar navbar-default navbar-fixed-bottom">
-                        <div class="container">
-                            <ul class="pagination pagination-sm">
-                                <li class="page-item"><a class="page-link" href="?page=1">首页</a></li>
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item"><a class="page-link"
-                                                             href="?page={{ page_obj.previous_page_number }}">上一页</a>
-                                    </li>
-                                {% endif %}
-                                <li class="page-item active"><a class="page-link" href="#">{{ page_obj.number }}</a>
-                                </li>
-                                {% if page_obj.has_next %}
-                                    <li class="page-item"><a class="page-link"
-                                                             href="?page={{ page_obj.next_page_number }}">下一页</a>
-                                    </li>
-                                {% endif %}
-                                <li class="page-item"><a class="page-link"
-                                                         href="?page={{ page_obj.paginator.num_pages }}">末页</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
+                <nav class="navbar navbar-default navbar-fixed-bottom">
+                    <div class="container">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item"><a class="page-link" href="?page=1">首页</a></li>
+                            {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link"
+                                    href="?page={{ page_obj.previous_page_number }}">上一页</a>
+                            </li>
+                            {% endif %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ page_obj.number }}</a>
+                            </li>
+                            {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link"
+                                    href="?page={{ page_obj.next_page_number }}">下一页</a>
+                            </li>
+                            {% endif %}
+                            <li class="page-item"><a class="page-link"
+                                    href="?page={{ page_obj.paginator.num_pages }}">末页</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
                 {% endif %}
             </main>
         </div>
@@ -347,7 +348,8 @@
     {% endblock %}
     <script>window.jQuery || document.write('<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"><\/script>')</script>
     <script src="https://cdn.bootcdn.net/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
-    <script src="{% static 'js/dashboard.js' %}"></script>
-    </body>
+    <script src="{{ url_for('static',filename='js/dashboard.js') }}"></script>
+</body>
 {% endblock %}
+
 </html>
