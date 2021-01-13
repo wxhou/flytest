@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block head %}
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <link href="{% static 'css/signin.css' %}" rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <body class="text-center">
+    <form class="form-signin" method="POST">
+        {% csrf_token %}
+        <h1 class="h3 mb-3 font-weight-normal">测试平台V1.0</h1>
+        <img class="mb-4" src="{% static 'images/login.jpg' %}" alt="" width="180" height="110">
+        <h1 class="h3 mb-3 font-weight-normal">请登录</h1>
+        <label for="inputEmail" class="sr-only">邮箱地址：</label>
+        <input type="text" name="username" id="inputEmail" class="form-control" placeholder="请输入用户名..." required
+               autofocus>
+        <label for="inputPassword" class="sr-only">密 码：</label>
+        <input type="password" name="password" id="inputPassword" class="form-control" placeholder="请输入密码..."
+               required>
+        <div class="checkbox mb-3">
+            <label>
+                <input type="checkbox" name="remember" value="remember-me"> 记住我
+            </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <p class="mt-5 mb-3 text-muted">&copy; 2018-2021</p>
+    </form>
+    </body>
+{% endblock %}

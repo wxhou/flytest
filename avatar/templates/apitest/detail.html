@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}
+    测试步骤
+{% endblock %}
+{% block content %}
+    <br>
+    {% if product %}
+        <h4>{{ product.name }}</h4>
+    {% endif %}
+    <div style="float: right">
+        <a href="{% url 'apitest:step-add' product.id %}">
+            <button type="button" class="btn btn-outline-primary">添加</button>
+        </a>
+    </div>
+    <br>
+    <br>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>步骤ID</th>
+                <th>步骤名称</th>
+                <th>测试地址</th>
+                <th>请求方法</th>
+                <th>参数</th>
+                <th>请求体</th>
+                <th>测试结果</th>
+                <th>状态</th>
+            </tr>
+            </thead>
+            {% for step in steps %}
+                <tr>
+                    <td>{{ step.id }}</td>
+                    <td>{{ step.name }}</td>
+                    <td>{{ step.url }}</td>
+                    <td>{{ step.method }}</td>
+                    <td>{{ step.params }}</td>
+                    <td>{{ step.body }}</td>
+                    {% if step.status %}
+                        <td class="text-success">通过</td>
+                    {% else %}
+                        <td class="text-danger">失败</td>
+                    {% endif %}
+                    {% if product.is_deleted %}
+                        <td class="text-danger">已删除</td>
+                    {% else %}
+                        <td class="text-success">正常</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% block script %}
+        <script>
+            $.get({% url 'product:names' %})
+        </script>
+    {% endblock %}
+{% endblock %}
