@@ -48,12 +48,12 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">测试平台</a>
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
         <ul class="navbar-nav px-3">
-            <img src="#">
+            <img src="{{ avatars.default(size='s') }}">
         </ul>
-        <span style="color: white">#</span>
+        <span style="color: white">{{ current_user.nickname }}</span>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="#">Sign out</a>
+                <a class="nav-link" href="{{ url_for('home.logout') }}">Sign out</a>
             </li>
         </ul>
     </nav>
@@ -158,13 +158,14 @@
                             <span data-feather="plus-circle"></span>
                         </a> -->
                     </h6>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
-                    {% for message in messages %}
+                    {% for category, message in messages %}
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
                             <a class="nav-link" href="#">
                                 <span data-feather="message-circle"></span>
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                                     {{ message }}
                                 </div>
@@ -182,6 +183,7 @@
                         </li>
                     </ul>
                     {% endif %}
+                    {% endwith %}
                 </div>
             </nav>
 

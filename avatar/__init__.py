@@ -5,10 +5,11 @@ import click
 from flask import Flask
 from avatar.settings import config
 from avatar.extensions import (
-    db, login_manager
+    db, login_manager, debugtoolbar, avatars, migrate
 )
-from avatar.models import User,Product,Apiurl,Apitest,Apistep
+from avatar.models import User, Product, Apiurl, Apitest, Apistep
 from avatar.views.view_home import home_bp
+
 
 def create_app(config_name=None):
     if config_name is None:
@@ -28,6 +29,9 @@ def register_blueprints(app):
 def register_extensions(app):
     db.init_app(app)
     login_manager.init_app(app)
+    debugtoolbar.init_app(app)
+    avatars.init_app(app)
+    migrate.init_app(app)
 
 
 def register_commands(app):
@@ -68,6 +72,7 @@ def register_commands(app):
             db.session.add(admin)
         db.session.commit()
         click.echo('Done.')
+
 
 if __name__ == "__main__":
     print(create_app('development'))

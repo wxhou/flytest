@@ -4,7 +4,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from avatar.extensions import db
-
+from flask_avatars import Identicon
 
 class BaseModel(db.Model):
     """模型基类"""
@@ -22,6 +22,22 @@ class User(BaseModel, UserMixin):
     password_hash = db.Column(db.String(128))
     products = db.relationship('Product', backref='user', lazy=True)  # pass
     apitests = db.relationship('Apitest', backref='user', lazy=True)
+    avatar_s = db.Column(db.String(64))
+    avatar_m = db.Column(db.String(64))
+    avatar_l = db.Column(db.String(64))
+
+    def __init__(self, *args, **kwargs):
+        super(User, self).init(*args, **kwargs)
+        self.generate_avatar()
+
+    def generate_avatar(self):
+        ava = Identicon()
+        filenames = ava.generate(text=self.nickname)
+        print(filenames)
+        self.avatar_s = filenames[0]
+        self.avatar_m = filenames[1]
+        self.avatar_l = filenames[2]
+        db.session.commit()
 
     @property
     def password(self):
@@ -90,7 +106,8 @@ class Apistep(BaseModel):
     apitest_id = db.Column(db.Integer, db.ForeignKey(
         "apitest.id"), nullable=False)  # pass
     name = db.Column(db.String(128))
-    apiurl_id = db.Column(db.Integer, db.ForeignKey('apiurl.id'), nullable=False)  # pass
+    apiurl_id = db.Column(db.Integer, db.ForeignKey(
+        'apiurl.id'), nullable=False)  # pass
     method = db.Column(db.String(16))
     params = db.Column(db.Text, nullable=True)
     body = db.Column(db.Text, nullable=True)
