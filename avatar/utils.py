@@ -18,3 +18,7 @@ def redirect_back(default='home.login', **kwargs):
         if is_safe_url(target):
             return redirect(target)
     return redirect(url_for(default, **kwargs))
+
+
+def per_page():
+    return current_app.config['WFTEST_PER_PAGE']

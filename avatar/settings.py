@@ -26,10 +26,11 @@ class BaseConfig(object):
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = ('test platform', MAIL_USERNAME)
+    WFTEST_PER_PAGE = 20
     # 上传目录
     WFTEST_UPLOAD_PATH = 'uploads'
     # flask_avatars保存目录
-    AVATARS_SAVE_PATH = os.path.join(WFTEST_UPLOAD_PATH,'avatars')
+    AVATARS_SAVE_PATH = os.path.join(WFTEST_UPLOAD_PATH, 'avatars')
 
 
 class DevelopmentConfig(BaseConfig):
