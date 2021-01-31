@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}
+流程接口
+{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<br>
+<div class="btn-group">
+    <button type="button" class="btn btn-info">{{ product.name }}</button>
+    <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">切换下拉菜单</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        {% for pd in products %}
+        <li><a href="{{ url_for('.test',pk=pd.id) }}">{{ pd.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+<br>
+<br>
+<div style="float: right">
+    <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#myModal">添加</button>
+</div>
+<!-- 模态框 -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- 模态框头部 -->
+            <div class="modal-header">
+                <h4 class="modal-title">新增一个用例</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- 模态框主体 -->
+            <div class="modal-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="apitestname" class="form-label">流程用例名称<label style="color: red;">*</label></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="请输入用例名称..." autofocus
+                            required>
+                        <div id="namehelp" class="form-text">输入用例名称</div>
+                    </div>
+                    <br>
+                    <div class="form-actions well well-sm clearfix">
+                        <button type="button" class="btn btn-info" data-dismiss="modal">
+                            <i class="fa fa-undo"></i>
+                            取消
+                        </button>
+                        <button type="submit" class="default btn btn-primary hide-xs">
+                            <i class="fa fa-save"></i>
+                            增加
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 模态框 -->
+<br>
+<br>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>流程接口测试名称</th>
+                <th>执行人</th>
+                <th>所属项目</th>
+                <th class="bg-info text-white">执行测试</th>
+                <th>测试结果</th>
+                <td>最后一次运行任务ID</td>
+                <th>更新时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if tests %}
+            {% for test in tests %}
+            <tr>
+                <td><a href="#">
+                        {{ test.id }}
+                    </a></td>
+                <td>{{ test.name }}</td>
+                <td>{{ test.user }}</td>
+                <td>{{ test.product.name }}</td>
+                <td>
+                    <a href="#">
+                        <button type="button" class="btn btn-outline-info btn-sm btn-block">
+                            运行
+                        </button>
+                    </a>
+                </td>
+                {% if test.results == '-1' %}
+                <td><span class="badge badge-warning">未测试</span></td>
+                {% elif test.results == '1' %}
+                <td><span class="badge badge-success">成功</span></td>
+                {% elif test.results == '0' %}
+                <td><span class="badge badge-danger">失败</span></td>
+                {% endif %}
+                <td><a href="#">{{ test.task_id }}</a></td>
+                <td>{{ moment(test.updated).format('lll') }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <p style="color: red">暂无数据</p>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

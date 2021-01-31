@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}
+    报告
+{% endblock %}
+{% block head %}
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+{% endblock %}
+{% block content %}
+    <br>
+    <h5>报告列表</h5>
+    <br>
+    <div class="row">
+        <div class="col-sm-9">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-sm">
+                    <thead>
+                    <tr>
+                        <th>报告ID</th>
+                        <th>任务ID</th>
+                        <th>用例名称</th>
+                        <th>通过数</th>
+                        <th>失败数</th>
+                        <th>查看BUG</th>
+                        <th>执行时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for report in reports %}
+                        <tr>
+                            <td>{{ report.pk }}</td>
+                            <td>{{ report.task_id }}</td>
+                            <td>{{ report.testcase }}</td>
+                            <td><span class="badge badge-success">{{ report.success }}</span></td>
+                            <td><span class="badge badge-danger">{{ report.failure }}</span></td>
+                            {% if report.failure %}
+                                <td>
+                                    <button type="button" class="btn btn-outline-info">
+                                        <a href="{% url 'charts:bug' %}?task_id={{ report.task_id }}">点击查看问题</a>
+                                    </button>
+                                </td>
+                            {% else %}
+                                <td><strong>暂无BUG</strong></td>
+                            {% endif %}
+                            <td>{{ report.updated }}</td>
+                        </tr>
+                    {% empty %}
+                        <p style="color: red">暂无数据</p>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div id="pie" style="width: 400px;height: 400px;margin: 20px auto"></div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block script %}
+    <script>
+        var chart = echarts.init(document.getElementById('pie'), 'white', {renderer: 'canvas'});
+        $(
+            function () {
+                fetchData(chart);
+                {#setInterval(fetchData, 2000);#}
+            }
+        );
+
+        function fetchData() {
+            $.get({
+                url: "{{ request.scheme }}://{{ request.get_host }}{% url 'charts:pie' %}?task_id={{ first_task }}",
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result);
+                    chart.setOption(result);
+                }
+            });
+        }
+    </script>
+{% endblock %}

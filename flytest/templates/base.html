@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v3.8.5">
+    <title>flytest{% block title %}
+        首页
+        {% endblock %}</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/table.css') }}">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    {% block head %}
+
+    {% endblock %}
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static',filename='css/dashboard.css') }}" rel="stylesheet">
+</head>
+{% block body %}
+
+<body>
+    {#导航栏#}
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">测试平台</a>
+        <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+        <ul class="navbar-nav px-3">
+            <img src="{{ url_for('.get_avatar',filename=current_user.avatar_s) }}">
+        </ul>
+        <span style="color: white">{{ current_user.username }}</span>
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap">
+                <a class="nav-link" href="{{ url_for('.logout') }}">Sign out</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            {# 侧边导航栏#}
+            <!-- 控制侧边宽度 -->
+            <nav class="col-md-2 col-lg-1 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky">
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'homepage' %}active{% endif %}"
+                                href="{{ url_for('.index') }}">
+                                <span data-feather="home"></span>
+                                控制台 <span class="sr-only">(current)</span>
+                            </a>
+                        </li>
+                        <h6
+                            class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>质量管理</span>
+                            {# <a class="d-flex align-items-center text-muted" href="#">#}
+                                {# <span data-feather="plus-circle"></span>#}
+                                {# </a>#}
+                        </h6>
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'productpage' %}active{% endif %}"
+                                href="{{ url_for('.product') }}">
+                                <span data-feather="shopping-cart"></span>
+                                项目管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'envpage' %}
+                                active{% endif %}" href="{{ url_for('.env') }}">
+                                <span data-feather="cloud"></span>
+                                环境配置
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'testpage' %}
+                                active{% endif %}" href="{{ url_for('.test') }}">
+                                <i data-feather="send"></i>
+                                测试管理
+                            </a>
+                        </li>
+                        {% if page_name == 'userpage' %}
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i data-feather="users"></i>
+                                人员管理
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <h6
+                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>任务管理</span>
+                        {# <a class="d-flex align-items-center text-muted" href="#">#}
+                            {# <span data-feather="plus-circle"></span>#}
+                            {# </a>#}
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'jobpage' %}active{% endif %}" href="#">
+                                <span data-feather="trello"></span>
+                                任务列表
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="truck"></span>
+                                定时任务
+                            </a>
+                        </li>
+                    </ul>
+                    <h6
+                        class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>报告管理</span>
+                        <!-- <a class="link-secondary" href="#" aria-label="Add a new report">
+                            <span data-feather="plus-circle"></span>
+                        </a> -->
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'reportpage' %}
+                            active
+                            {% endif %}" href="#">
+                                <span data-feather="file-minus"></span>
+                                最新报告
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'bugpage' %}active{% endif %}" href="#">
+                                <span data-feather="file-text"></span>
+                                问题管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if page_name == 'trendingpage' %}
+                            active
+                            {% endif %}" href="#">
+                                <span data-feather="activity"></span>
+                                结果趋势
+                            </a>
+                        </li>
+                    </ul>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    <ul class="navbar-nav px-30">
+                        {% for category, message in messages %}
+                        <li class="nav-item">
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                {{ message }}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </nav>
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-11 px-4">
+                <br>
+                {% block content %}
+                {% endblock content %}
+                {% if pagination %}
+                <nav class="navbar navbar-default navbar-fixed-bottom">
+                    <div class="container">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item"><a class="page-link" href="?page=1">首页</a></li>
+                            {% if pagination.has_prev %}
+                            <li class="page-item"><a class="page-link" href="?page={{ pagination.prev_num }}">上一页</a>
+                            </li>
+                            {% endif %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ pagination.page }}/{{
+                                    pagination.pages }}</a>
+                            </li>
+                            {% if pagination.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ pagination.next_num }}">下一页</a>
+                            </li>
+                            {% endif %}
+                            <li class="page-item"><a class="page-link"
+                                    href="?page={{ page_obj.paginator.num_pages }}">末页</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+    <script>window.jQuery || document.write('<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"><\/script>')</script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+    <script src="{{ url_for('static',filename='js/dashboard.js') }}"></script>
+    {% block script %}
+
+    {% endblock %}
+    {{ moment.include_moment(local_js=url_for('static', filename='js/moment-with-locales.min.js')) }}
+    {{ moment.locale(auto_detect=True) }}
+</body>
+{% endblock %}
+
+</html>

@@ -1,2 +1,2 @@
 FLASK_ENV=development
-FLASK_APP=avatar
+FLASK_APP=flytest

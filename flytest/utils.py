@@ -11,14 +11,10 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
-def redirect_back(default='home.login', **kwargs):
+def redirect_back(default='.index', **kwargs):
     for target in request.args.get('next'), request.referrer:
         if not target:
             continue
         if is_safe_url(target):
             return redirect(target)
     return redirect(url_for(default, **kwargs))
-
-
-def per_page():
-    return current_app.config['WFTEST_PER_PAGE']
