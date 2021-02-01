@@ -1,114 +1,116 @@
 {% extends 'base.html' %}
 {% block title %}
-    测试步骤
+测试步骤
 {% endblock %}
 {% block content %}
-    <br>
-    <br>
-    {% if apitest %}
-        <h4>用例——{{ apitest.name }}</h4>
-    {% endif %}
-    <div style="float: right">
-        <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#myModal">添加</button>
-    </div>
-    <!-- 模态框 -->
-    <div class="modal fade" id="myModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+{% if apitest %}
+<h4>用例——{{ apitest.name }}</h4>
+{% endif %}
+<div style="float: right">
+    <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#myModal">添加</button>
+</div>
+<!-- 模态框 -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
 
-                <!-- 模态框头部 -->
-                <div class="modal-header">
-                    <h4 class="modal-title">添加测试步骤</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
+            <!-- 模态框头部 -->
+            <div class="modal-header">
+                <h4 class="modal-title">添加测试步骤</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
 
-                <!-- 模态框主体 -->
-                <div class="modal-body">
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="name">步骤名称<label style="color: red;">*</label></label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="请输入步骤名称..."
-                                       required>
-                                <div class="invalid-feedback">
-                                    Valid first name is required.
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="method">请求方法<label style="color: red;">*</label></label>
-                                <select class="form-control" id="method" name="method">
-                                    <option>GET</option>
-                                    <option>POST</option>
-                                    <option>PUT</option>
-                                    <option>DELETE</option>
-                                </select>
+            <!-- 模态框主体 -->
+            <div class="modal-body">
+                <form method="post" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name">步骤名称<label style="color: red;">*</label></label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="请输入步骤名称..."
+                                required>
+                            <div class="invalid-feedback">
+                                Valid first name is required.
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="url">请求地址<label style="color: red;">*</label></label>
-                            <div class="radio">
-                                {% for url in apiurl %}
-                                    <label class="radio-inline"><input type="radio" name="url" value="{{ url.name }}">{{ url.name }}
-                                    </label>
-                                {% empty %}
-                                    <p style="color: red;">请先新建一个测试地址</p>
-                                {% endfor %}
+                        <div class="col-md-6 mb-3">
+                            <label for="method">请求方法<label style="color: red;">*</label></label>
+                            <select class="form-control" id="method" name="method">
+                                <option>GET</option>
+                                <option>POST</option>
+                                <option>PUT</option>
+                                <option>DELETE</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="url">请求地址<label style="color: red;">*</label></label>
+                        <div class="radio">
+                            {% if apiurl %}
+                            {% for url in apiurl %}
+                            <label class="radio-inline"><input type="radio" name="url" value="{{ url.id }}">{{
+                                url.name  }}
+                            </label>
+                            {% endfor %}
+                            {% else %}
+                            <p style="color: red;">请先新建一个测试地址</p>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="route">请求路径<label style="color: red;">*</label></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">/</span>
+                            </div>
+                            <input type="text" class="form-control" id="route" name="route" placeholder="请输入请求路径..."
+                                required>
+                            <div class="invalid-feedback" style="width: 100%;">
+                                Your username is required.
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="route">请求路径<label style="color: red;">*</label></label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">/</span>
-                                </div>
-                                <input type="text" class="form-control" id="route" name="route" placeholder="请输入请求路径..." required>
-                                <div class="invalid-feedback" style="width: 100%;">
-                                    Your username is required.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="headers">请求头</label>
-                            <textarea class="form-control" rows="5" id="headers" name="headers"
-                                      placeholder="直接在浏览器中复制请求头然后粘贴至此即可"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="request_data">请求内容</label>
-                            <textarea class="form-control" rows="5" id="request_data" name="request_data"
-                                      placeholder='输入json格式的字符串，键名称必须符合requests库的相应参数规范; 示例：{"json":{"username":"admin","password":"admin"}}'></textarea>
-                            <a href="https://requests.readthedocs.io/zh_CN/latest/user/quickstart.html#url">requests官方文档</a>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expected_result">预期结果<label style="color: red;">*</label></label>
-                            <input type="text" class="form-control" id="expected_result" name="expected_result" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expected_regular">预期正则</label>
-                            <input type="text" class="form-control" id="expected_regular" name="expected_regular">
-                        </div>
-                        <hr class="mb-4">
-                        <div class="form-actions well well-sm clearfix">
-                            <button type="button" class="btn btn-info" data-dismiss="modal">
-                                <i class="fa fa-undo"></i>
-                                取消
-                            </button>
-                            <button type="submit" class="default btn btn-primary hide-xs">
-                                <i class="fa fa-save"></i>
-                                增加
-                            </button>
-                        </div>                    
-                    </form>
-                </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="headers">请求头</label>
+                        <textarea class="form-control" rows="5" id="headers" name="headers"
+                            placeholder="直接在浏览器中复制请求头然后粘贴至此即可"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="request_data">请求内容</label>
+                        <textarea class="form-control" rows="5" id="request_data" name="request_data"
+                            placeholder='输入json格式的字符串，键名称必须符合requests库的相应参数规范; 示例：{"json":{"username":"admin","password":"admin"}}'></textarea>
+                        <a href="https://requests.readthedocs.io/zh_CN/latest/user/quickstart.html#url">requests官方文档</a>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expected_result">预期结果<label style="color: red;">*</label></label>
+                        <input type="text" class="form-control" id="expected_result" name="expected_result" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expected_regular">预期正则</label>
+                        <input type="text" class="form-control" id="expected_regular" name="expected_regular">
+                    </div>
+                    <hr class="mb-4">
+                    <div class="form-actions well well-sm clearfix">
+                        <button type="button" class="btn btn-info" data-dismiss="modal">
+                            <i class="fa fa-undo"></i>
+                            取消
+                        </button>
+                        <button type="submit" class="default btn btn-primary hide-xs">
+                            <i class="fa fa-save"></i>
+                            增加
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!-- 模态框 -->
-    <br>
-    <br>
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped table-sm">
-            <thead>
+</div>
+<!-- 模态框 -->
+<br>
+<br>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
             <tr>
                 <th>ID</th>
                 <th>步骤名称</th>
@@ -122,44 +124,44 @@
                 <th class="col-1 bg-info text-white">执行步骤</th>
                 <th>实际结果</th>
                 <th>是否通过</th>
-                <th>状态</th>
                 <th>更新时间</th>
             </tr>
-            </thead>
-            <tbody>
-            {% for step in page_obj %}
-                <tr>
-                    <td scope="col">{{ step.id }}</td>
-                    <td>{{ step.name }}</td>
-                    <td>{{ step.method }}</td>
-                    <td>{{ step.url }}</td>
-                    <td>{{ step.route }}</td>
-                    <td>{{ step.headers }}</td>
-                    <td><code>{{ step.request_data }}</code></td>
-                    <td>{{ step.expected_result }}</td>
-                    <td>{{ step.expected_regular }}</td>
-                    <td>
-                        <a href="{% url 'skytest:job' step.pk %}">
-                            <button type="button" class="btn btn-outline-info btn-sm btn-block">
-                                运行
-                            </button>
-                        </a>
-                    </td>
-                    <td>{{ step.results }}</td>
-                    {% if step.status == -1 %}
-                        <td><span class="badge badge-warning">未测试</span></td>
-                    {% elif step.status == 1 %}
-                        <td><span class="badge badge-success">通过</span></td>
-                    {% elif step.status == 0 %}
-                        <td><span class="badge badge-danger">失败</span></td>
-                    {% endif %}
-                    <td><span class="badge badge-pill badge-success">正常</span></td>
-                    <td>{{ step.updated_time }}</td>
-                </tr>
-            {% empty %}
-                <p style="color: red">暂无数据</p>
+        </thead>
+        <tbody>
+            {% if apisteps %}
+            {% for step in apisteps %}
+            <tr>
+                <td scope="col">{{ step.id }}</td>
+                <td>{{ step.name }}</td>
+                <td>{{ step.method }}</td>
+                <td>{{ step.apiurl.url }}</td>
+                <td>{{ step.route }}</td>
+                <td>{{ step.headers }}</td>
+                <td><code>{{ step.request_data }}</code></td>
+                <td>{{ step.expected_result }}</td>
+                <td>{{ step.expected_regular }}</td>
+                <td>
+                    <a href="#">
+                        <button type="button" class="btn btn-outline-info btn-sm btn-block">
+                            运行
+                        </button>
+                    </a>
+                </td>
+                <td>{{ step.results }}</td>
+                {% if step.status == -1 %}
+                <td><span class="badge badge-warning">未测试</span></td>
+                {% elif step.status == 1 %}
+                <td><span class="badge badge-success">通过</span></td>
+                {% elif step.status == 0 %}
+                <td><span class="badge badge-danger">失败</span></td>
+                {% endif %}
+                <td>{{ moment(step.updated).format('lll') }}</td>
+            </tr>
             {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            {% else %}
+            <p style="color: red">暂无数据</p>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

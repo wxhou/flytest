@@ -110,8 +110,8 @@ class Apistep(db.Model):
     request_data = db.Column(db.Text, nullable=True)
     expected_result = db.Column(db.String(512))
     expected_regular = db.Column(db.String(512), nullable=True)
-    status = db.Column(db.Boolean)
-    results = db.Column(db.String(512), nullable=True)
+    status = db.Column(db.Integer, default=-1)
+    results = db.Column(db.Text, nullable=True)
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)

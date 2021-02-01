@@ -80,7 +80,7 @@
             {% if tests %}
             {% for test in tests %}
             <tr>
-                <td><a href="#">
+                <td><a href="{{ url_for('.step',pk=test.id) }}">
                         {{ test.id }}
                     </a></td>
                 <td>{{ test.name }}</td>
@@ -93,11 +93,11 @@
                         </button>
                     </a>
                 </td>
-                {% if test.results == '-1' %}
+                {% if test.results == -1 %}
                 <td><span class="badge badge-warning">未测试</span></td>
-                {% elif test.results == '1' %}
+                {% elif test.results == 1 %}
                 <td><span class="badge badge-success">成功</span></td>
-                {% elif test.results == '0' %}
+                {% elif test.results == 0 %}
                 <td><span class="badge badge-danger">失败</span></td>
                 {% endif %}
                 <td><a href="#">{{ test.task_id }}</a></td>

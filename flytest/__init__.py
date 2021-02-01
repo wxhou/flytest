@@ -5,7 +5,7 @@ import click
 from flask import Flask
 from celery import Celery
 from .extensions import (
-    db, login_manager, avatars, migrate, moment, toolbar
+    db, login_manager, avatars, migrate, moment, toolbar,cache
 )
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
 from .settings import config
@@ -49,8 +49,9 @@ def register_blueprints(app):
 def register_extensions(app):
     login_manager.init_app(app)
     avatars.init_app(app)
-    migrate.init_app(app)
+    migrate.init_app(app=app)
     moment.init_app(app)
+    cache.init_app(app)
     db.init_app(app)
 
 

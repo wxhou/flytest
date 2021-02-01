@@ -122,10 +122,31 @@ def test(pk=None):
                            tests=tests, page_name='testpage')
 
 
-@fly.route('/step', methods=["GET", "POST"])
-@fly.route('/step/<int:pk>')
-def step(pk=None):
-    apitest = Apitest.query.get(int(pk)) if pk else Apitest.query.first()
+@fly.route('/step/<int:pk>', methods=["GET", "POST"])
+def step(pk):
+    apitest = Apitest.query.get(int(pk))
     if request.method == "POST":
-        pass
-    return render_template('step.html')
+        name = request.form.get('name')
+        method = request.form.get('method')
+        url = request.form.get('url')
+        route = request.form.get('route')
+        headers = request.form.get('headers')
+        request_data = request.form.get('request_data')
+        expected_result = request.form.get('expected_result')
+        expected_regular = request.form.get('expected_regular')
+        if not all([name, method, url]):
+            flash("请输入完整的请求参数！")
+            return redirect(request.referrer)
+        apistep = Apistep(apitest=apitest, name=name, apiurl_id=url, method=method, request_data=request_data,
+                          expected_result=expected_result, expected_regular=expected_regular)
+        db.session.add(apistep)
+        db.session.commit()
+        return redirect(url_for('.step', pk=pk))
+    page = request.args.get("page")
+    per_page = app.config['PER_PAGE_SIZE']
+    apiurl = Apiurl.query.filter_by(product_id=apitest.product_id).all()
+    paginate = Apistep.query.filter_by(
+        apitest=apitest).paginate(page, per_page)
+    apisteps = paginate.items
+    return render_template('step.html', apitest=apitest, apiurl=apiurl,
+                           paginate=paginate, apisteps=apisteps, page_name='testpage')

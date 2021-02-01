@@ -12,7 +12,6 @@ PREFIX = 'sqlite:///' if WIN else 'sqlite:////'
 
 
 class BaseConfig(object):
-
     # key
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev key')
     # celery
@@ -33,6 +32,8 @@ class BaseConfig(object):
     AVATARS_SAVE_PATH = os.path.join(BASE_DIR, 'avatar')
 
     DEBUG_TB_INTERCEPT_REDIRECTS = False
+
+    CACHE_TYPE = "redis", # Flask-Caching related configs
 
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = PREFIX + os.path.join(BASE_DIR, 'data-dev.db')

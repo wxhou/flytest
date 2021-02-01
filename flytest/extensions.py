@@ -2,12 +2,14 @@
 # -*- coding:utf-8 -*-
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
+from flask_caching import Cache
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_avatars import Avatars
 from flask_moment import Moment
 
 db = SQLAlchemy()
+cache = Cache()
 moment = Moment()
 avatars = Avatars()
 migrate = Migrate(db=db)
