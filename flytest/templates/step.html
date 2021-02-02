@@ -48,7 +48,7 @@
                             {% if apiurl %}
                             {% for url in apiurl %}
                             <label class="radio-inline"><input type="radio" name="url" value="{{ url.id }}">{{
-                                url.name  }}
+                                url.name }}
                             </label>
                             {% endfor %}
                             {% else %}
@@ -141,7 +141,7 @@
                 <td>{{ step.expected_result }}</td>
                 <td>{{ step.expected_regular }}</td>
                 <td>
-                    <a href="#">
+                    <a href="{{ url_for('.job',pk=step.id) }}">
                         <button type="button" class="btn btn-outline-info btn-sm btn-block">
                             运行
                         </button>

@@ -5,12 +5,11 @@ import click
 from flask import Flask
 from celery import Celery
 from .extensions import (
-    db, login_manager, avatars, migrate, moment, toolbar,cache
+    db, login_manager, avatars, migrate, moment, toolbar, cache
 )
-from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
-from .settings import config
-from .views import fly
-from .celeryconfig import broker_url, result_backend
+from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
+from flytest.settings import config, cache_config, WIN
+from flytest.celeryconfig import broker_url, result_backend
 
 celery = Celery(__name__, broker=broker_url, backend=result_backend)
 
@@ -32,7 +31,7 @@ def create_app(config_name=None):
 
 
 def register_celery(app):
-    celery.config_from_object('celeryconfig')
+    celery.config_from_object('flytest.celeryconfig')
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
@@ -43,6 +42,7 @@ def register_celery(app):
 
 
 def register_blueprints(app):
+    from flytest.views import fly  # 防止celery循环导入
     app.register_blueprint(fly, url_prefix='/')
 
 
@@ -51,8 +51,10 @@ def register_extensions(app):
     avatars.init_app(app)
     migrate.init_app(app=app)
     moment.init_app(app)
-    cache.init_app(app)
+    cache.init_app(app, config=cache_config)
     db.init_app(app)
+    if not WIN:
+        toolbar.init_app(app)
 
 
 def register_template_context(app):

@@ -1,12 +1,12 @@
 from flask import current_app as app
-from flytest import celery
 from .extensions import db
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from .utils import generate_url
+from flytest import celery
 
 
-@celery.task()
+@celery.task
 def apistep_job(pk):
     apistep = Apistep.query.get(pk)
     task_id = apistep_job.request.id
@@ -18,7 +18,7 @@ def apistep_job(pk):
         db.session.commit()
 
 
-@celery.task()
+@celery.task
 def apitest_job(pk):
     task_id = apitest_job.request.id
     apisteps = Apistep.query.filter_by(apitest_id=pk)

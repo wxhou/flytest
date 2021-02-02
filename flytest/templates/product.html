@@ -81,14 +81,14 @@
                 </p>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
-                        <a href="#">
+                        <a href="{{ url_for('.test',pk=product.id ) }}">
                             <button type="button" class="btn btn-sm btn-outline-primary">
                                 <font style="vertical-align: inherit;">
                                     <font style="vertical-align: inherit;">进入用例</font>
                                 </font>
                             </button>
                         </a>
-                        <a href="#">
+                        <a href="{{ url_for('.env',pk=product.id) }}">
                             <button type="button" class="btn btn-sm btn-outline-info">
                                 <font style="vertical-align: inherit;">
                                     <font style="vertical-align: inherit;">配置环境</font>
@@ -103,7 +103,8 @@
                     </div>
                     <small class="text-muted">
                         <font style="vertical-align: inherit;">
-                            <font style="vertical-align: inherit;">更新时间-{{  moment(product.updated).format('lll') }}</font>
+                            <font style="vertical-align: inherit;">更新时间-{{ moment(product.updated).format('lll') }}
+                            </font>
                         </font>
                     </small>
                 </div>

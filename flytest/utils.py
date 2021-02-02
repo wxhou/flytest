@@ -20,7 +20,6 @@ def redirect_back(default='.index', **kwargs):
     return redirect(url_for(default, **kwargs))
 
 
-
 def generate_url(url, route):
     """
     generate url

@@ -11,3 +11,5 @@ watchdog
 flask-sqlalchemy
 flask-avatars
 flask-migrate
+flask-moment
+eventlet

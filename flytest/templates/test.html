@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-流程接口
+接口测试
 {% endblock %}
 {% block head %}
 {% endblock %}
@@ -87,7 +87,7 @@
                 <td>{{ test.user }}</td>
                 <td>{{ test.product.name }}</td>
                 <td>
-                    <a href="#">
+                    <a href="{{ url_for('.jobs',pk=test.id) }}">
                         <button type="button" class="btn btn-outline-info btn-sm btn-block">
                             运行
                         </button>

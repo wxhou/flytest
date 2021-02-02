@@ -7,11 +7,12 @@ from flask_login import current_user, login_user, logout_user, login_required
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
 from .extensions import db
 from .utils import redirect_back
+from flytest.tasks import apistep_job, apitest_job
 
 fly = Blueprint('', __name__)
 
 
-@fly.route('/')
+@fly.route('/index')
 @login_required
 def index():
     return render_template('index.html', page_name='homepage')
@@ -33,8 +34,7 @@ def login():
             if user and user.verify_password(password):
                 login_user(user, remember=remember)
                 flash("登录成功！", 'success')
-                next_url = request.args.get('next', '.index')
-                return redirect(url_for(next_url))
+                return redirect_back()
         flash('账户不存在', 'danger')
         return redirect(request.referrer)
     return render_template('login.html')
@@ -44,7 +44,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("退出登录成功", 'info')
+    flash("退出登录成功", 'success')
     return redirect(url_for('.login'))
 
 
@@ -56,7 +56,7 @@ def product():
         desc = request.form.get('desc')
         product_type = request.form.get('product_type')
         if not all([name, desc, product_type]):
-            flash("添加产品失败", 'error')
+            flash("添加产品失败", 'danger')
             return redirect(request.referrer)
         product = Product(name=name, desc=desc, user=current_user)
         db.session.add(product)
@@ -135,7 +135,7 @@ def step(pk):
         expected_result = request.form.get('expected_result')
         expected_regular = request.form.get('expected_regular')
         if not all([name, method, url]):
-            flash("请输入完整的请求参数！")
+            flash("请输入完整的请求参数！", 'warning')
             return redirect(request.referrer)
         apistep = Apistep(apitest=apitest, name=name, apiurl_id=url, method=method, request_data=request_data,
                           expected_result=expected_result, expected_regular=expected_regular)
@@ -150,3 +150,19 @@ def step(pk):
     apisteps = paginate.items
     return render_template('step.html', apitest=apitest, apiurl=apiurl,
                            paginate=paginate, apisteps=apisteps, page_name='testpage')
+
+
+@fly.route('/jobs/<int:pk>')
+def jobs(pk):
+    result = apitest_job.delay(int(pk))
+    result.wait()
+    flash("正在运行测试用例：%s" % pk, 'info')
+    return redirect(request.referrer)
+
+
+@fly.route('/job/<int:pk>')
+def job(pk):
+    result = apistep_job.delay(int(pk))
+    result.wait()
+    flash("正在运行测试步骤：%s" % pk, "info")
+    return redirect(request.referrer)

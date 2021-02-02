@@ -12,7 +12,7 @@ db = SQLAlchemy()
 cache = Cache()
 moment = Moment()
 avatars = Avatars()
-migrate = Migrate(db=db)
+migrate = Migrate(db=db, render_as_batch=True)
 login_manager = LoginManager()
 toolbar = DebugToolbarExtension()
 
@@ -24,6 +24,6 @@ def load_user(user_id):
     return user
 
 
-login_manager.login_view = 'home.login'
+login_manager.login_view = '.login'
 login_manager.login_message_category = 'warning'
 login_manager.login_message = "请先登录"

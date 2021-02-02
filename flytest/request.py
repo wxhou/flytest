@@ -3,9 +3,9 @@ import json
 import requests
 from flask import current_app as app
 
-from .extensions import db
+from .extensions import db, cache
 from .models import Report
-from .utils import header_to_dict, cache_set, cache_get, generate_url
+from .utils import header_to_dict, generate_url
 
 
 class HttpRequest(object):
@@ -27,7 +27,7 @@ class HttpRequest(object):
         url = generate_url(db.url, db.route)
         if header := case.headers:
             app.logger.info("请求头：%s" % header)
-            cache_set('headers_%s' % task_id, header_to_dict(header))
+            cache.set('headers_%s' % task_id, header_to_dict(header))
         if data := case.request_data:
             cache_set('request_data_%s' % task_id, deserializer(data))
         app.logger.info("Request Url: {}".format(url))
@@ -48,10 +48,6 @@ class HttpRequest(object):
         case.results = _text
         case.status = status
         case.task_id = task_id
-        db.session.commit()
-
-        report = Report(task_id=task_id, apitests=case., result=_text, status=status)
-        db.session.add(report)
         db.session.commit()
         return response
 

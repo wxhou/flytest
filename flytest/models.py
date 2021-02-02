@@ -107,6 +107,8 @@ class Apistep(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     method = db.Column(db.String(16))
+    route = db.Column(db.String(512))
+    headers = db.Column(db.Text)
     request_data = db.Column(db.Text, nullable=True)
     expected_result = db.Column(db.String(512))
     expected_regular = db.Column(db.String(512), nullable=True)

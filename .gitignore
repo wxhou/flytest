@@ -192,3 +192,4 @@ dmypy.json
 *.sqlite3
 **migrations
 .idea/
+*.png

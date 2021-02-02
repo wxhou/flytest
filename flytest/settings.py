@@ -33,7 +33,10 @@ class BaseConfig(object):
 
     DEBUG_TB_INTERCEPT_REDIRECTS = False
 
-    CACHE_TYPE = "redis", # Flask-Caching related configs
+    CACHE_TYPE = "redis",  # Flask-Caching related configs
+    CELERY_BROKER_URL = 'redis://localhost:6379',
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
 
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = PREFIX + os.path.join(BASE_DIR, 'data-dev.db')
@@ -46,6 +49,10 @@ class ProductionConfig(BaseConfig):
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig
+}
+
+cache_config = {
+    'CACHE_TYPE': "redis",  # Flask-Caching related configs
 }
 
 if __name__ == '__main__':
