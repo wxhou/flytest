@@ -11,8 +11,6 @@ from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
 from flytest.settings import config, cache_config, WIN
 from flytest.celeryconfig import broker_url, result_backend
 
-celery = Celery(__name__, broker=broker_url, backend=result_backend)
-
 
 def create_app(config_name=None):
     if config_name is None:
@@ -26,11 +24,12 @@ def create_app(config_name=None):
     register_template_context(app)
     register_shell_context(app)
     register_commands(app)
-    register_celery(app)
     return app
 
 
-def register_celery(app):
+def create_celery(app=None):
+    app = app or create_app()
+    celery = Celery(__name__, broker=broker_url, backend=result_backend)
     celery.config_from_object('flytest.celeryconfig')
 
     class ContextTask(celery.Task):
@@ -39,6 +38,7 @@ def register_celery(app):
                 return self.run(*args, **kwargs)
 
     celery.Task = ContextTask
+    return celery
 
 
 def register_blueprints(app):

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-from flask import current_app as app
 from flask import flash, redirect, url_for, request
 from flask import Blueprint, render_template, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
-from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
+from flytest import create_app as app
+from .models import (
+    User, Product, Apiurl, Apitest, Apistep, Report, Bug
+)
 from .extensions import db
 from .utils import redirect_back
-from flytest.tasks import apistep_job, apitest_job
+from .tasks import apistep_job, apitest_job
 
 fly = Blueprint('', __name__)
 
