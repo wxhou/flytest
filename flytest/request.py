@@ -29,16 +29,16 @@ class HttpRequest(object):
             app.logger.info("请求头：%s" % header)
             cache.set('headers_%s' % task_id, header_to_dict(header))
         if data := case.request_data:
-            cache_set('request_data_%s' % task_id, deserializer(data))
+            cache.set('request_data_%s' % task_id, deserializer(data))
         app.logger.info("Request Url: {}".format(url))
         app.logger.info("Request Method: {}".format(method))
         app.logger.info("Request Headers: {}".format(
-            cache_get('headers_%s' % task_id)))
+            cache.get('headers_%s' % task_id)))
         app.logger.info("Request Data: {}".format(
-            cache_get('request_data_%s' % task_id)))
+            cache.get('request_data_%s' % task_id)))
         response = self.dispatch(method.lower(), url,
-                                 headers=cache_get('headers_%s' % task_id),
-                                 **cache_get('request_data_%s' % task_id))
+                                 headers=cache.get('headers_%s' % task_id),
+                                 **cache.get('request_data_%s' % task_id))
         _text = response.text
         app.logger.info("Response Data: {}".format(_text))
         expected_result = case.expected_result

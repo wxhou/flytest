@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+from flask import current_app as app
 from flask import flash, redirect, url_for, request
 from flask import Blueprint, render_template, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
-from flytest import create_app as app
 from .models import (
     User, Product, Apiurl, Apitest, Apistep, Report, Bug
 )

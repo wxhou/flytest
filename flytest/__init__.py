@@ -9,7 +9,9 @@ from .extensions import (
 )
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
 from flytest.settings import config, cache_config, WIN
-from flytest.celeryconfig import broker_url, result_backend
+from .celeryconfig import broker_url, result_backend
+
+celery = Celery(__name__, broker=broker_url, backend=result_backend)
 
 
 def create_app(config_name=None):
@@ -24,12 +26,11 @@ def create_app(config_name=None):
     register_template_context(app)
     register_shell_context(app)
     register_commands(app)
+    register_celery(app)
     return app
 
 
-def create_celery(app=None):
-    app = app or create_app()
-    celery = Celery(__name__, broker=broker_url, backend=result_backend)
+def register_celery(app):
     celery.config_from_object('flytest.celeryconfig')
 
     class ContextTask(celery.Task):
@@ -38,7 +39,6 @@ def create_celery(app=None):
                 return self.run(*args, **kwargs)
 
     celery.Task = ContextTask
-    return celery
 
 
 def register_blueprints(app):

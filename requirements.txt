@@ -5,7 +5,6 @@ itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
 Werkzeug==1.0.1
-python-dotenv==0.15
 celery==4.4.2
 watchdog
 flask-sqlalchemy
@@ -13,3 +12,8 @@ flask-avatars
 flask-migrate
 flask-moment
 eventlet
+flask-debugtoolbar
+flask-caching
+python-dotenv
+requests
+redis

@@ -2,9 +2,7 @@ from flytest.extensions import db
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from flytest.utils import generate_url
-from flytest import create_celery
-
-celery = create_celery()
+from flytest import celery
 
 
 @celery.task
