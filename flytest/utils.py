@@ -2,7 +2,9 @@ try:
     from urlparse import urlparse, urljoin
 except ImportError:
     from urllib.parse import urlparse, urljoin
-from flask import request, redirect, url_for, current_app
+import json
+from flask import current_app as app
+from flask import request, redirect, url_for
 
 
 def is_safe_url(target):
@@ -12,12 +14,11 @@ def is_safe_url(target):
 
 
 def redirect_back(default='.index', **kwargs):
-    for target in request.args.get('next'), request.referrer:
-        if not target:
-            continue
-        if is_safe_url(target):
-            return redirect(target)
-    return redirect(url_for(default, **kwargs))
+    nex_url = request.args.get('next', url_for(default))
+    if is_safe_url(nex_url):
+        return redirect(nex_url, **kwargs)
+    else:
+        return redirect(request.referrer)
 
 
 def generate_url(url, route):
@@ -27,7 +28,9 @@ def generate_url(url, route):
     :param route:
     :return:
     """
-    return urljoin(url.url.rstrip('/'),
+    if route is None:
+        return url
+    return urljoin(url.rstrip('/'),
                    route if route[0] == '/' else '/' + route)
 
 

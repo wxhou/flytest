@@ -1,8 +1,10 @@
-from flask import current_app as app
-from flytest.extensions import db, celery
+from flytest.extensions import db
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from flytest.utils import generate_url
+from flytest import celery_app
+
+celery = celery_app()
 
 
 @celery.task

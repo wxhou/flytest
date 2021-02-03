@@ -5,7 +5,7 @@ from flask import current_app as app
 
 from .extensions import db, cache
 from .models import Report
-from .utils import header_to_dict, generate_url
+from .utils import header_to_dict, generate_url, is_json_str
 
 
 class HttpRequest(object):
@@ -24,7 +24,8 @@ class HttpRequest(object):
         :return:
         """
         method = case.method
-        url = generate_url(db.url, db.route)
+        app.logger.info("请求方法：%s" % method)
+        url = generate_url(case.apiurl.url, case.route)
         if header := case.headers:
             app.logger.info("请求头：%s" % header)
             cache.set('headers_%s' % task_id, header_to_dict(header))

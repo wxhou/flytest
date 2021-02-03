@@ -1,28 +1,42 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import os
 import click
 from flask import Flask
+from celery import Celery
+from flytest import settings
 from .extensions import (
-    db, login_manager, avatars, migrate, moment, toolbar, cache, celery
+    db, login_manager, avatars, migrate, moment, toolbar, cache
 )
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
-from flytest.settings import win, config, cache_config
 
 
-def create_app(config_name=None):
-    if config_name is None:
-        config_name = os.getenv('FLASK_CONFIG', 'development')
+def create_app(register_blueprint=True):
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
-    app.jinja_env.trim_blocks = True
-    app.jinja_env.lstrip_blocks = True
-    register_blueprints(app)
+    app.config.from_object(settings)
     register_extensions(app)
-    register_template_context(app)
-    register_shell_context(app)
-    register_commands(app)
+    if register_blueprint:
+        app.jinja_env.trim_blocks = True
+        app.jinja_env.lstrip_blocks = True
+        register_blueprints(app)
+        register_template_context(app)
+        register_shell_context(app)
+        register_commands(app)
     return app
+
+
+def celery_app(app=None):
+    app = app or create_app(register_blueprint=False)
+    celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'],
+                    backend=app.config['CELERY_RESULT_BACKEND'])
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
 
 
 def register_blueprints(app):
@@ -35,10 +49,9 @@ def register_extensions(app):
     avatars.init_app(app)
     migrate.init_app(app=app)
     moment.init_app(app)
-    cache.init_app(app, config=cache_config)
+    cache.init_app(app, settings.CACHE_CONFIG)
     db.init_app(app)
-    celery.init_app(app)
-    if not win:
+    if not settings.WIN:
         toolbar.init_app(app)
 
 

@@ -156,15 +156,13 @@ def step(pk):
 
 @fly.route('/jobs/<int:pk>')
 def jobs(pk):
-    result = apitest_job.delay(int(pk))
-    result.wait()
+    apitest_job.delay(int(pk))
     flash("正在运行测试用例：%s" % pk, 'info')
     return redirect(request.referrer)
 
 
 @fly.route('/job/<int:pk>')
 def job(pk):
-    result = apistep_job.delay(int(pk))
-    result.wait()
+    apistep_job.delay(int(pk))
     flash("正在运行测试步骤：%s" % pk, "info")
     return redirect(request.referrer)
