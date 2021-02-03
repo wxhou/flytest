@@ -3,15 +3,12 @@
 import os
 import click
 from flask import Flask
-from celery import Celery
 from .extensions import (
     db, login_manager, avatars, migrate, moment, toolbar, cache
 )
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
 from flytest.settings import config, cache_config, WIN
-from .celeryconfig import broker_url, result_backend
-
-celery = Celery(__name__, broker=broker_url, backend=result_backend)
+from .celeryapp import celery_app
 
 
 def create_app(config_name=None):
@@ -19,6 +16,9 @@ def create_app(config_name=None):
         config_name = os.getenv('FLASK_CONFIG', 'development')
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    celery_app.conf.update(
+        {'broker_url': 'redis://127.0.0.1:6379/1',
+         'result_backend': 'redis://127.0.0.1:6379/2'})
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
     register_blueprints(app)
@@ -26,19 +26,7 @@ def create_app(config_name=None):
     register_template_context(app)
     register_shell_context(app)
     register_commands(app)
-    register_celery(app)
     return app
-
-
-def register_celery(app):
-    celery.config_from_object('flytest.celeryconfig')
-
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
 
 
 def register_blueprints(app):

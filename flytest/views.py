@@ -9,7 +9,7 @@ from .models import (
 )
 from .extensions import db
 from .utils import redirect_back
-from .tasks import apistep_job, apitest_job
+from .celeryapp import apistep_job, apitest_job
 
 fly = Blueprint('', __name__)
 
