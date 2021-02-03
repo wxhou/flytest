@@ -3,12 +3,12 @@
 import os
 import sys
 
-BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-WIN = sys.platform.startswith('win')
+win = sys.platform.startswith('win')
 
 # 数据库前缀
-PREFIX = 'sqlite:///' if WIN else 'sqlite:////'
+prefix = 'sqlite:///' if win else 'sqlite:////'
 
 
 class BaseConfig(object):
@@ -29,21 +29,19 @@ class BaseConfig(object):
     MAIL_DEFAULT_SENDER = ('flytest', MAIL_USERNAME)
     PER_PAGE_SIZE = 15
     # flask_avatars
-    AVATARS_SAVE_PATH = os.path.join(BASE_DIR, 'avatar')
+    AVATARS_SAVE_PATH = os.path.join(basedir, 'avatar')
 
     DEBUG_TB_INTERCEPT_REDIRECTS = False
 
     CACHE_TYPE = "redis",  # Flask-Caching related configs
-    CELERY_BROKER_URL = 'redis://localhost:6379',
-    CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 
 
 class DevelopmentConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = PREFIX + os.path.join(BASE_DIR, 'data-dev.db')
+    SQLALCHEMY_DATABASE_URI = prefix + os.path.join(basedir, 'data-dev.db')
 
 
 class ProductionConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = PREFIX + os.path.join(BASE_DIR, 'data.db')
+    SQLALCHEMY_DATABASE_URI = prefix + os.path.join(basedir, 'data.db')
 
 
 config = {

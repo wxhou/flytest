@@ -4,11 +4,10 @@ import os
 import click
 from flask import Flask
 from .extensions import (
-    db, login_manager, avatars, migrate, moment, toolbar, cache
+    db, login_manager, avatars, migrate, moment, toolbar, cache, celery
 )
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
-from flytest.settings import config, cache_config, WIN
-from .celeryapp import celery_app
+from flytest.settings import win, config, cache_config
 
 
 def create_app(config_name=None):
@@ -16,9 +15,6 @@ def create_app(config_name=None):
         config_name = os.getenv('FLASK_CONFIG', 'development')
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-    celery_app.conf.update(
-        {'broker_url': 'redis://127.0.0.1:6379/1',
-         'result_backend': 'redis://127.0.0.1:6379/2'})
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
     register_blueprints(app)
@@ -41,7 +37,8 @@ def register_extensions(app):
     moment.init_app(app)
     cache.init_app(app, config=cache_config)
     db.init_app(app)
-    if not WIN:
+    celery.init_app(app)
+    if not win:
         toolbar.init_app(app)
 
 
