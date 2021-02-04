@@ -14,11 +14,10 @@ def is_safe_url(target):
 
 
 def redirect_back(default='.index', **kwargs):
-    nex_url = request.args.get('next', url_for(default))
-    if is_safe_url(nex_url):
-        return redirect(nex_url, **kwargs)
-    else:
-        return redirect(request.referrer)
+    for target in request.args.get('next'), request.referrer:
+        if target:
+            return redirect(target)
+    return redirect(url_for(default, **kwargs))
 
 
 def generate_url(url, route):

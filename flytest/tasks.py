@@ -1,9 +1,11 @@
+import logging
 from flytest.extensions import db
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from flytest.utils import generate_url
 from flytest import celery_app
 
+log = logging.getLogger(__name__)
 celery = celery_app()
 
 
@@ -25,17 +27,21 @@ def apitest_job(pk):
     apisteps = Apistep.query.filter_by(apitest_id=pk)
     for step in apisteps:
         HttpRequest().request(step, task_id)
-    app.logger.info("测试完成！")
+    log.info("测试完成！")
     apisteps = Apistep.query.filter_by(apitest_id=pk)
     results = []
     for i in apisteps:
+        report = Report(task_id=i.apitest.task_id,
+                        result=i.results, status=i.status)
+        db.session.add(report)
+        report.apistep = i
         if i.status == 0:
             bug = Bug(task_id=task_id, casename=i.apitest.name, stepname=i.name,
                       request="""
                         请求方法：{}
                         请求地址：{}
                         请求内容：{}
-                        """.format(i.method, generate_url(i.url, i.route), i.request_data),
+                        """.format(i.method, generate_url(i.apiurl.url, i.route), i.request_data),
                       detail="""
                     预期结果：{}
                     实际结果：{}

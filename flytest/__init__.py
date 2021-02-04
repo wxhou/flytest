@@ -4,7 +4,7 @@ import click
 from flask import Flask
 from celery import Celery
 from flytest import settings
-from .extensions import (
+from flytest.extensions import (
     db, login_manager, avatars, migrate, moment, toolbar, cache
 )
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
@@ -15,8 +15,6 @@ def create_app(register_blueprint=True):
     app.config.from_object(settings)
     register_extensions(app)
     if register_blueprint:
-        app.jinja_env.trim_blocks = True
-        app.jinja_env.lstrip_blocks = True
         register_blueprints(app)
         register_template_context(app)
         register_shell_context(app)
@@ -56,6 +54,9 @@ def register_extensions(app):
 
 
 def register_template_context(app):
+    app.jinja_env.trim_blocks = True
+    app.jinja_env.lstrip_blocks = True
+
     @app.context_processor
     def make_template_context():
         products = Product.query.all()

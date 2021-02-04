@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+from sqlalchemy import func
 from flask import current_app as app
 from flask import flash, redirect, url_for, request
 from flask import Blueprint, render_template, send_from_directory
@@ -7,7 +8,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from .models import (
     User, Product, Apiurl, Apitest, Apistep, Report, Bug
 )
-from .extensions import db
+from .extensions import db, cache
 from .utils import redirect_back
 from .tasks import apistep_job, apitest_job
 
@@ -15,6 +16,7 @@ fly = Blueprint('', __name__)
 
 
 @fly.route('/index')
+@cache.cached(timeout=600)
 @login_required
 def index():
     return render_template('index.html', page_name='homepage')
@@ -139,8 +141,8 @@ def step(pk):
         if not all([name, method, url]):
             flash("请输入完整的请求参数！", 'warning')
             return redirect(request.referrer)
-        apistep = Apistep(apitest=apitest, name=name, apiurl_id=url, method=method, request_data=request_data,
-                          expected_result=expected_result, expected_regular=expected_regular)
+        apistep = Apistep(apitest=apitest, name=name, apiurl_id=url, route=route, method=method, request_data=request_data,
+                          headers=headers, expected_result=expected_result, expected_regular=expected_regular)
         db.session.add(apistep)
         db.session.commit()
         return redirect(url_for('.step', pk=pk))
@@ -166,3 +168,27 @@ def job(pk):
     apistep_job.delay(int(pk))
     flash("正在运行测试步骤：%s" % pk, "info")
     return redirect(request.referrer)
+
+
+@fly.route('/report')
+def report():
+    first_task = None
+    results = []
+    Report.query.group_by(Report.task_id).order_by(Report.created)
+    task_group = Report.objects.values(
+        'task_id').annotate(Count=Count('task_id'))
+    for to_task in task_group:
+        reports = Report.objects.filter(task_id=to_task['task_id'])
+        first_report = reports.first()
+        if first_task is None:
+            first_task = first_report.task_id
+        content = {
+            "pk": first_report.id,
+            "task_id": first_report.task_id,
+            "testcase": first_report.step.apiTest.name,
+            "success": reports.filter(status=1).count(),
+            "failure": reports.filter(status=0).count(),
+            "updated": first_report.updated_time
+        }
+        results.append(content)
+    results.reverse()

@@ -123,7 +123,7 @@ class Apistep(db.Model):
     apitest_id = db.Column(db.Integer, db.ForeignKey('apitest.id'))
     apitest = db.relationship('Apitest', back_populates='apisteps')
     report_id = db.Column(db.Integer, db.ForeignKey("report.id"))
-    report = db.relationship('Report', back_populates='apisteps')
+    report = db.relationship('Report')
 
     def __repr__(self):
         return '<ApiStep %s>' % self.name
@@ -137,11 +137,7 @@ class Report(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
-
-    apisteps = db.relationship('Apistep', back_populates='report')
-
-    def __repr__(self):
-        return self.apisteps
+    apistep = db.relationship('Apistep', uselist=False)
 
 
 class Bug(db.Model):
