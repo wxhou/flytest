@@ -13,7 +13,7 @@ celery = celery_app()
 def apistep_job(pk):
     apistep = Apistep.query.get(pk)
     task_id = apistep_job.request.id
-    HttpRequest().request(apistep, task_id)
+    HttpRequest().http_request(apistep, task_id)
     if Apistep.query.filter_by(apitest_id=apistep.apitest_id).count() == 1:
         apitest = Apitest.query.get(apistep.apitest_id)
         apitest.task_id = task_id
@@ -26,7 +26,7 @@ def apitest_job(pk):
     task_id = apitest_job.request.id
     apisteps = Apistep.query.filter_by(apitest_id=pk)
     for step in apisteps:
-        HttpRequest().request(step, task_id)
+        HttpRequest().http_request(step, task_id)
     log.info("测试完成！")
     apisteps = Apistep.query.filter_by(apitest_id=pk)
     results = []

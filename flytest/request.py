@@ -1,18 +1,17 @@
 import re
 import json
-import requests
+from requests.sessions import Session
 from flask import current_app as app
 
 from .extensions import db, cache
-from .models import Report
 from .utils import header_to_dict, generate_url, is_json_str
 
 
-class BaseRequest(object):
+class BaseRequest(Session):
     http_methods = 'get', 'post', 'put', 'delete'
 
     def __init__(self):
-        self.r = requests.session()
+        super(BaseRequest, self).__init__()
 
     def set_cache(self, k, v):
         cache.set(k, v)
@@ -62,10 +61,10 @@ class BaseRequest(object):
         return 1 if all(results) else 0
 
 
-class HttpRequest(object):
+class HttpRequest(BaseRequest):
     """HTTP request obj"""
 
-    def request(self, case, task_id):
+    def http_request(self, case, task_id):
         """
         http request
         :param db:
@@ -79,7 +78,7 @@ class HttpRequest(object):
             app.logger.info("请求头：%s" % header)
             self.set_cache('headers_%s' % task_id, header_to_dict(header))
         if data := case.request_data:
-            self.set_cache('request_data_%s' % task_id, deserializer(data))
+            self.set_cache('request_data_%s' % task_id, self.deserializer(data))
         app.logger.info("Request Url: {}".format(url))
         app.logger.info("Request Method: {}".format(method))
         app.logger.info("Request Headers: {}".format(
@@ -87,13 +86,14 @@ class HttpRequest(object):
         app.logger.info("Request Data: {}".format(
             self.get_cache('request_data_%s' % task_id)))
         response = self.dispatch(method.lower(), url,
-                                 headers=self.get_cache('headers_%s' % task_id),
+                                 headers=self.get_cache(
+                                     'headers_%s' % task_id),
                                  **self.get_cache('request_data_%s' % task_id))
         _text = response.text
         app.logger.info("Response Data: {}".format(_text))
         expected_result = case.expected_result
         expected_regular = case.expected_regular
-        status = check_result(_text, expected_result, expected_regular)
+        status = self.check_result(_text, expected_result, expected_regular)
         app.logger.info("Test Result: {}".format("通过" if status else "失败"))
         case.results = _text
         case.status = status
@@ -110,7 +110,7 @@ class HttpRequest(object):
         :return:
         """
         if method in self.http_methods:
-            handler = getattr(self.r, method)
+            handler = getattr(self, method)
         else:
-            handler = getattr(self.r, "get")
+            handler = getattr(self, "get")
         return handler(*args, **kwargs)

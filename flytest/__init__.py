@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+import logging
+from logging.handlers import RotatingFileHandler
 import click
 from flask import Flask
 from celery import Celery
@@ -8,7 +10,7 @@ from flytest.extensions import (
     db, login_manager, avatars, migrate, moment, toolbar, cache
 )
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
-
+from flytest.utils import make_dir
 
 def create_app(register_blueprint=True):
     app = Flask(__name__)
@@ -19,6 +21,7 @@ def create_app(register_blueprint=True):
         register_template_context(app)
         register_shell_context(app)
         register_commands(app)
+        register_logger(app)
     return app
 
 
@@ -105,6 +108,18 @@ def register_commands(app):
         db.session.commit()
         click.echo('Administrator Created Done.')
 
+
+def register_logger(app):
+    app.logger.setLevel(logging.DEBUG)
+    make_dir(app.config['LOG_FILE'])
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler = RotatingFileHandler(filename=app.config['LOG_FILE'],
+                                       maxBytes=10 * 1024 * 1024, backupCount=10)
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(logging.DEBUG)
+
+    app.logger.addHandler(file_handler)
 
 if __name__ == "__main__":
     print(__name__)

@@ -38,6 +38,8 @@ def login():
             if user and user.verify_password(password):
                 login_user(user, remember=remember)
                 flash("登录成功！", 'success')
+                if user.is_authenticated:
+                    print('login success')
                 return redirect_back()
         flash('账户不存在', 'danger')
         return redirect(request.referrer)
