@@ -155,9 +155,9 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'trendingpage' %}
+                            <a class="nav-link {% if page_name == 'trendpage' %}
                             active
-                            {% endif %}" href="#">
+                            {% endif %}" href="{{ url_for('.trend') }}">
                                 <span data-feather="activity"></span>
                                 结果趋势
                             </a>

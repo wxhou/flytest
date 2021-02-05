@@ -39,3 +39,6 @@ CACHE_CONFIG = {
     'CACHE_REDIS_PORT': 6379,
     "CACHE_DEFAULT_TIMEOUT": 600
 }
+
+if __name__ == '__main__':
+    print(BASE_DIR)

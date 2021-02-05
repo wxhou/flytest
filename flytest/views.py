@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-from sqlalchemy import func
 from flask import current_app as app
 from flask import flash, redirect, url_for, request
 from flask import Blueprint, render_template, send_from_directory
@@ -8,15 +7,17 @@ from flask_login import current_user, login_user, logout_user, login_required
 from .models import (
     User, Product, Apiurl, Apitest, Apistep, Report, Bug
 )
-from .extensions import db, cache
+from .extensions import db, cache, raw_sql
 from .utils import redirect_back
 from .tasks import apistep_job, apitest_job
+from pyecharts import options as opts
+from pyecharts.charts import Pie, Line
+
 
 fly = Blueprint('', __name__)
 
 
 @fly.route('/index')
-@cache.cached(timeout=600)
 @login_required
 def index():
     return render_template('index.html', page_name='homepage')
@@ -36,10 +37,10 @@ def login():
         if username and password:
             user = User.query.filter_by(email=username).first()
             if user and user.verify_password(password):
+                if user.is_authenticated:
+                    return redirect_back()
                 login_user(user, remember=remember)
                 flash("登录成功！", 'success')
-                if user.is_authenticated:
-                    print('login success')
                 return redirect_back()
         flash('账户不存在', 'danger')
         return redirect(request.referrer)
@@ -176,21 +177,52 @@ def job(pk):
 def report():
     first_task = None
     results = []
-    Report.query.group_by(Report.task_id).order_by(Report.created)
-    task_group = Report.objects.values(
-        'task_id').annotate(Count=Count('task_id'))
-    for to_task in task_group:
-        reports = Report.objects.filter(task_id=to_task['task_id'])
+    raw_result = raw_sql(
+        'SELECT task_id,COUNT(task_id) from report GROUP BY task_id;')
+    for res in raw_result:
+        reports = Report.query.filter_by(task_id=res[0])
         first_report = reports.first()
         if first_task is None:
             first_task = first_report.task_id
         content = {
             "pk": first_report.id,
             "task_id": first_report.task_id,
-            "testcase": first_report.step.apiTest.name,
-            "success": reports.filter(status=1).count(),
-            "failure": reports.filter(status=0).count(),
-            "updated": first_report.updated_time
+            "testcase": first_report.apistep.apitest.name,
+            "success": reports.filter_by(status=1).count(),
+            "failure": reports.filter_by(status=0).count(),
+            "updated": first_report.updated
         }
         results.append(content)
-    results.reverse()
+    return render_template('show.html', results=results)
+
+
+@fly.route('/trend')
+def trend():
+    return render_template('trending.html', page_name="trendpage")
+
+
+@fly.route('/trending')
+def trending():
+    results = []
+    raw_result = raw_sql(
+        'SELECT task_id,COUNT(task_id) from report GROUP BY task_id;')
+    for res in raw_result:
+        reports = Report.query.filter_by(task_id=res[0])
+        first_report = reports.first()
+        apistep = Apistep.query.with_parent(first_report).first()
+        if apistep:
+            test_name = apistep.apitest.name
+        else:
+            test_name = 'default'
+        results.append(
+            [test_name, reports.filter_by(status=1).count(), reports.filter_by(status=0).count()])
+    names, success, failure = zip(*results)
+    app.logger.info("名称：{}，通过：{}，失败：{}".format(names, success, failure))
+    c = (
+        Line()
+        .add_xaxis(names)
+        .add_yaxis("失败", failure, color="red")
+        .add_yaxis("通过", success, color="green")
+        .set_global_opts(title_opts=opts.TitleOpts(title="测试结果趋势图"))
+    )
+    return c.dump_options_with_quotes()

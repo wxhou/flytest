@@ -17,7 +17,7 @@
                 var chart = echarts.init(document.getElementById('bar'), 'white', {renderer: 'canvas'});
                 $.ajax({
                     type: "GET",
-                    url: "{{ request.scheme }}://{{ request.get_host }}/chart/trending/",
+                    url: "{{ url_for('.trending') }}",
                     dataType: 'json',
                     success: function (result) {
                         chart.setOption(result);

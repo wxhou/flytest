@@ -25,7 +25,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for report in reports %}
+                    {% if results %}
+                    {% for report in results %}
                         <tr>
                             <td>{{ report.pk }}</td>
                             <td>{{ report.task_id }}</td>
@@ -43,9 +44,10 @@
                             {% endif %}
                             <td>{{ report.updated }}</td>
                         </tr>
-                    {% empty %}
-                        <p style="color: red">暂无数据</p>
                     {% endfor %}
+                    {% else %}
+                        <p style="color: red">暂无数据</p>
+                    {% endif %}
                     </tbody>
                 </table>
             </div>

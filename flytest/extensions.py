@@ -25,6 +25,11 @@ def load_user(user_id):
     return user
 
 
+def raw_sql(_sql):
+    result = db.engine.execute(_sql)
+    return result
+
+
 login_manager.login_view = '.login'
 login_manager.login_message_category = 'warning'
 login_manager.login_message = "请先登录"
