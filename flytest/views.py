@@ -9,6 +9,7 @@ from .models import (
 )
 from .extensions import db, cache, raw_sql
 from .utils import redirect_back
+from .choices import *
 from .tasks import apistep_job, apitest_job
 from pyecharts import options as opts
 from pyecharts.charts import Pie, Line
@@ -102,12 +103,7 @@ def edit_product(pk):
         db.session.commit()
         flash("更新项目信息成功！", "success")
         return redirect(url_for('.product'))
-    tags = (
-        ('网页端', "网页端"),
-        ('移动端', "移动端"),
-        ('小程序', "小程序")
-    )
-    return render_template('product_edit.html', product=product, tags=tags, page_name='productpage')
+    return render_template('product_edit.html', product=product, tags=TAGS, page_name='productpage')
 
 
 @fly.route('/env', methods=["GET", "POST"])
@@ -219,7 +215,7 @@ def step(pk):
     paginate = Apistep.query.filter_by(
         apitest=apitest).paginate(page, per_page)
     apisteps = paginate.items
-    return render_template('step.html', apitest=apitest, apiurl=apiurl,
+    return render_template('step.html', apitest=apitest, apiurl=apiurl, methods=METHODS,
                            paginate=paginate, apisteps=apisteps, page_name='testpage')
 
 
@@ -230,7 +226,10 @@ def edit_step(pk):
     apistep = Apistep.query.get(pk)
     if request.method == "POST":
         pass
-    return render_template('step_edit.html', apistep=apistep, apiurl=apiurl, page_name='testpage')
+    app.logger.info("headers: {}".format(apistep.headers))
+    app.logger.info("request_data: {}".format(apistep.request_data))
+    return render_template('step_edit.html', apistep=apistep, apiurl=apiurl,
+                           methods=METHODS, page_name='testpage')
 
 
 @fly.route('/jobs/<int:pk>')

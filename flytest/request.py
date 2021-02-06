@@ -75,9 +75,11 @@ class HttpRequest(BaseRequest):
         app.logger.info("请求方法：%s" % method)
         url = generate_url(case.apiurl.url, case.route)
         if header := case.headers:
+            header = header.strip()
             app.logger.info("请求头：%s" % header)
             self.set_cache('headers_%s' % task_id, header_to_dict(header))
         if data := case.request_data:
+            data = data.strip()
             self.set_cache('request_data_%s' % task_id, self.deserializer(data))
         app.logger.info("Request Url: {}".format(url))
         app.logger.info("Request Method: {}".format(method))

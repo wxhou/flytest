@@ -41,6 +41,7 @@ def header_to_dict(raw_str):
     """header to dict
     :type raw_str: str
     """
+    raw_str = raw_str.strip()
     return dict([k.strip() for k in i.split(": ", 1)] for i in raw_str.split('\n'))
 
 

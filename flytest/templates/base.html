@@ -13,10 +13,7 @@
     <!-- Bootstrap core CSS -->
     <link rel="icon" href="{{ url_for('static',filename='images/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/table.css') }}">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
-    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css') }}">
     {% block head %}
 
     {% endblock %}
@@ -209,8 +206,10 @@
             </main>
         </div>
     </div>
-    <script>window.jQuery || document.write('<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"><\/script>')</script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+    <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/feather.min.js') }}"></script>
     <script src="{{ url_for('static',filename='js/dashboard.js') }}"></script>
     {% block script %}
 

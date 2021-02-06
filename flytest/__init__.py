@@ -3,11 +3,11 @@
 import logging
 from logging.handlers import RotatingFileHandler
 import click
-from flask import Flask
+from flask import Flask, render_template
 from celery import Celery
 from flytest import settings
 from flytest.extensions import (
-    db, login_manager, avatars, migrate, moment, toolbar, cache
+    db, login_manager, avatars, migrate, moment, toolbar, cache, assets
 )
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
 from flytest.utils import make_dir
@@ -16,6 +16,7 @@ from flytest.utils import make_dir
 def create_app(register_blueprint=True):
     app = Flask(__name__)
     app.config.from_object(settings)
+    register_make_dir()
     register_extensions(app)
     if register_blueprint:
         register_blueprints(app)
@@ -23,6 +24,7 @@ def create_app(register_blueprint=True):
         register_shell_context(app)
         register_commands(app)
         register_logger(app)
+        register_errors(app)
     return app
 
 
@@ -42,7 +44,7 @@ def celery_app(app=None):
 
 
 def register_blueprints(app):
-    from flytest.views import fly  # 防止celery循环导入
+    from flytest.views import fly
     app.register_blueprint(fly, url_prefix='/')
 
 
@@ -53,6 +55,7 @@ def register_extensions(app):
     moment.init_app(app)
     cache.init_app(app, settings.CACHE_CONFIG)
     db.init_app(app)
+    assets.init_app(app)
     if not settings.WIN:
         toolbar.init_app(app)
 
@@ -110,9 +113,13 @@ def register_commands(app):
         click.echo('Administrator Created Done.')
 
 
+def register_make_dir():
+    make_dir(app.config['LOG_FILE'])
+    make_dir(app.config['AVATARS_SAVE_PATH'])
+
+
 def register_logger(app):
     app.logger.setLevel(logging.DEBUG)
-    make_dir(app.config['LOG_FILE'])
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler = RotatingFileHandler(filename=app.config['LOG_FILE'],
@@ -121,6 +128,20 @@ def register_logger(app):
     file_handler.setLevel(logging.DEBUG)
 
     app.logger.addHandler(file_handler)
+
+
+def register_errors(app):
+    @app.errorhandler(400)
+    def bad_request(e):
+        return render_template('errors/400.html'), 400
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        return render_template('errors/500.html'), 500
 
 
 if __name__ == "__main__":

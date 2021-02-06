@@ -35,10 +35,9 @@
                         <div class="col-md-6 mb-3">
                             <label for="method">请求方法<label style="color: red;">*</label></label>
                             <select class="form-control" id="method" name="method">
-                                <option>GET</option>
-                                <option>POST</option>
-                                <option>PUT</option>
-                                <option>DELETE</option>
+                                {% for method in methods %}
+                                <option>{{ method[0] }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -148,7 +147,11 @@
                         </button>
                     </a>
                 </td>
+                {% if step.results %}
                 <td><code>{{ step.results }}</code></td>
+                {% else %}
+                <td>没有测试过哦</td>
+                {% endif %}
                 {% if step.status == -1 %}
                 <td><span class="badge badge-warning">未测试</span></td>
                 {% elif step.status == 1 %}
@@ -167,3 +170,10 @@
     </table>
 </div>
 {% endblock %}
+{% block script %}
+<script>
+    document.getElementById('headers').value = "Content-Type：application/json;charset=utf-8\
+    Accept：application/json"
+    document.getElementById('request_data').value = '{"json":}'
+</script>
+{% endblock script %}

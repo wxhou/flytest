@@ -22,18 +22,10 @@
                 <div class="col-md-6 mb-3">
                     <label for="method">请求方法<label style="color: red;">*</label></label>
                     <select class="form-control" id="method" defaultValue="{{ apistep.method }}" name="method">
-                        <option {% if apistep.method == "GET" %}
-                        selected="selected"
-                    {% endif %}>GET</option>
-                        <option {% if apistep.method == "POST" %}
-                            selected="selected"
-                        {% endif %}>POST</option>
-                        <option {% if apistep.method == "PUT" %}
-                        selected="selected"
-                    {% endif %}>PUT</option>
-                        <option {% if apistep.method == "DELETE" %}
-                        selected="selected"
-                    {% endif %}>DELETE</option>
+                        {% for method in methods %}
+                        <option {% if apistep.method==method[0] %} selected="selected" {% endif %}>{{ method[0] }}
+                        </option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -43,9 +35,8 @@
                     {% if apiurl %}
                     {% for url in apiurl %}
                     <label class="radio-inline">
-                        <input type="radio" name="url" value="{{ url.id }}" {% if apistep.apiurl_id == url.id %}
-                        checked
-                        {% endif %} >{{url.name }}
+                        <input type="radio" name="url" value="{{ url.id }}" {% if apistep.apiurl_id==url.id %} checked
+                            {% endif %}>{{url.name }}
                     </label>
                     {% endfor %}
                     {% else %}
@@ -104,10 +95,10 @@
         </form>
     </div>
 </div>
+{% endblock %}
 {% block script %}
 <script>
     document.getElementById('headers').value = "{{ apistep.headers }}"
-    document.getElementById('request_data').value = {{ apistep.request_data|tojson  }}
+    document.getElementById('request_data').nodeValue = {{ apistep.request_data | tojson }}
 </script>
 {% endblock script %}
-{% endblock %}
