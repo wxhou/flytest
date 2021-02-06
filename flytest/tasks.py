@@ -24,7 +24,7 @@ def apistep_job(pk):
 @celery.task
 def apitest_job(pk):
     task_id = apitest_job.request.id
-    apisteps = Apistep.query.filter_by(apitest_id=pk)
+    apisteps = Apistep.query.filter_by(apitest_id=pk, is_deleted=False)
     for step in apisteps:
         HttpRequest().http_request(step, task_id)
     log.info("测试完成！")
@@ -32,7 +32,7 @@ def apitest_job(pk):
     results = []
     for i in apisteps:
         report = Report(task_id=i.apitest.task_id,
-                        result=i.results, status=i.status)
+                        result=i.results, status=i.status, is_deleted=False)
         db.session.add(report)
         report.apistep = i
         if i.status == 0:
@@ -46,7 +46,8 @@ def apitest_job(pk):
                     预期结果：{}
                     实际结果：{}
                     """.format(i.expected_result, i.results),
-                      status=i.status)
+                      status=i.status,
+                      is_deleted=False)
             db.session.add(bug)
         results.append(i.status)
     status = all(results)

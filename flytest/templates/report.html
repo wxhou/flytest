@@ -36,7 +36,7 @@
                             {% if report.failure %}
                                 <td>
                                     <button type="button" class="btn btn-outline-info">
-                                        <a href="{% url 'charts:bug' %}?task_id={{ report.task_id }}">点击查看问题</a>
+                                        <a href="#">点击查看问题</a>
                                     </button>
                                 </td>
                             {% else %}
@@ -64,13 +64,13 @@
         $(
             function () {
                 fetchData(chart);
-                {#setInterval(fetchData, 2000);#}
+                <!-- setInterval(fetchData, 2000); -->
             }
         );
 
         function fetchData() {
             $.get({
-                url: "{{ request.scheme }}://{{ request.get_host }}{% url 'charts:pie' %}?task_id={{ first_task }}",
+                url: "{{ url_for('.pie',task_id=first_task) }}",
                 dataType: 'json',
                 success: function (result) {
                     console.log(result);

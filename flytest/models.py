@@ -18,6 +18,7 @@ class User(db.Model, UserMixin):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     products = db.relationship('Product', back_populates='user')
     apitests = db.relationship('Apitest', back_populates='user')
@@ -57,6 +58,7 @@ class Product(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='products')
@@ -75,6 +77,7 @@ class Apiurl(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     product = db.relationship('Product', back_populates="apiurls")
@@ -92,6 +95,7 @@ class Apitest(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='apitests')
@@ -117,6 +121,7 @@ class Apistep(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     apiurl_id = db.Column(db.Integer, db.ForeignKey('apiurl.id'))
     apiurl = db.relationship('Apiurl', back_populates='apisteps')
@@ -137,6 +142,8 @@ class Report(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
+
     apistep = db.relationship('Apistep', uselist=False)
 
 
@@ -152,6 +159,7 @@ class Bug(db.Model):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return '<BUG FOR %S>' % self.stepname

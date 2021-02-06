@@ -12,6 +12,7 @@ from flytest.extensions import (
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
 from flytest.utils import make_dir
 
+
 def create_app(register_blueprint=True):
     app = Flask(__name__)
     app.config.from_object(settings)
@@ -62,7 +63,7 @@ def register_template_context(app):
 
     @app.context_processor
     def make_template_context():
-        products = Product.query.all()
+        products = Product.query.filter_by(is_deleted=False)
         return dict(products=products)
 
 
@@ -102,7 +103,7 @@ def register_commands(app):
             admin.password = password
         else:
             click.echo('Creating the temporary administrator account...')
-            admin = User(email=email, username='admin')
+            admin = User(email=email, username='admin', is_deleted=False)
             admin.password = password
             db.session.add(admin)
         db.session.commit()
@@ -120,6 +121,7 @@ def register_logger(app):
     file_handler.setLevel(logging.DEBUG)
 
     app.logger.addHandler(file_handler)
+
 
 if __name__ == "__main__":
     print(__name__)

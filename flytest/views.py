@@ -37,9 +37,7 @@ def login():
         if username and password:
             user = User.query.filter_by(email=username).first()
             if user and user.verify_password(password):
-                if user.is_authenticated:
-                    return redirect_back()
-                login_user(user, remember=remember)
+                login_user(user, remember)
                 flash("登录成功！", 'success')
                 return redirect_back()
         flash('账户不存在', 'danger')
@@ -65,7 +63,8 @@ def product():
         if not all([name, desc, product_type]):
             flash("添加产品失败", 'danger')
             return redirect(request.referrer)
-        product = Product(name=name, desc=desc, user=current_user)
+        product = Product(name=name, desc=desc, tag=product_type,
+                          user=current_user, is_deleted=False)
         db.session.add(product)
         db.session.commit()
         return redirect(url_for('.product'))
@@ -74,14 +73,41 @@ def product():
         ('移动端', "移动端"),
         ('小程序', "小程序")
     )
-    product = Product.query.first()
     page = request.args.get("page", 1)
     per_page = app.config['PER_PAGE_SIZE']
     paginate = Product.query.with_parent(current_user).order_by(
         Product.created.desc()).paginate(page, per_page)
     products = paginate.items
-    return render_template('product.html', tags=tags, product=product, products=products,
+    return render_template('product.html', tags=tags, products=products,
                            paginate=paginate, page_name='productpage')
+
+
+@fly.route('/product/<int:pk>/edit', methods=["GET", "POST"])
+@login_required
+def edit_product(pk):
+    product = Product.query.get(pk)
+    if request.method == 'POST':
+        name = request.form.get('name')
+        desc = request.form.get('desc')
+        delete = request.form.get('delete')
+        product_type = request.form.get('product_type')
+        if not product_type:
+            flash("没有产品类型", 'danger')
+            return redirect(request.referrer)
+        product.name = name
+        product.desc = desc
+        product.tag = product_type
+        if delete:
+            product.is_deleted = True
+        db.session.commit()
+        flash("更新项目信息成功！", "success")
+        return redirect(url_for('.product'))
+    tags = (
+        ('网页端', "网页端"),
+        ('移动端', "移动端"),
+        ('小程序', "小程序")
+    )
+    return render_template('product_edit.html', product=product, tags=tags, page_name='productpage')
 
 
 @fly.route('/env', methods=["GET", "POST"])
@@ -93,7 +119,8 @@ def env(pk=None):
         name = request.form.get('name')
         url = request.form.get('url')
         if name and url:
-            apiurl = Apiurl(name=name, url=url, product=product)
+            apiurl = Apiurl(name=name, url=url,
+                            product=product, is_deleted=False)
             db.session.add(apiurl)
             db.session.commit()
             flash("【%s】%s添加成功" % (name, url), 'success')
@@ -108,6 +135,23 @@ def env(pk=None):
                            envs=envs, paginate=paginate, page_name='envpage')
 
 
+@fly.route('/env/<int:pk>/edit', methods=["GET", "POST"])
+@login_required
+def edit_env(pk):
+    env = Apiurl.query.get(pk)
+    if request.method == 'POST':
+        name = request.form.get('name')
+        url = request.form.get('url')
+        delete = request.form.get('delete')
+        env.name = name
+        env.url = url
+        if delete:
+            env.is_deleted = True
+        db.session.commit()
+        return redirect(url_for('.env', pk=env.product_id))
+    return render_template('env_edit.html', env=env, page_name='envpage')
+
+
 @fly.route('/test', methods=["GET", "POST"])
 @fly.route('/test/<int:pk>', methods=["GET", "POST"])
 @login_required
@@ -116,10 +160,14 @@ def test(pk=None):
     if request.method == "POST":
         name = request.form.get('name')
         if name:
-            apitest = Apitest(name=name, user=current_user, product=product)
+            apitest = Apitest(name=name, user=current_user,
+                              product=product, is_deleted=False)
             db.session.add(apitest)
             db.session.commit()
             return redirect(url_for('.test', pk=pk))
+        else:
+            flash("没有输入用例名称")
+            return redirect(request.referrer)
     page = request.args.get("page")
     per_page = app.config['PER_PAGE_SIZE']
     paginate = Apitest.query.with_parent(product).order_by(
@@ -129,7 +177,23 @@ def test(pk=None):
                            tests=tests, page_name='testpage')
 
 
+@fly.route('/test/<int:pk>/edit', methods=["GET", "POST"])
+@login_required
+def edit_test(pk):
+    apitest = Apitest.query.get(pk)
+    if request.method == "POST":
+        name = request.form.get('name')
+        delete = request.form.get('delete')
+        apitest.name = name
+        if delete:
+            apitest.is_deleted = True
+        db.session.commit()
+        return redirect(url_for('.test', pk=apitest.product_id))
+    return render_template('test_edit.html', apitest=apitest, page_name='testpage')
+
+
 @fly.route('/step/<int:pk>', methods=["GET", "POST"])
+@login_required
 def step(pk):
     apitest = Apitest.query.get(int(pk))
     if request.method == "POST":
@@ -145,7 +209,7 @@ def step(pk):
             flash("请输入完整的请求参数！", 'warning')
             return redirect(request.referrer)
         apistep = Apistep(apitest=apitest, name=name, apiurl_id=url, route=route, method=method, request_data=request_data,
-                          headers=headers, expected_result=expected_result, expected_regular=expected_regular)
+                          headers=headers, expected_result=expected_result, expected_regular=expected_regular, is_deleted=False)
         db.session.add(apistep)
         db.session.commit()
         return redirect(url_for('.step', pk=pk))
@@ -159,7 +223,18 @@ def step(pk):
                            paginate=paginate, apisteps=apisteps, page_name='testpage')
 
 
+@fly.route('/step/<int:pk>/edit', methods=["GET", "POST"])
+@login_required
+def edit_step(pk):
+    apiurl = Apiurl.query.filter_by(is_deleted=False)
+    apistep = Apistep.query.get(pk)
+    if request.method == "POST":
+        pass
+    return render_template('step_edit.html', apistep=apistep, apiurl=apiurl, page_name='testpage')
+
+
 @fly.route('/jobs/<int:pk>')
+@login_required
 def jobs(pk):
     apitest_job.delay(int(pk))
     flash("正在运行测试用例：%s" % pk, 'info')
@@ -167,6 +242,7 @@ def jobs(pk):
 
 
 @fly.route('/job/<int:pk>')
+@login_required
 def job(pk):
     apistep_job.delay(int(pk))
     flash("正在运行测试步骤：%s" % pk, "info")
@@ -174,13 +250,14 @@ def job(pk):
 
 
 @fly.route('/report')
+@login_required
 def report():
     first_task = None
     results = []
     raw_result = raw_sql(
         'SELECT task_id,COUNT(task_id) from report GROUP BY task_id;')
     for res in raw_result:
-        reports = Report.query.filter_by(task_id=res[0])
+        reports = Report.query.filter_by(task_id=res[0], is_deleted=False)
         first_report = reports.first()
         if first_task is None:
             first_task = first_report.task_id
@@ -193,21 +270,42 @@ def report():
             "updated": first_report.updated
         }
         results.append(content)
-    return render_template('show.html', results=results)
+    return render_template('report.html', results=results, first_task=first_task, page_name='reportpage')
+
+
+@fly.route('/pie')
+@login_required
+def pie():
+    task_id = request.args.get('task_id')
+    app.logger.info("pie图task_id是：%s" % task_id)
+    if not task_id:
+        return {}, 400
+    reports = Report.query.filter_by(task_id=task_id, is_deleted=False)
+    c = (
+        Pie()
+        .add("", [["测试失败", reports.filter(status=0).count()],
+                  ["测试成功", reports.filter(status=1).count()]])
+        .set_colors(["red", "green"])
+        .set_global_opts(title_opts=opts.TitleOpts(title="最新报告"))
+        .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
+    )
+    return c.dump_options_with_quotes()
 
 
 @fly.route('/trend')
+@login_required
 def trend():
     return render_template('trending.html', page_name="trendpage")
 
 
 @fly.route('/trending')
+@login_required
 def trending():
     results = []
     raw_result = raw_sql(
         'SELECT task_id,COUNT(task_id) from report GROUP BY task_id;')
     for res in raw_result:
-        reports = Report.query.filter_by(task_id=res[0])
+        reports = Report.query.filter_by(task_id=res[0], is_deleted=False)
         first_report = reports.first()
         apistep = Apistep.query.with_parent(first_report).first()
         if apistep:
@@ -216,7 +314,11 @@ def trending():
             test_name = 'default'
         results.append(
             [test_name, reports.filter_by(status=1).count(), reports.filter_by(status=0).count()])
-    names, success, failure = zip(*results)
+    app.logger.info("results内容：{}".format(results))
+    if results:
+        names, success, failure = zip(*results)
+    else:
+        names, success, failure = ['default'], [0], [0]
     app.logger.info("名称：{}，通过：{}，失败：{}".format(names, success, failure))
     c = (
         Line()

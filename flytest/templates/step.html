@@ -125,6 +125,7 @@
                 <th>实际结果</th>
                 <th>是否通过</th>
                 <th>更新时间</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -156,6 +157,7 @@
                 <td><span class="badge badge-danger">失败</span></td>
                 {% endif %}
                 <td>{{ moment(step.updated).format('lll') }}</td>
+                <td><a href="{{ url_for('.edit_step',pk=step.id) }}">编辑</a></td>
             </tr>
             {% endfor %}
             {% else %}
