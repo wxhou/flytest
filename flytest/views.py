@@ -201,14 +201,15 @@ def step(pk):
         request_data = request.form.get('request_data')
         expected_result = request.form.get('expected_result')
         expected_regular = request.form.get('expected_regular')
-        extract = request.form.get('extract')
+        request_extract = request.form.get('request_extract')
+        response_extract = request.form.get('response_extract')
         if not all([name, method, url]):
             flash("请输入完整的请求参数！", 'warning')
             return redirect(request.referrer)
         apistep = Apistep(apitest=apitest, name=name, apiurl_id=url, route=route,
                           method=method, request_data=request_data, headers=headers,
                           expected_result=expected_result, expected_regular=expected_regular,
-                          extract=extract, is_deleted=False)
+                          request_extract=request_extract, response_extract=response_extract, is_deleted=False)
         db.session.add(apistep)
         db.session.commit()
         return redirect(url_for('.step', pk=pk))
@@ -237,7 +238,8 @@ def edit_step(pk):
         apistep.request_data = request.form.get('request_data')
         apistep.expected_result = request.form.get('expected_result')
         apistep.expected_regular = request.form.get('expected_regular')
-        apistep.extract = request.form.get('extract')
+        apistep.request_extract = request.form.get('request_extract')
+        apistep.response_extract = request.form.get('response_extract')
         flash("更新步骤【{}】成功".format(name), 'success')
         db.session.commit()
         return redirect(url_for('.step', pk=apistep.apitest_id))
@@ -325,7 +327,7 @@ def pie():
 @login_required
 def bug():
     bugs = Bug.query.filter_by(is_deleted=False).order_by(Bug.updated.desc())
-    return render_template('bug.html',bugs=bugs, page_name='bugpage')
+    return render_template('bug.html', bugs=bugs, page_name='bugpage')
 
 
 @fly.route('/trend')

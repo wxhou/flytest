@@ -41,10 +41,15 @@ class BaseRequest(Session):
         """
             json_str -> obj
         """
-        json_str = json_str.replace('\'', '\"')
-        if is_json_str(json_str):
-            return json.loads(json_str)
-        return {}
+        json_str = json_str.replace("'", '"')
+        data = is_json_str(json_str)
+        if data:
+            return data
+        elif isinstance(json_str, dict):
+            return json_str
+        else:
+            current_app.logger.info("请求体类型 {}".format(type(json_str)))
+            return {}
 
     def substitutions(self, raw_str, task_id):
         """
@@ -100,13 +105,17 @@ class HttpRequest(BaseRequest):
         method = case.method
         url = generate_url(case.apiurl.url, case.route)
         if header := case.headers:
-            header = header.strip()
+            header = header.strip().replace("：",": ")
             header = self.substitutions(header, task_id)
             self.set_cache('headers_%s' % task_id, header_to_dict(header))
         if data := case.request_data:
+            current_app.logger.info("原始请求内容：{}".format(data))
             data = data.strip()
             data = self.substitutions(data, task_id)
-            self.set_cache('request_data_%s' %task_id, self.deserializer(data))
+            # request_extract
+            if extract := case.request_extract:
+                self.get_extract(data, extract, task_id)
+            self.set_cache('request_data_%s' %task_id, self.deserializer(str(data)))
         else:
             self.delete_cache('request_data_%s' % task_id)
         # logging
@@ -128,18 +137,26 @@ class HttpRequest(BaseRequest):
         status = self.check_result(_text, expected_result, expected_regular)
         current_app.logger.info("步骤[{}]测试结果: {}".format(case.name, "通过" if status else "失败"))
         case.status = status
-        # extract
-        if extract := case.extract:
-            extracts = extract.split('|')
-            current_app.logger.info("需获取的变量值列表：{}".format(extracts))
-            for name in extracts:
-                pattern = self.compiles(r'\"%s": "(.*?)"' % name)
-                result = pattern.findall(_text)[0]
-                name = "%s_%s" % (name, task_id)
-                self.set_cache(name, result)
-                current_app.logger.info("变量【%s】值设置结果：%s" %(name, self.get_cache(name)))
+        # response_extract
+        if extract := case.response_extract:
+            self.get_extract(_text, extract, task_id)
         db.session.commit()
+        current_app.logger.info(">>"*50)
         return response
+
+    def get_extract(self, to_string, extract, task_id):
+        extracts = extract.split('|')
+        current_app.logger.info("需获取的变量值列表：{}".format(extracts))
+        for name in extracts:
+            thename = '\"%s":.*?"(.*?)"' % name
+            current_app.logger.info("表达式：{}".format(thename))
+            pattern = self.compiles(r'{}'.format(thename))
+            result = pattern.findall(to_string)
+            current_app.logger.info("获取变量[{}]的值：{}".format(name, result))
+            name = "%s_%s" % (name, task_id)
+            self.set_cache(name, result[0])
+            current_app.logger.info("变量【%s】值设置结果：%s" %(name, self.get_cache(name)))
+
 
     def dispatch(self, method, *args, **kwargs):
         """handler request

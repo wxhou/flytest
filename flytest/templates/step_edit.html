@@ -80,11 +80,16 @@
                     name="expected_regular">
             </div>
             <div class="mb-3">
-                <label for="extract">
-                    <font style="color:brown;">变量提取</font>
+                <label for="request_extract">
+                    <font style="color:brown;">提取Request变量{请求值}</font>
                 </label>
-                <input type="text" class="form-control" id="extract" name="extract" {% if apistep.extract %} value="{{ apistep.extract }}
-                {% endif %}">
+                <input type="text" class="form-control" id="request_extract" value="{{ apistep.request_extract }}" name="request_extract">
+            </div>
+            <div class="mb-3">
+                <label for="response_extract">
+                    <font style="color:crimson;">提取Response变量{响应值}</font>
+                </label>
+                <input type="text" class="form-control" id="response_extract" value="{{ apistep.response_extract }}" name="response_extract">
             </div>
             <div class="form-group">
                 <label for="url">是否删除</label></label>

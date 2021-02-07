@@ -88,6 +88,18 @@
                         <label for="expected_regular">预期正则</label>
                         <input type="text" class="form-control" id="expected_regular" name="expected_regular">
                     </div>
+                    <div class="mb-3">
+                        <label for="request_extract">
+                            <font style="color:brown;">提取Request变量{请求值}</font>
+                        </label>
+                        <input type="text" class="form-control" id="request_extract" name="request_extract">
+                    </div>
+                    <div class="mb-3">
+                        <label for="response_extract">
+                            <font style="color:crimson;">提取Response变量{响应值}</font>
+                        </label>
+                        <input type="text" class="form-control" id="response_extract" name="response_extract">
+                    </div>
                     <hr class="mb-4">
                     <div class="form-actions well well-sm clearfix">
                         <button type="button" class="btn btn-info" data-dismiss="modal">
@@ -141,10 +153,10 @@
                 <td><code>{{ step.request_data }}</code></td>
                 <td><strong>{{ step.expected_result }}</strong></td>
                 <td>{{ step.expected_regular }}</td>
-                {% if step.extract %}
-                <td>{{ step.extract }}</td>
+                {% if step.response_extract or step.request_extract %}
+                <td>{{ step.request_extract }}&{{ step.response_extract }}</td>
                 {% else %}
-                <td>无</td>
+                <td class="text-muted">无</td>
                 {% endif %}
                 <td>
                     <a href="{{ url_for('.job',pk=step.id) }}">
@@ -156,7 +168,7 @@
                 {% if step.results %}
                 <td><code>{{ step.results }}</code></td>
                 {% else %}
-                <td>没有测试过哦</td>
+                <td class="text-muted">暂无</td>
                 {% endif %}
                 {% if step.status == -1 %}
                 <td><span class="badge badge-warning">未测试</span></td>

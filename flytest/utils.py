@@ -30,10 +30,11 @@ def generate_url(url, route):
     :param route:
     :return:
     """
-    if route is None:
-        return url
-    return urljoin(url.rstrip('/'),
-                   route if route[0] == '/' else '/' + route)
+    current_app.logger.info("请求服务器：{}".format(url))
+    current_app.logger.info("请求路径：`{}`".format(route))
+    if not route:
+        return url.strip()
+    return urljoin(url.strip(), route.strip())
 
 
 def header_to_dict(raw_str):
@@ -46,7 +47,6 @@ def header_to_dict(raw_str):
         raw_str = raw_str.split('\n')
     res = [[k.strip() for k in i.split(": ")] for i in raw_str]
     current_app.logger.info(res)
-    print(res)
     return dict(res)
 
 

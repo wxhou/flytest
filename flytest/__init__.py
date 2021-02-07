@@ -18,8 +18,8 @@ def create_app(register_blueprint=True):
     app.config.from_object(settings)
     register_make_dir(app)
     register_extensions(app)
-    register_logger(app)
     if register_blueprint:
+        register_logger(app)
         register_blueprints(app)
         register_template_context(app)
         register_shell_context(app)
