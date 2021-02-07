@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% block title %}
-    报告
+报告
 {% endblock %}
 {% block content %}
-    <br>
-    <h5>问题列表</h5>
-    <br>
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped table-sm">
-                    <thead>
+<br>
+<h5>问题列表</h5>
+<br>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-sm">
+                <thead>
                     <tr>
                         <th>BUG_ID</th>
                         <th>任务ID</th>
@@ -22,30 +22,33 @@
                         <th>BUG等级</th>
                         <th>更新时间</th>
                     </tr>
-                    </thead>
-                    <tbody>
-                    {% for bug in page_obj %}
-                        <tr>
-                            <td>{{ bug.id }}</td>
-                            <td>{{ bug.task }}</td>
-                            <td>{{ bug.casename }}</td>
-                            <td>{{ bug.stepname }}</td>
-                            <td>{{ bug.request }}</td>
-                            <td>{{ bug.detail }}</td>
-                            {% if bug.status == '已解决' %}
-                                <td><span class="badge badge-success">已解决</span></td>
-                            {% elif bug.status == '未解决' %}
-                                <td><span class="badge badge-danger">未解决</span></td>
-                            {% endif %}
-                            <td>{{ bug.level }}</td>
-                            <td>{{ bug.updated_time }}</td>
-                        </tr>
-                    {% empty %}
-                        <p style="color: red">暂无数据</p>
+                </thead>
+                <tbody>
+                    {% if bugs %}                        
+                    {% for bug in bugs %}
+                    <tr>
+                        <td>{{ bug.id }}</td>
+                        <td><small class="text-muted">{{ bug.task_id }}</small></td>
+                        <td><strong>{{ bug.casename }}</strong></td>
+                        <td><strong>{{ bug.stepname }}</strong></td>
+                        <td><small class="text-muted">{{ bug.request }}</small></td>
+                        <td><small class="text-muted">{{ bug.detail }}</small></td>
+                        {% if bug.status == 1 %}
+                        <td><span class="badge badge-success">已解决</span></td>
+                        {% elif bug.status == 0 %}
+                        <td><span class="badge badge-danger">未解决</span></td>
+                        {% endif %}
+                        <td>{{ bug.level }}</td>
+                        <td>{{ moment(bug.updated).format('lll') }}</td>
+                    </tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% else %}
+                    <p style="color: red">暂无数据</p>
+                    {% endif %}
+
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 {% endblock %}

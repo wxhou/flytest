@@ -16,14 +16,14 @@ from flytest.utils import make_dir
 def create_app(register_blueprint=True):
     app = Flask(__name__)
     app.config.from_object(settings)
-    register_make_dir()
+    register_make_dir(app)
     register_extensions(app)
+    register_logger(app)
     if register_blueprint:
         register_blueprints(app)
         register_template_context(app)
         register_shell_context(app)
         register_commands(app)
-        register_logger(app)
         register_errors(app)
     return app
 
@@ -113,7 +113,7 @@ def register_commands(app):
         click.echo('Administrator Created Done.')
 
 
-def register_make_dir():
+def register_make_dir(app):
     make_dir(app.config['LOG_FILE'])
     make_dir(app.config['AVATARS_SAVE_PATH'])
 
@@ -121,7 +121,7 @@ def register_make_dir():
 def register_logger(app):
     app.logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        '%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s')
     file_handler = RotatingFileHandler(filename=app.config['LOG_FILE'],
                                        maxBytes=10 * 1024 * 1024, backupCount=10)
     file_handler.setFormatter(formatter)

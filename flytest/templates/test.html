@@ -84,7 +84,7 @@
                 <td><a href="{{ url_for('.step',pk=test.id) }}">
                         {{ test.id }}
                     </a></td>
-                <td>{{ test.name }}</td>
+                <td><strong>{{ test.name }}</strong></td>
                 <td>{{ test.user }}</td>
                 <td>{{ test.product.name }}</td>
                 <td>
@@ -101,7 +101,8 @@
                 {% elif test.results == 0 %}
                 <td><span class="badge badge-danger">失败</span></td>
                 {% endif %}
-                <td><a href="#">{{ test.task_id }}</a></td>
+                <td><small class="text-muted"><a href="{{ url_for('.report') }}?task_id={{ test.task_id }}">
+                            {{ test.task_id }}</a></small></td>
                 <td>{{ moment(test.updated).format('lll') }}</td>
                 <td><a href="{{ url_for('.edit_test',pk=test.id) }}">编辑</a></td>
             </tr>

@@ -4,7 +4,7 @@ except ImportError:
     from urllib.parse import urlparse, urljoin
 import os
 import json
-from flask import current_app as app
+from flask import current_app
 from flask import request, redirect, url_for
 
 
@@ -22,7 +22,6 @@ def redirect_back(default='.index', **kwargs):
             return redirect(target)
     return redirect(url_for(default, **kwargs))
 
-   
 
 def generate_url(url, route):
     """
@@ -41,8 +40,14 @@ def header_to_dict(raw_str):
     """header to dict
     :type raw_str: str
     """
-    raw_str = raw_str.strip()
-    return dict([k.strip() for k in i.split(": ", 1)] for i in raw_str.split('\n'))
+    if '\\n' in raw_str:
+        raw_str = raw_str.split('\\n')
+    else:
+        raw_str = raw_str.split('\n')
+    res = [[k.strip() for k in i.split(": ")] for i in raw_str]
+    current_app.logger.info(res)
+    print(res)
+    return dict(res)
 
 
 def is_json_str(string):
@@ -65,3 +70,8 @@ def make_dir(dir):
     else:
         os.makedirs(dir)
         return dir
+
+
+if __name__ == '__main__':
+    a = "Content-Type: application/json;charset=utf-8\nAccept: application/json"
+    print(header_to_dict(a))

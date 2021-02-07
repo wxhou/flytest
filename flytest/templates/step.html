@@ -120,6 +120,7 @@
                 <th>请求内容</th>
                 <th>预期结果</th>
                 <th>预期正则</th>
+                <th>提取变量</th>
                 <th class="col-1 bg-info text-white">执行步骤</th>
                 <th>实际结果</th>
                 <th>是否通过</th>
@@ -131,15 +132,20 @@
             {% if apisteps %}
             {% for step in apisteps %}
             <tr>
-                <td scope="col">{{ step.id }}</td>
-                <td>{{ step.name }}</td>
+                <td scope="col" class="text-info">{{ step.id }}</td>
+                <td><strong>{{ step.name }}</strong></td>
                 <td>{{ step.method }}</td>
-                <td>{{ step.apiurl.url }}</td>
-                <td>{{ step.route }}</td>
-                <td>{{ step.headers }}</td>
+                <td><small class="text-muted">{{ step.apiurl.url }}</small></td>
+                <td><small class="text-muted">{{ step.route }}</small></td>
+                <td><small class="text-muted">{{ step.headers }}</small></td>
                 <td><code>{{ step.request_data }}</code></td>
-                <td>{{ step.expected_result }}</td>
+                <td><strong>{{ step.expected_result }}</strong></td>
                 <td>{{ step.expected_regular }}</td>
+                {% if step.extract %}
+                <td>{{ step.extract }}</td>
+                {% else %}
+                <td>无</td>
+                {% endif %}
                 <td>
                     <a href="{{ url_for('.job',pk=step.id) }}">
                         <button type="button" class="btn btn-outline-info btn-sm btn-block">
@@ -172,8 +178,7 @@
 {% endblock %}
 {% block script %}
 <script>
-    document.getElementById('headers').value = "Content-Type：application/json;charset=utf-8\
-    Accept：application/json"
-    document.getElementById('request_data').value = '{"json":}'
+    document.getElementById('headers').value = "Content-Type: application/json;charset=utf-8\nAccept: application/json"
+    document.getElementById('request_data').value = '{"json": }'
 </script>
 {% endblock script %}

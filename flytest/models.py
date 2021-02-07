@@ -116,6 +116,7 @@ class Apistep(db.Model):
     request_data = db.Column(db.Text, nullable=True)
     expected_result = db.Column(db.String(512))
     expected_regular = db.Column(db.String(512), nullable=True)
+    extract = db.Column(db.String(512))
     status = db.Column(db.Integer, default=-1)
     results = db.Column(db.Text, nullable=True)
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -137,6 +138,7 @@ class Apistep(db.Model):
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.String(255), index=True)
+    name = db.Column(db.String(255), default="NULL")
     result = db.Column(db.String(2048))
     status = db.Column(db.Integer, default=-1)
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -154,7 +156,7 @@ class Bug(db.Model):
     stepname = db.Column(db.String(512))
     request = db.Column(db.Text)
     detail = db.Column(db.Text)
-    status = db.Column(db.Integer, default='未解决')
+    status = db.Column(db.Integer)
     level = db.Column(db.String(10), default='一般')
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,

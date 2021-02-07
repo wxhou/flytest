@@ -1,12 +1,11 @@
-import logging
 from flytest.extensions import db
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from flytest.utils import generate_url
 from flytest import celery_app
+from flask import current_app
 
-log = logging.getLogger(__name__)
-celery = celery_app()
+celery = celery_app(current_app)
 
 
 @celery.task
@@ -24,14 +23,15 @@ def apistep_job(pk):
 @celery.task
 def apitest_job(pk):
     task_id = apitest_job.request.id
-    apisteps = Apistep.query.filter_by(apitest_id=pk, is_deleted=False)
+    apitest = Apitest.query.get_or_404(pk)
+    apisteps = Apistep.query.filter_by(apitest=apitest, is_deleted=False)
     for step in apisteps:
         HttpRequest().http_request(step, task_id)
-    log.info("测试完成！")
+    current_app.logger.info("测试完成！")
     apisteps = Apistep.query.filter_by(apitest_id=pk)
     results = []
     for i in apisteps:
-        report = Report(task_id=i.apitest.task_id,
+        report = Report(task_id=i.apitest.task_id, name=apitest.name,
                         result=i.results, status=i.status, is_deleted=False)
         db.session.add(report)
         report.apistep = i
@@ -51,7 +51,6 @@ def apitest_job(pk):
             db.session.add(bug)
         results.append(i.status)
     status = all(results)
-    apitest = Apitest.query.get(pk)
     apitest.task_id = task_id
     apitest.result = 1 if status else 0
     db.session.commit()
