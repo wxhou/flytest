@@ -115,7 +115,7 @@
                     </h6>
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'jobpage' %}active{% endif %}" href="#">
+                            <a class="nav-link {% if page_name == 'jobpage' %}active{% endif %}" href="{{ url_for('.work') }}">
                                 <span data-feather="trello"></span>
                                 任务列表
                             </a>
@@ -146,7 +146,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'bugpage' %}active{% endif %}" href="{{ url_for('.bug') }}">
+                            <a class="nav-link {% if page_name == 'bugpage' %}active{% endif %}"
+                                href="{{ url_for('.bug') }}">
                                 <span data-feather="file-text"></span>
                                 问题管理
                             </a>
@@ -211,6 +212,11 @@
     <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static',filename='js/feather.min.js') }}"></script>
     <script src="{{ url_for('static',filename='js/dashboard.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
     {% block script %}
 
     {% endblock %}

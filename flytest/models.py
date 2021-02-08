@@ -65,6 +65,9 @@ class Product(db.Model):
 
     apiurls = db.relationship('Apiurl', back_populates='product')
     apitests = db.relationship('Apitest', back_populates='product')
+    reports = db.relationship('Report', back_populates='product')
+    bugs = db.relationship('Bug', back_populates='product')
+    works = db.relationship('Work', back_populates='product')
 
     def __repr__(self):
         return '<Product %s>' % self.name
@@ -148,6 +151,8 @@ class Report(db.Model):
     is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     apistep = db.relationship('Apistep', uselist=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    product = db.relationship('Product', back_populates='reports')
 
 
 class Bug(db.Model):
@@ -164,5 +169,26 @@ class Bug(db.Model):
                         default=datetime.utcnow)
     is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    product = db.relationship('Product', back_populates='bugs')
+
     def __repr__(self):
         return '<BUG FOR %S>' % self.stepname
+
+
+class Work(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.String(256), index=True)
+    name = db.Column(db.String(512))
+    hostname = db.Column(db.String(512))
+    params = db.Column(db.String(512))
+    status = db.Column(db.Text)
+    result = db.Column(db.Text)
+    traceback = db.Column(db.Text)
+    created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    product = db.relationship('Product', back_populates='works')
+
+    def __repr__(self):
+        return self.task_id

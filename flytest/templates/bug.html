@@ -4,6 +4,20 @@
 {% endblock %}
 {% block content %}
 <br>
+<div class="btn-group">
+    <button type="button" class="btn btn-info">{{ product.name }}</button>
+    <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">切换下拉菜单</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        {% for pd in products %}
+        <li><a href="{{ url_for('.bug',pk=pd.id) }}">{{ pd.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+<br>
+<br>
 <h5>问题列表</h5>
 <br>
 <div class="row">
@@ -13,7 +27,6 @@
                 <thead>
                     <tr>
                         <th>BUG_ID</th>
-                        <th>任务ID</th>
                         <th>用例名称</th>
                         <th>步骤名称</th>
                         <th>数据详情</th>
@@ -21,14 +34,14 @@
                         <th>BUG状态</th>
                         <th>BUG等级</th>
                         <th>更新时间</th>
+                        <th>任务ID</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% if bugs %}                        
+                    {% if bugs %}
                     {% for bug in bugs %}
                     <tr>
-                        <td>{{ bug.id }}</td>
-                        <td><small class="text-muted">{{ bug.task_id }}</small></td>
+                        <td><strong class="text-info">{{ bug.id }}</strong></td>
                         <td><strong>{{ bug.casename }}</strong></td>
                         <td><strong>{{ bug.stepname }}</strong></td>
                         <td><small class="text-muted">{{ bug.request }}</small></td>
@@ -38,8 +51,17 @@
                         {% elif bug.status == 0 %}
                         <td><span class="badge badge-danger">未解决</span></td>
                         {% endif %}
-                        <td>{{ bug.level }}</td>
+                        {% if bug.level == "建议" %}
+                        <td class="text-info">{{ bug.level }}</td>
+                        {% elif bug.level == "一般" %}
+                        <td class="text-warning">{{ bug.level }}</td>
+                        {% elif bug.level == "严重" %}
+                        <td class="text-danger">{{ bug.level }}</td>
+                        {% elif bug.level == "致命" %}
+                        <td class="bg-danger text-white">{{ bug.level }}</td>
+                        {% endif %}
                         <td>{{ moment(bug.updated).format('lll') }}</td>
+                        <td><small class="text-muted">{{ bug.task_id }}</small></td>
                     </tr>
                     {% endfor %}
                     {% else %}

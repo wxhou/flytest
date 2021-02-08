@@ -5,12 +5,12 @@ from flask import flash, redirect, url_for, request
 from flask import Blueprint, render_template, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 from .models import (
-    User, Product, Apiurl, Apitest, Apistep, Report, Bug
+    User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 )
 from .extensions import db, cache, raw_sql
 from .utils import redirect_back
 from .choices import *
-from .tasks import apistep_job, apitest_job
+from .tasks import celery, apistep_job, apitest_job
 from pyecharts import options as opts
 from pyecharts.charts import Pie, Line
 
@@ -252,7 +252,22 @@ def edit_step(pk):
 @fly.route('/jobs/<int:pk>')
 @login_required
 def jobs(pk):
-    apitest_job.delay(int(pk))
+    result = apitest_job.delay(int(pk))
+    res = result.wait()
+    # current_app.logger.info(result)
+    # current_app.logger.info(result.id)
+    # current_app.logger.info(result.info)
+    for i in res:
+        work = Work(task_id=result.id,
+                    name=apitest_job.name,
+                    params="{}&{}".format(i['args'], i['kwargs']),
+                    hostname=i['hostname'],
+                    status=result.status,
+                    result=str(result.get(timeout=1)),
+                    traceback=result.traceback
+                    )
+        db.session.add(work)
+    db.session.commit()
     flash("正在运行测试用例：%s" % pk, 'info')
     return redirect(request.referrer)
 
@@ -260,17 +275,21 @@ def jobs(pk):
 @fly.route('/job/<int:pk>')
 @login_required
 def job(pk):
-    apistep_job.delay(int(pk))
+    result = apistep_job.delay(int(pk))
+    current_app.logger.info(result.wait())  # 65
     flash("正在运行测试步骤：%s" % pk, "info")
     return redirect(request.referrer)
 
 
 @fly.route('/report')
+@fly.route('/report/<int:pk>')
 @login_required
-def report():
+def report(pk=None):
+    product = Product.query.get(pk) if pk else Product.query.first()
     task_id = request.args.get('task_id')
     if task_id:
-        reports = Report.query.filter_by(task_id=task_id, is_deleted=False)
+        reports = Report.query.filter_by(
+            product=product, task_id=task_id, is_deleted=False)
         current_app.logger.info(reports)
         first_report = reports.first()
         content = {
@@ -281,11 +300,11 @@ def report():
             "failure": reports.filter_by(status=0).count(),
             "updated": first_report.updated
         }
-        return render_template('report.html', results=content, first_task=task_id, page_name='reportpage')
+        return render_template('report.html', results=[content], first_task=task_id, page_name='reportpage')
     first_task = None
     results = []
     raw_result = raw_sql(
-        'SELECT task_id,COUNT(task_id) from report GROUP BY task_id ORDER BY created desc;')
+        'SELECT task_id,COUNT(task_id) from report WHERE product_id =%d GROUP BY task_id ORDER BY created desc;' % product.id)
     for res in raw_result:
         reports = Report.query.filter_by(task_id=res[0], is_deleted=False)
         first_report = reports.first()
@@ -301,7 +320,8 @@ def report():
         }
         results.append(content)
     current_app.logger.info("报告数据：{}".format(results))
-    return render_template('report.html', results=results, first_task=first_task, page_name='reportpage')
+    return render_template('report.html', results=results, first_task=first_task,
+                           product=product, page_name='reportpage')
 
 
 @fly.route('/pie')
@@ -324,24 +344,35 @@ def pie():
 
 
 @fly.route('/bug')
+@fly.route('/bug/<int:pk>')
 @login_required
-def bug():
-    bugs = Bug.query.filter_by(is_deleted=False).order_by(Bug.updated.desc())
-    return render_template('bug.html', bugs=bugs, page_name='bugpage')
+def bug(pk=None):
+    product = Product.query.get(pk) if pk else Product.query.first()
+    task_id = request.args.get('task_id')
+    if task_id:
+        bugs = Bug.query.filter_by(product=product,
+                                   task_id=task_id, is_deleted=False).order_by(Bug.updated.desc())
+    else:
+        bugs = Bug.query.filter_by(product=product,
+                                   is_deleted=False).order_by(Bug.updated.desc())
+    return render_template('bug.html', bugs=bugs, product=product, page_name='bugpage')
 
 
 @fly.route('/trend')
+@fly.route('/trend/<int:pk>')
 @login_required
-def trend():
-    return render_template('trending.html', page_name="trendpage")
+def trend(pk=None):
+    product = Product.query.get(pk) if pk else Product.query.first()
+    return render_template('trending.html', page_name="trendpage", product=product)
 
 
-@fly.route('/trending')
+@fly.route('/trend')
+@fly.route('/trending/<int:pk>')
 @login_required
-def trending():
+def trending(pk=None):
     results = []
     raw_result = raw_sql(
-        'SELECT task_id,COUNT(task_id) from report GROUP BY task_id;')
+        'SELECT task_id,COUNT(task_id) from report WHERE product_id =%d GROUP BY task_id;' % pk)
     for res in raw_result:
         reports = Report.query.filter_by(task_id=res[0], is_deleted=False)
         first_report = reports.first()
@@ -352,7 +383,6 @@ def trending():
             test_name = 'default'
         results.append(
             [test_name, reports.filter_by(status=1).count(), reports.filter_by(status=0).count()])
-    current_app.logger.info("results内容：{}".format(results))
     if results:
         names, success, failure = zip(*results)
     else:
@@ -360,10 +390,50 @@ def trending():
     current_app.logger.info(
         "名称：{}，通过：{}，失败：{}".format(names, success, failure))
     c = (
-        Line()
-        .add_xaxis(names)
-        .add_yaxis("失败", failure, color="red")
-        .add_yaxis("通过", success, color="green")
-        .set_global_opts(title_opts=opts.TitleOpts(title="测试结果趋势图"))
+        Line(init_opts=opts.InitOpts(width="1600px", height="800px"))
+        .add_xaxis(xaxis_data=names)
+        .add_yaxis(
+            series_name="失败数",
+            y_axis=failure,
+            markpoint_opts=opts.MarkPointOpts(
+                data=[
+                    opts.MarkPointItem(type_="max", name="最大值"),
+                    opts.MarkPointItem(type_="min", name="最小值"),
+                ]
+            ),
+            markline_opts=opts.MarkLineOpts(
+                data=[opts.MarkLineItem(type_="average", name="平均值")]
+            ),
+        )
+        .add_yaxis(
+            series_name="通过数",
+            y_axis=success,
+            markpoint_opts=opts.MarkPointOpts(
+                data=[opts.MarkPointItem(value=-2, name="周最低", x=1, y=-1.5)]
+            ),
+            markline_opts=opts.MarkLineOpts(
+                data=[
+                    opts.MarkLineItem(type_="average", name="平均值"),
+                    opts.MarkLineItem(symbol="none", x="90%", y="max"),
+                    opts.MarkLineItem(
+                        symbol="circle", type_="max", name="最高点"),
+                ]
+            ),
+        )
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title="测试结果趋势图", subtitle='虚构'),
+            tooltip_opts=opts.TooltipOpts(trigger="axis"),
+            toolbox_opts=opts.ToolboxOpts(is_show=True),
+            xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
+        )
     )
     return c.dump_options_with_quotes()
+
+
+@fly.route('/work')
+@fly.route('/work/<int:pk>')
+@login_required
+def work(pk=None):
+    product = Product.query.get(pk) if pk else Product.query.first()
+    works = Work.query.filter_by(product=product)
+    return render_template('work.html', works=works, product=product, page_name='jobpage')

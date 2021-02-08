@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 import logging
-from logging.handlers import RotatingFileHandler
 import click
 from flask import Flask, render_template
 from celery import Celery
 from flytest import settings
-from flytest.extensions import (
-    db, login_manager, avatars, migrate, moment, toolbar, cache, assets
-)
-from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug
+from flytest.extensions import (db, login_manager, avatars, migrate, moment,
+                                toolbar, cache, assets)
+from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug ,Work
 from flytest.utils import make_dir
 
 
@@ -30,7 +28,8 @@ def create_app(register_blueprint=True):
 
 def celery_app(app=None):
     app = app or create_app(register_blueprint=False)
-    celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'],
+    celery = Celery(app.name,
+                    broker=app.config['CELERY_BROKER_URL'],
                     backend=app.config['CELERY_RESULT_BACKEND'])
     celery.conf.update(app.config)
 
@@ -73,9 +72,15 @@ def register_template_context(app):
 def register_shell_context(app):
     @app.shell_context_processor
     def make_shell_context():
-        return dict(db=db, User=User, Product=Product,
-                    Apiurl=Apiurl, Apitest=Apitest, Apistep=Apistep,
-                    Report=Report, Bug=Bug)
+        return dict(db=db,
+                    User=User,
+                    Product=Product,
+                    Apiurl=Apiurl,
+                    Apitest=Apitest,
+                    Apistep=Apistep,
+                    Report=Report,
+                    Bug=Bug,
+                    Work=Work)
 
 
 def register_commands(app):
@@ -85,7 +90,8 @@ def register_commands(app):
         """Initialize the database."""
         if drop:
             click.confirm(
-                'This operation will delete the database, do you want to continue?', abort=True)
+                'This operation will delete the database, do you want to continue?',
+                abort=True)
             db.drop_all()
             click.echo('Drop tables.')
         db.create_all()
@@ -93,8 +99,11 @@ def register_commands(app):
 
     @app.cli.command()
     @click.option('--email', prompt=True, help='The email to login.')
-    @click.option('--password', prompt=True, hide_input=True,
-                  confirmation_prompt=True, help='The password used to login.')
+    @click.option('--password',
+                  prompt=True,
+                  hide_input=True,
+                  confirmation_prompt=True,
+                  help='The password used to login.')
     def adminuser(email, password):
         click.echo('Initializing the database...')
         db.create_all()
@@ -119,11 +128,14 @@ def register_make_dir(app):
 
 
 def register_logger(app):
+    from logging.handlers import RotatingFileHandler
+
     app.logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s')
     file_handler = RotatingFileHandler(filename=app.config['LOG_FILE'],
-                                       maxBytes=10 * 1024 * 1024, backupCount=10)
+                                       maxBytes=10 * 1024 * 1024,
+                                       backupCount=10)
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.DEBUG)
 

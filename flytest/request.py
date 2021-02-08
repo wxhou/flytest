@@ -141,7 +141,7 @@ class HttpRequest(BaseRequest):
         if extract := case.response_extract:
             self.get_extract(_text, extract, task_id)
         db.session.commit()
-        current_app.logger.info(">>"*50)
+        current_app.logger.info(">>"*45)
         return response
 
     def get_extract(self, to_string, extract, task_id):

@@ -72,8 +72,8 @@
                 <th>所属项目</th>
                 <th class="bg-info text-white">执行测试</th>
                 <th>测试结果</th>
-                <td>最后一次运行任务ID</td>
                 <th>更新时间</th>
+                <td>最后一次运行任务ID</td>
                 <th>操作</th>
             </tr>
         </thead>
@@ -101,13 +101,13 @@
                 {% elif test.results == 0 %}
                 <td><span class="badge badge-danger">失败</span></td>
                 {% endif %}
+                <td>{{ moment(test.updated).format('lll') }}</td>
                 <td><small class="text-muted">{% if test.task_id %}
                     <a href="{{ url_for('.report') }}?task_id={{ test.task_id }}">
                         {{ test.task_id }}</a>
                         {% else %}
                         暂无
                 {% endif %}</small></td>
-                <td>{{ moment(test.updated).format('lll') }}</td>
                 <td><a href="{{ url_for('.edit_test',pk=test.id) }}">编辑</a></td>
             </tr>
             {% endfor %}

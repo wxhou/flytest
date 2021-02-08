@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}
+任务
+{% endblock %}
+{% block content %}
+<br>
+<div class="btn-group">
+    <button type="button" class="btn btn-info">{{ product.name }}</button>
+    <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">切换下拉菜单</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        {% for pd in products %}
+        <li><a href="{{ url_for('.work',pk=pd.id) }}">{{ pd.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+<br>
+<br>
+<h5>任务列表</h5>
+<br>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>任务ID</th>
+                        <th>名称</th>
+                        <th>执行主机</th>
+                        <th>参数</th>
+                        <th>状态</th>
+                        <th>结果</th>
+                        <th>异常信息</th>
+                        <th>创建时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if works %}
+                    {% for work in works %}
+                    <tr>
+                        <td><strong class="text-info">{{ work.id }}</strong></td>
+                        <td><small class="text-muted">{{ work.task_id }}</small></td>
+                        <td><small>{{ work.name }}</small></td>
+                        <td><small class="text-muted">{{ work.hostname }}</small></td>
+                        <td><strong class="text-info">{{ work.params }}</strong></td>
+                        {% if work.status == 'SUCCESS' %}
+                        <td><span class="badge badge-success">{{ work.status }}</span></td>
+                        {% else %}
+                        <td><span class="badge badge-danger">{{ work.status }}</span></td>
+                        {% endif %}
+                        <td>{{ work.result }}</td>
+                        <td class="text-muted"><code>{{ work.traceback }}</code></td>
+                        <td>{{ moment(work.created).format('lll') }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color: red">暂无数据</p>
+                    {% endif %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,11 +1,14 @@
+import time
+from flask import current_app
+from celery.utils.log import get_task_logger
 from flytest.extensions import db
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from flytest.utils import generate_url
 from flytest import celery_app
-from flask import current_app
 
 celery = celery_app(current_app)
+log = get_task_logger(__name__)
 
 
 @celery.task
@@ -18,39 +21,42 @@ def apistep_job(pk):
         apitest.task_id = task_id
         apitest.results = apistep.status
         db.session.commit()
+    log.info("测试完成")
 
 
 @celery.task
 def apitest_job(pk):
     task_id = apitest_job.request.id
+    hostname = apitest_job.request.hostname
     apitest = Apitest.query.get_or_404(pk)
     apisteps = Apistep.query.filter_by(apitest=apitest, is_deleted=False)
     for step in apisteps:
         HttpRequest().http_request(step, task_id)
-    current_app.logger.info("测试完成！")
     apisteps = Apistep.query.filter_by(apitest_id=pk)
     results = []
     for i in apisteps:
-        report = Report(task_id=i.apitest.task_id, name=apitest.name,
+        report = Report(task_id=task_id, name=apitest.name, product_id=apitest.product_id,
                         result=i.results, status=i.status, is_deleted=False)
         db.session.add(report)
         report.apistep = i
         if i.status == 0:
-            bug = Bug(task_id=task_id, casename=i.apitest.name, stepname=i.name,
+            bug = Bug(task_id=task_id, casename=i.apitest.name, stepname=i.name, product_id=apitest.product_id,
                       request="""
                         请求方法：{}
                         请求地址：{}
                         请求内容：{}
                         """.format(i.method, generate_url(i.apiurl.url, i.route), i.request_data),
                       detail="""
-                    预期结果：{}
-                    实际结果：{}
-                    """.format(i.expected_result, i.results),
+                    {} 不在预期结果中
+                    实际响应：{}
+                    """.format(i.expected_result + '&' + i.expected_regular, i.results),
                       status=i.status,
                       is_deleted=False)
             db.session.add(bug)
         results.append(i.status)
     status = all(results)
     apitest.task_id = task_id
-    apitest.result = 1 if status else 0
-    db.session.commit()
+    apitest.results = 1 if status else 0
+    log.info("测试完成！")
+    task_info = celery.control.inspect().active()
+    return task_info[hostname]
