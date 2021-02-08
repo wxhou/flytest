@@ -23,7 +23,7 @@
 <h5>报告列表</h5>
 <br>
 <div class="row">
-    <div class="col-sm-9">
+    <div class="col-sm-8">
         <div class="table-responsive">
             <table class="table table-bordered table-striped table-sm">
                 <thead>
@@ -34,7 +34,6 @@
                         <th class="text-danger">失败数</th>
                         <th>查看BUG</th>
                         <th>执行时间</th>
-                        <th>任务ID</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -61,7 +60,6 @@
                         <td><strong class="text-info">暂无BUG</strong></td>
                         {% endif %}
                         <td>{{ moment(report.updated).format('lll') }}</td>
-                        <td><small class="text-muted">{{ report.task_id }}</small></td>
                     </tr>
                     {% endfor %}
                     {% else %}
@@ -71,7 +69,7 @@
             </table>
         </div>
     </div>
-    <div class="col-sm-3">
+    <div class="col-sm-4">
         <div id="pie" style="width: 400px;height: 400px;margin: 20px auto"></div>
     </div>
 </div>

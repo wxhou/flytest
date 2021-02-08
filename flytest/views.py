@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+from threading import Thread
 from flask import current_app
-from flask import flash, redirect, url_for, request
+from flask import flash, redirect, url_for, request, abort
 from flask import Blueprint, render_template, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 from .models import (
     User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 )
-from .extensions import db, cache, raw_sql
-from .utils import redirect_back
 from .choices import *
+from .extensions import db, cache, raw_sql
 from .tasks import celery, apistep_job, apitest_job
 from pyecharts import options as opts
 from pyecharts.charts import Pie, Line
@@ -39,8 +39,9 @@ def login():
             user = User.query.filter_by(email=username).first()
             if user and user.verify_password(password):
                 login_user(user, remember)
+                next_url = request.args.get('next', url_for('.index'))
                 flash("登录成功！", 'success')
-                return redirect_back()
+                return redirect(next_url)
         flash('账户不存在', 'danger')
         return redirect(request.referrer)
     return render_template('login.html')
@@ -110,7 +111,7 @@ def edit_product(pk):
 @fly.route('/env/<int:pk>', methods=["GET", "POST"])
 @login_required
 def env(pk=None):
-    product = Product.query.get(pk) if pk else Product.query.first()
+    product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if request.method == "POST":
         name = request.form.get('name')
         url = request.form.get('url')
@@ -152,7 +153,7 @@ def edit_env(pk):
 @fly.route('/test/<int:pk>', methods=["GET", "POST"])
 @login_required
 def test(pk=None):
-    product = Product.query.get(pk) if pk else Product.query.first()
+    product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if request.method == "POST":
         name = request.form.get('name')
         if name:
@@ -285,13 +286,15 @@ def job(pk):
 @fly.route('/report/<int:pk>')
 @login_required
 def report(pk=None):
-    product = Product.query.get(pk) if pk else Product.query.first()
+    product = Product.query.get_or_404(pk) if pk else Product.query.first()
     task_id = request.args.get('task_id')
     if task_id:
         reports = Report.query.filter_by(
             product=product, task_id=task_id, is_deleted=False)
         current_app.logger.info(reports)
         first_report = reports.first()
+        if first_report is None:
+            abort(404)
         content = {
             "pk": first_report.id,
             "task_id": task_id,
@@ -300,7 +303,7 @@ def report(pk=None):
             "failure": reports.filter_by(status=0).count(),
             "updated": first_report.updated
         }
-        return render_template('report.html', results=[content], first_task=task_id, page_name='reportpage')
+        return render_template('report.html', results=[content], first_task=task_id, product=product, page_name='reportpage')
     first_task = None
     results = []
     raw_result = raw_sql(
@@ -333,11 +336,23 @@ def pie():
         return {}, 400
     reports = Report.query.filter_by(task_id=task_id, is_deleted=False)
     c = (
-        Pie()
-        .add("", [["测试失败", reports.filter_by(status=0).count()],
-                  ["测试成功", reports.filter_by(status=1).count()]])
+        Pie(
+            init_opts=opts.InitOpts(
+                width="200px",
+                height="200px"
+            )
+        )
+        .add(
+            series_name="",
+            data_pair=[["测试失败", reports.filter_by(status=0).count()],
+                       ["测试成功", reports.filter_by(status=1).count()]],
+            radius='50%',
+        )
         .set_colors(["red", "green"])
-        .set_global_opts(title_opts=opts.TitleOpts(title="最新报告"))
+        .set_global_opts(
+            title_opts=opts.TitleOpts(
+                title="最新报告",
+            ))
         .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
     )
     return c.dump_options_with_quotes()
@@ -347,7 +362,7 @@ def pie():
 @fly.route('/bug/<int:pk>')
 @login_required
 def bug(pk=None):
-    product = Product.query.get(pk) if pk else Product.query.first()
+    product = Product.query.get_or_404(pk) if pk else Product.query.first()
     task_id = request.args.get('task_id')
     if task_id:
         bugs = Bug.query.filter_by(product=product,
@@ -362,7 +377,7 @@ def bug(pk=None):
 @fly.route('/trend/<int:pk>')
 @login_required
 def trend(pk=None):
-    product = Product.query.get(pk) if pk else Product.query.first()
+    product = Product.query.get_or_404(pk) if pk else Product.query.first()
     return render_template('trending.html', page_name="trendpage", product=product)
 
 
@@ -390,10 +405,12 @@ def trending(pk=None):
     current_app.logger.info(
         "名称：{}，通过：{}，失败：{}".format(names, success, failure))
     c = (
-        Line(init_opts=opts.InitOpts(width="1600px", height="800px"))
+        Line(init_opts=opts.InitOpts(width="1000px", height="500px"))
         .add_xaxis(xaxis_data=names)
         .add_yaxis(
             series_name="失败数",
+            is_smooth=True,
+            is_connect_nones=True,
             y_axis=failure,
             markpoint_opts=opts.MarkPointOpts(
                 data=[
@@ -408,6 +425,8 @@ def trending(pk=None):
         .add_yaxis(
             series_name="通过数",
             y_axis=success,
+            is_smooth=True,
+            is_connect_nones=True,
             markpoint_opts=opts.MarkPointOpts(
                 data=[opts.MarkPointItem(value=-2, name="周最低", x=1, y=-1.5)]
             ),
@@ -421,7 +440,7 @@ def trending(pk=None):
             ),
         )
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="测试结果趋势图", subtitle='虚构'),
+            title_opts=opts.TitleOpts(title="测试结果趋势图"),
             tooltip_opts=opts.TooltipOpts(trigger="axis"),
             toolbox_opts=opts.ToolboxOpts(is_show=True),
             xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
@@ -434,6 +453,6 @@ def trending(pk=None):
 @fly.route('/work/<int:pk>')
 @login_required
 def work(pk=None):
-    product = Product.query.get(pk) if pk else Product.query.first()
+    product = Product.query.get_or_404(pk) if pk else Product.query.first()
     works = Work.query.filter_by(product=product)
     return render_template('work.html', works=works, product=product, page_name='jobpage')

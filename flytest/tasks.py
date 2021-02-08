@@ -57,6 +57,7 @@ def apitest_job(pk):
     status = all(results)
     apitest.task_id = task_id
     apitest.results = 1 if status else 0
+    db.session.commit()
     log.info("测试完成！")
     task_info = celery.control.inspect().active()
     return task_info[hostname]

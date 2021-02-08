@@ -14,15 +14,6 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
-def redirect_back(default='.index', **kwargs):
-    for target in request.args.get('next'), request.referrer:
-        if not target:
-            continue
-        if is_safe_url(target):
-            return redirect(target)
-    return redirect(url_for(default, **kwargs))
-
-
 def generate_url(url, route):
     """
     generate url
@@ -53,13 +44,13 @@ def header_to_dict(raw_str):
 def is_json_str(string):
     """str is json str
     """
-    if not isinstance(string, str):
-        return False
-    try:
-        data = json.loads(string)
-        return data
-    except ValueError:
-        return False
+    if isinstance(string, str):
+        try:
+            data = json.loads(string)
+            return data
+        except ValueError:
+            return False
+    return False
 
 
 def make_dir(dir):
@@ -73,5 +64,4 @@ def make_dir(dir):
 
 
 if __name__ == '__main__':
-    a = "Content-Type: application/json;charset=utf-8\nAccept: application/json"
-    print(header_to_dict(a))
+    pass

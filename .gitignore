@@ -194,3 +194,4 @@ dmypy.json
 .idea/
 *.png
 avatar/
+demo*
