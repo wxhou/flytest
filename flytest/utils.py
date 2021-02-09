@@ -37,8 +37,16 @@ def header_to_dict(raw_str):
     else:
         raw_str = raw_str.split('\n')
     res = [[k.strip() for k in i.split(": ")] for i in raw_str]
-    current_app.logger.info(res)
     return dict(res)
+
+
+def params2dict(raw_str):
+    """get params to dict
+    """
+    if isinstance(raw_str, dict):
+        return raw_str
+    new_dict = dict(i.split('=') for i in raw_str.split('&'))
+    return new_dict
 
 
 def is_json_str(string):

@@ -5,7 +5,7 @@ from requests.sessions import Session
 from flask import current_app
 
 from .extensions import db, cache
-from .utils import header_to_dict, generate_url, is_json_str
+from .utils import header_to_dict, params2dict, generate_url, is_json_str
 
 
 class BaseRequest(Session):
@@ -42,9 +42,9 @@ class BaseRequest(Session):
             json_str -> obj
         """
         json_str = json_str.replace("'", '"')
-        current_app.logger.info("原始请求内容999：{}".format(json_str))
         if data := is_json_str(json_str):
-            current_app.logger.info("原始请求内容888：{}".format(json_str))
+            if "params" in data:
+                data['params'] = params2dict(data['params'])
             return data
         elif isinstance(json_str, dict):
             return json_str
@@ -117,7 +117,6 @@ class HttpRequest(BaseRequest):
             # request_extract
             if extract := case.request_extract:
                 self.get_extract(data, extract, task_id)
-            current_app.logger.info("原始请求内容333：{}".format(data))
             self.set_cache('request_data_%s' %
                            task_id, self.deserializer(data))
         else:
@@ -149,7 +148,7 @@ class HttpRequest(BaseRequest):
         if extract := case.response_extract:
             self.get_extract(_text, extract, task_id)
         db.session.commit()
-        current_app.logger.info(">>"*45)
+        current_app.logger.info(">>" * 45)
         return response
 
     def get_extract(self, to_string, extract, task_id):

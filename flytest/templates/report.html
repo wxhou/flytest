@@ -2,9 +2,6 @@
 {% block title %}
 报告
 {% endblock %}
-{% block head %}
-<script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
-{% endblock %}
 {% block content %}
 <div class="btn-group">
     <button type="button" class="btn btn-info">{{ product.name }}</button>
@@ -84,7 +81,6 @@
             setInterval(fetchData, 50000);
         }
     );
-
     function fetchData() {
         $.get({
             url: "{{ url_for('.pie',task_id=first_task) }}",

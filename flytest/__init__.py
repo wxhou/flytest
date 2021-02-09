@@ -6,8 +6,8 @@ from flask import Flask, render_template
 from celery import Celery
 from flytest import settings
 from flytest.extensions import (db, login_manager, avatars, migrate, moment,
-                                toolbar, cache, assets)
-from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug ,Work
+                                toolbar, cache, assets, scheduler)
+from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 from flytest.utils import make_dir
 
 
@@ -55,6 +55,7 @@ def register_extensions(app):
     cache.init_app(app, settings.CACHE_CONFIG)
     db.init_app(app)
     assets.init_app(app)
+    scheduler.init_app(app)
     if not settings.WIN:
         toolbar.init_app(app)
 

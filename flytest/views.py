@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 from threading import Thread
-from flask import current_app
+from flask import current_app, jsonify
 from flask import flash, redirect, url_for, request, abort
 from flask import Blueprint, render_template, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
@@ -250,10 +250,10 @@ def edit_step(pk):
                            methods=METHODS, page_name='testpage')
 
 
-@fly.route('/jobs/<int:pk>')
+@fly.route('/jobs/<int:pd_id>/<int:t_id>')
 @login_required
-def jobs(pk):
-    result = apitest_job.delay(int(pk))
+def jobs(pd_id, t_id):
+    result = apitest_job.delay(int(t_id))
     res = result.wait()
     # current_app.logger.info(result)
     # current_app.logger.info(result.id)
@@ -265,16 +265,16 @@ def jobs(pk):
                     hostname=i['hostname'],
                     status=result.status,
                     result=str(result.get(timeout=1)),
-                    traceback=result.traceback
+                    traceback=result.traceback,
+                    product_id=pd_id
                     )
         db.session.add(work)
     db.session.commit()
-    flash("正在运行测试用例：%s" % pk, 'info')
-    return redirect(request.referrer)
+    return jsonify({"product": pd_id, "test": t_id, 'errmsg': '执行完成'})
 
 
-@fly.route('/job/<int:pk>')
-@login_required
+@ fly.route('/job/<int:pk>')
+@ login_required
 def job(pk):
     result = apistep_job.delay(int(pk))
     current_app.logger.info(result.wait())  # 65
@@ -282,9 +282,9 @@ def job(pk):
     return redirect(request.referrer)
 
 
-@fly.route('/report')
-@fly.route('/report/<int:pk>')
-@login_required
+@ fly.route('/report')
+@ fly.route('/report/<int:pk>')
+@ login_required
 def report(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     task_id = request.args.get('task_id')
@@ -327,8 +327,8 @@ def report(pk=None):
                            product=product, page_name='reportpage')
 
 
-@fly.route('/pie')
-@login_required
+@ fly.route('/pie')
+@ login_required
 def pie():
     task_id = request.args.get('task_id')
     current_app.logger.info("pie图task_id是：%s" % task_id)
@@ -358,9 +358,9 @@ def pie():
     return c.dump_options_with_quotes()
 
 
-@fly.route('/bug')
-@fly.route('/bug/<int:pk>')
-@login_required
+@ fly.route('/bug')
+@ fly.route('/bug/<int:pk>')
+@ login_required
 def bug(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     task_id = request.args.get('task_id')
@@ -373,17 +373,17 @@ def bug(pk=None):
     return render_template('bug.html', bugs=bugs, product=product, page_name='bugpage')
 
 
-@fly.route('/trend')
-@fly.route('/trend/<int:pk>')
-@login_required
+@ fly.route('/trend')
+@ fly.route('/trend/<int:pk>')
+@ login_required
 def trend(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     return render_template('trending.html', page_name="trendpage", product=product)
 
 
-@fly.route('/trend')
-@fly.route('/trending/<int:pk>')
-@login_required
+@ fly.route('/trending')
+@ fly.route('/trending/<int:pk>')
+@ login_required
 def trending(pk=None):
     results = []
     raw_result = raw_sql(
@@ -440,7 +440,7 @@ def trending(pk=None):
             ),
         )
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="测试结果趋势图"),
+            title_opts=opts.TitleOpts(title="趋势图"),
             tooltip_opts=opts.TooltipOpts(trigger="axis"),
             toolbox_opts=opts.ToolboxOpts(is_show=True),
             xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
@@ -449,9 +449,9 @@ def trending(pk=None):
     return c.dump_options_with_quotes()
 
 
-@fly.route('/work')
-@fly.route('/work/<int:pk>')
-@login_required
+@ fly.route('/work')
+@ fly.route('/work/<int:pk>')
+@ login_required
 def work(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     works = Work.query.filter_by(product=product)

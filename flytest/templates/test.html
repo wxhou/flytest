@@ -2,8 +2,6 @@
 {% block title %}
 接口测试
 {% endblock %}
-{% block head %}
-{% endblock %}
 {% block content %}
 <br>
 <div class="btn-group">
@@ -82,17 +80,16 @@
             {% for test in tests %}
             <tr>
                 <td><strong><a href="{{ url_for('.step',pk=test.id) }}">
-                    {{ test.id }}
-                </a></strong></td>
+                            {{ test.id }}
+                        </a></strong></td>
                 <td><strong>{{ test.name }}</strong></td>
                 <td>{{ test.user }}</td>
                 <td class="bg-light text-dark">{{ test.product.name }}</td>
                 <td>
-                    <a href="{{ url_for('.jobs',pk=test.id) }}">
-                        <button type="button" class="btn btn-outline-info btn-sm btn-block">
-                            运行
-                        </button>
-                    </a>
+                    <button id="testrunner" type="button" value="{{ test.id }}"
+                        class="btn btn-outline-info btn-sm btn-block">
+                        运行
+                    </button>
                 </td>
                 {% if test.results == -1 %}
                 <td><span class="badge badge-warning">未测试</span></td>
@@ -103,11 +100,11 @@
                 {% endif %}
                 <td>{{ moment(test.updated).format('lll') }}</td>
                 <td><small class="text-muted">{% if test.task_id %}
-                    <a href="{{ url_for('.report') }}?task_id={{ test.task_id }}">
-                        {{ test.task_id }}</a>
+                        <a href="{{ url_for('.report') }}?task_id={{ test.task_id }}">
+                            {{ test.task_id }}</a>
                         {% else %}
                         暂无
-                {% endif %}</small></td>
+                        {% endif %}</small></td>
                 <td><a href="{{ url_for('.edit_test',pk=test.id) }}">编辑</a></td>
             </tr>
             {% endfor %}
@@ -117,4 +114,25 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+{% block script %}
+<script>
+    $(document).ready(function () {
+        $("#testrunner").click(function () {
+            var pk = $(this).val()
+            $.get({
+                url: "{{ request.host_url }}jobs/{{ product.id}}/" + pk,
+                dataType: 'json',
+                success: function (response) {
+                    alert("任务" + pk + response.errmsg);
+                    $("#testrunner").removeAttr('disabled')
+                    $(this).text("运行")
+                }
+            });
+            $(this).text("运行中")
+            $(this).attr("disabled", "disabled")
+            alert("任务正在运行中。。。")
+        });
+    });
+</script>
 {% endblock %}
