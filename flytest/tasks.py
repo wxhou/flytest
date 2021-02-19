@@ -1,13 +1,11 @@
 import time
-from flask import current_app
 from celery.utils.log import get_task_logger
 from flytest.extensions import db
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from flytest.utils import generate_url
-from flytest import celery_app
+from flytest.worker import celery
 
-celery = celery_app(current_app)
 log = get_task_logger(__name__)
 
 

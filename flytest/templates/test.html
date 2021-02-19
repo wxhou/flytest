@@ -124,14 +124,13 @@
                 url: "{{ request.host_url }}jobs/{{ product.id}}/" + pk,
                 dataType: 'json',
                 success: function (response) {
-                    alert("任务" + pk + response.errmsg);
-                    $("#testrunner").removeAttr('disabled')
+                    $(this).removeAttr('disabled')
                     $(this).text("运行")
+                    alert("任务" + pk + response.errmsg);
                 }
             });
             $(this).text("运行中")
             $(this).attr("disabled", "disabled")
-            alert("任务正在运行中。。。")
         });
     });
 </script>

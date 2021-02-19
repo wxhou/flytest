@@ -3,61 +3,51 @@
 import logging
 import click
 from flask import Flask, render_template
-from celery import Celery
+
 from flytest import settings
 from flytest.extensions import (db, login_manager, avatars, migrate, moment,
-                                toolbar, cache, assets, scheduler)
+                                toolbar, cache, assets, scheduler, whooshee)
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 from flytest.utils import make_dir
 
 
-def create_app(register_blueprint=True):
+def create_app():
     app = Flask(__name__)
     app.config.from_object(settings)
     register_make_dir(app)
     register_extensions(app)
-    if register_blueprint:
-        register_logger(app)
-        register_blueprints(app)
-        register_template_context(app)
-        register_shell_context(app)
-        register_commands(app)
-        register_errors(app)
+    register_logger(app)
+    register_blueprints(app)
+    register_template_context(app)
+    register_shell_context(app)
+    register_commands(app)
+    register_errors(app)
     return app
 
 
-def celery_app(app=None):
-    app = app or create_app(register_blueprint=False)
-    celery = Celery(app.name,
-                    broker=app.config['CELERY_BROKER_URL'],
-                    backend=app.config['CELERY_RESULT_BACKEND'])
-    celery.conf.update(app.config)
-
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
+def create_celery_app():
+    app = Flask(__name__)
+    app.config.from_object(settings)
+    register_extensions(app)
+    return app
 
 
 def register_blueprints(app):
-    from flytest.views import fly
+    from flytest.views import fly  # 防止celery循环导入
     app.register_blueprint(fly, url_prefix='/')
 
 
 def register_extensions(app):
+    db.init_app(app)
     login_manager.init_app(app)
     avatars.init_app(app)
     migrate.init_app(app=app)
     moment.init_app(app)
     cache.init_app(app, settings.CACHE_CONFIG)
-    db.init_app(app)
     assets.init_app(app)
     scheduler.init_app(app)
-    if not settings.WIN:
-        toolbar.init_app(app)
+    whooshee.init_app(app)
+    toolbar.init_app(app)
 
 
 def register_template_context(app):

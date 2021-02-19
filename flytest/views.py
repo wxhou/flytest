@@ -75,13 +75,13 @@ def product():
         ('移动端', "移动端"),
         ('小程序', "小程序")
     )
-    page = request.args.get("page", 1)
+    page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    paginate = Product.query.with_parent(current_user).order_by(
+    pagination = Product.query.with_parent(current_user).order_by(
         Product.created.desc()).paginate(page, per_page)
-    products = paginate.items
+    products = pagination.items
     return render_template('product.html', tags=tags, products=products,
-                           paginate=paginate, page_name='productpage')
+                           pagination=pagination, page_name='productpage')
 
 
 @fly.route('/product/<int:pk>/edit', methods=["GET", "POST"])
@@ -123,13 +123,13 @@ def env(pk=None):
             flash("【%s】%s添加成功" % (name, url), 'success')
             return redirect(url_for('.env', pk=pk))
         return redirect(request.referrer)
-    page = request.args.get("page")
+    page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    paginate = Apiurl.query.with_parent(product).order_by(
+    pagination = Apiurl.query.with_parent(product).order_by(
         Apiurl.created.desc()).paginate(page, per_page)
-    envs = paginate.items
+    envs = pagination.items
     return render_template('env.html', product=product,
-                           envs=envs, paginate=paginate, page_name='envpage')
+                           envs=envs, pagination=pagination, page_name='envpage')
 
 
 @fly.route('/env/<int:pk>/edit', methods=["GET", "POST"])
@@ -165,12 +165,12 @@ def test(pk=None):
         else:
             flash("没有输入用例名称")
             return redirect(request.referrer)
-    page = request.args.get("page")
+    page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    paginate = Apitest.query.with_parent(product).order_by(
+    pagination = Apitest.query.with_parent(product).order_by(
         Apitest.created.desc()).paginate(page, per_page)
-    tests = paginate.items
-    return render_template('test.html', product=product, paginate=paginate,
+    tests = pagination.items
+    return render_template('test.html', product=product, pagination=pagination,
                            tests=tests, page_name='testpage')
 
 
@@ -214,14 +214,14 @@ def step(pk):
         db.session.add(apistep)
         db.session.commit()
         return redirect(url_for('.step', pk=pk))
-    page = request.args.get("page")
+    page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
     apiurl = Apiurl.query.filter_by(product_id=apitest.product_id).all()
-    paginate = Apistep.query.filter_by(
+    pagination = Apistep.query.filter_by(
         apitest=apitest).paginate(page, per_page)
-    apisteps = paginate.items
+    apisteps = pagination.items
     return render_template('step.html', apitest=apitest, apiurl=apiurl, methods=METHODS,
-                           paginate=paginate, apisteps=apisteps, page_name='testpage')
+                           pagination=pagination, apisteps=apisteps, page_name='testpage')
 
 
 @fly.route('/step/<int:pk>/edit', methods=["GET", "POST"])
@@ -273,8 +273,8 @@ def jobs(pd_id, t_id):
     return jsonify({"product": pd_id, "test": t_id, 'errmsg': '执行完成'})
 
 
-@ fly.route('/job/<int:pk>')
-@ login_required
+@fly.route('/job/<int:pk>')
+@login_required
 def job(pk):
     result = apistep_job.delay(int(pk))
     current_app.logger.info(result.wait())  # 65
@@ -282,9 +282,9 @@ def job(pk):
     return redirect(request.referrer)
 
 
-@ fly.route('/report')
-@ fly.route('/report/<int:pk>')
-@ login_required
+@fly.route('/report')
+@fly.route('/report/<int:pk>')
+@login_required
 def report(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     task_id = request.args.get('task_id')
@@ -327,8 +327,8 @@ def report(pk=None):
                            product=product, page_name='reportpage')
 
 
-@ fly.route('/pie')
-@ login_required
+@fly.route('/pie')
+@login_required
 def pie():
     task_id = request.args.get('task_id')
     current_app.logger.info("pie图task_id是：%s" % task_id)
@@ -358,32 +358,37 @@ def pie():
     return c.dump_options_with_quotes()
 
 
-@ fly.route('/bug')
-@ fly.route('/bug/<int:pk>')
-@ login_required
+@fly.route('/bug')
+@fly.route('/bug/<int:pk>')
+@login_required
 def bug(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     task_id = request.args.get('task_id')
     if task_id:
         bugs = Bug.query.filter_by(product=product,
                                    task_id=task_id, is_deleted=False).order_by(Bug.updated.desc())
+
+        return render_template('bug.html', bugs=bugs, product=product, page_name='bugpage')
     else:
-        bugs = Bug.query.filter_by(product=product,
-                                   is_deleted=False).order_by(Bug.updated.desc())
-    return render_template('bug.html', bugs=bugs, product=product, page_name='bugpage')
+        page = request.args.get("page", 1, type=int)
+        per_page = current_app.config['PER_PAGE_SIZE']
+        pagination = Bug.query.filter_by(product=product,
+                                         is_deleted=False).order_by(Bug.updated.desc()).paginate(page, per_page)
+        bugs = pagination.items
+        return render_template('bug.html', pagination=pagination, bugs=bugs, product=product, page_name='bugpage')
 
 
-@ fly.route('/trend')
-@ fly.route('/trend/<int:pk>')
-@ login_required
+@fly.route('/trend')
+@fly.route('/trend/<int:pk>')
+@login_required
 def trend(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     return render_template('trending.html', page_name="trendpage", product=product)
 
 
-@ fly.route('/trending')
-@ fly.route('/trending/<int:pk>')
-@ login_required
+@fly.route('/trending')
+@fly.route('/trending/<int:pk>')
+@login_required
 def trending(pk=None):
     results = []
     raw_result = raw_sql(
@@ -449,10 +454,13 @@ def trending(pk=None):
     return c.dump_options_with_quotes()
 
 
-@ fly.route('/work')
-@ fly.route('/work/<int:pk>')
-@ login_required
+@fly.route('/work')
+@fly.route('/work/<int:pk>')
+@login_required
 def work(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
-    works = Work.query.filter_by(product=product)
-    return render_template('work.html', works=works, product=product, page_name='jobpage')
+    page = request.args.get("page", 1, type=int)
+    per_page = current_app.config['PER_PAGE_SIZE']
+    pagination = Work.query.filter_by(product=product).paginate(page, per_page)
+    works = pagination.items
+    return render_template('work.html', works=works, pagination=pagination, product=product, page_name='jobpage')

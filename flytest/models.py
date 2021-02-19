@@ -3,10 +3,11 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import UserMixin
-from flytest.extensions import db
+from flytest.extensions import db, whooshee
 from flask_avatars import Identicon
 
 
+@whooshee.register_model('email', 'username')
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(128), unique=True)
@@ -50,6 +51,7 @@ class User(db.Model, UserMixin):
         return self.username
 
 
+@whooshee.register_model('name')
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
@@ -73,6 +75,7 @@ class Product(db.Model):
         return '<Product %s>' % self.name
 
 
+@whooshee.register_model('name')
 class Apiurl(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
@@ -90,6 +93,7 @@ class Apiurl(db.Model):
         return '<Url %s>' % self.name
 
 
+@whooshee.register_model('name')
 class Apitest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
@@ -110,6 +114,7 @@ class Apitest(db.Model):
         return '<ApiTest %s>' % self.name
 
 
+@whooshee.register_model('name')
 class Apistep(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
@@ -139,6 +144,7 @@ class Apistep(db.Model):
         return '<ApiStep %s>' % self.name
 
 
+@whooshee.register_model('name')
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.String(255), index=True)
@@ -155,6 +161,7 @@ class Report(db.Model):
     product = db.relationship('Product', back_populates='reports')
 
 
+@whooshee.register_model('detail')
 class Bug(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.String(255), index=True)
@@ -176,6 +183,7 @@ class Bug(db.Model):
         return '<BUG FOR %S>' % self.stepname
 
 
+@whooshee.register_model('task_id')
 class Work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.String(256), index=True)
