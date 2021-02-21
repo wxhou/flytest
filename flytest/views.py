@@ -8,9 +8,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 from .models import (
     User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 )
-from .choices import *
-from .extensions import db, cache, raw_sql
-from .tasks import celery, apistep_job, apitest_job
+from flytest.choices import *
+from flytest.extensions import db, cache, raw_sql, scheduler
+from flytest.tasks import celery, apistep_job, apitest_job
 from pyecharts import options as opts
 from pyecharts.charts import Pie, Line
 
@@ -464,3 +464,26 @@ def work(pk=None):
     pagination = Work.query.filter_by(product=product).paginate(page, per_page)
     works = pagination.items
     return render_template('work.html', works=works, pagination=pagination, product=product, page_name='jobpage')
+
+
+@fly.route('/crons', methods=['GET', 'POST'])
+@fly.route('/crons/<int:pk>', methods=['GET', 'POST'])
+@login_required
+def crons(pk=None):
+    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    page = request.args.get("page", 1, type=int)
+    per_page = current_app.config['PER_PAGE_SIZE']
+    pagination = Apitest.query.with_parent(product).filter_by(
+        is_deleted=False).paginate(page, per_page)
+    apitests = pagination.items
+    if request.method == "POST":
+        trigger = request.form.get('trigger')
+        jobid = request.form.get('jobid')
+        jobsecond = request.form.get('jobsecond')        
+        current_app.logger.warning("定时任务：%s已被移除" % jobid)
+        scheduler.add_job(id=jobid, func=apitest_job.delay, name=apitest_job.name,
+                          args=(1,), trigger=trigger, minute=jobsecond)
+        return redirect(url_for('.crons', pk=pk))
+    return render_template('crons.html', crontab=CRONTAB, product=product, page_name='cronpage')
+
+

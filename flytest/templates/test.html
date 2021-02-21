@@ -69,6 +69,7 @@
                 <th>执行人</th>
                 <th>所属项目</th>
                 <th class="bg-info text-white">执行测试</th>
+                <th>定时任务</th>
                 <th>测试结果</th>
                 <th>更新时间</th>
                 <td>最后一次运行任务ID</td>
@@ -91,6 +92,7 @@
                         运行
                     </button>
                 </td>
+                <td><a href="{{ url_for('.crons',pk=test.id) }}"></a></td>
                 {% if test.results == -1 %}
                 <td><span class="badge badge-warning">未测试</span></td>
                 {% elif test.results == 1 %}

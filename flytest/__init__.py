@@ -18,6 +18,7 @@ def create_app():
     register_extensions(app)
     register_logger(app)
     register_blueprints(app)
+    register_scheduler(app)
     register_template_context(app)
     register_shell_context(app)
     register_commands(app)
@@ -37,6 +38,11 @@ def register_blueprints(app):
     app.register_blueprint(fly, url_prefix='/')
 
 
+def register_scheduler(app):
+    scheduler.init_app(app)
+    scheduler.start()
+
+
 def register_extensions(app):
     db.init_app(app)
     login_manager.init_app(app)
@@ -45,7 +51,6 @@ def register_extensions(app):
     moment.init_app(app)
     cache.init_app(app, settings.CACHE_CONFIG)
     assets.init_app(app)
-    scheduler.init_app(app)
     whooshee.init_app(app)
     toolbar.init_app(app)
 

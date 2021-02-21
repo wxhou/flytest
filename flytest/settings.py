@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 import os
 import sys
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -41,6 +42,21 @@ CACHE_CONFIG = {
     'CACHE_REDIS_PORT': 6379,
     "CACHE_DEFAULT_TIMEOUT": 600
 }
+# crontabs
+SCHEDULER_JOBSTORES = {
+    'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI)
+}
+
+SCHEDULER_EXECUTORS = {
+    'default': {'type': 'threadpool', 'max_workers': 20}
+}
+
+SCHEDULER_JOB_DEFAULTS = {
+    'coalesce': False,
+    'max_instances': 3
+}
+
+SCHEDULER_API_ENABLED = True
 
 if __name__ == '__main__':
     print(BASE_DIR)

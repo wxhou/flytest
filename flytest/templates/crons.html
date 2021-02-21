@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}
+定时任务
+{% endblock %}
+{% block content %}
+<br>
+<div class="btn-group">
+    <button type="button" class="btn btn-info">{{ product.name }}</button>
+    <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">切换下拉菜单</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        {% for pd in products %}
+        <li><a href="{{ url_for('.crons',pk=pd.id) }}">{{ pd.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+<div style="float: right">
+    <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#myModal">添加新的定时任务</button>
+</div>
+<br>
+<br>
+<h5>定时任务</h5>
+<br>
+<!-- 模态框 -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- 模态框头部 -->
+            <div class="modal-header">
+                <h4 class="modal-title">添加环境</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- 模态框主体 -->
+            <div class="modal-body">
+                <h4 class="mb-3">添加一个新的环境</h4>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">任务类型<label style="color: red;">*</label></label>
+                        <select class="form-control" id="trigger" name="trigger">
+                            {% for cron in crontab %}
+                            <option value="{{ cron[0] }}">{{ cron[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="url" class="form-label">任务编号<label style="color: red;">*</label></label>
+                        <input type="text" class="form-control" id="jobid" name="jobid" placeholder="请输入任务ID..." required>
+                        <div id="url" class="form-text">输入任务编号</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="url" class="form-label">运行时间<label style="color: red;">*</label></label>
+                        <input type="text" class="form-control" id="jobsecond" name="jobsecond" placeholder="请输入任务运行机制..." required>
+                        <div id="url" class="form-text">输入任务运行机制</div>
+                    </div>
+                    <br>
+                    <div class="form-actions well well-sm clearfix">
+                        <button type="button" class="btn btn-info" data-dismiss="modal">
+                            <i class="fa fa-undo"></i>
+                            取消
+                        </button>
+                        <button type="submit" class="default btn btn-primary hide-xs">
+                            <i class="fa fa-save"></i>
+                            增加
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 模态框 -->
+<br>
+<br>
+{% endblock %}
