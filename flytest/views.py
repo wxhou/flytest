@@ -10,7 +10,7 @@ from .models import (
 )
 from flytest.choices import *
 from flytest.extensions import db, cache, raw_sql, scheduler
-from flytest.tasks import celery, apistep_job, apitest_job
+from flytest.tasks import celery, apistep_job, apitest_job, add_cronjob
 from pyecharts import options as opts
 from pyecharts.charts import Pie, Line
 
@@ -479,11 +479,7 @@ def crons(pk=None):
     if request.method == "POST":
         trigger = request.form.get('trigger')
         jobid = request.form.get('jobid')
-        jobsecond = request.form.get('jobsecond')        
-        current_app.logger.warning("定时任务：%s已被移除" % jobid)
-        scheduler.add_job(id=jobid, func=apitest_job.delay, name=apitest_job.name,
-                          args=(1,), trigger=trigger, minute=jobsecond)
+        jobsecond = request.form.get('jobsecond')
+        add_cronjob.d
         return redirect(url_for('.crons', pk=pk))
     return render_template('crons.html', crontab=CRONTAB, product=product, page_name='cronpage')
-
-

@@ -1,6 +1,6 @@
 import time
 from celery.utils.log import get_task_logger
-from flytest.extensions import db
+from flytest.extensions import db, scheduler
 from flytest.models import Apistep, Apitest, Report, Bug
 from flytest.request import HttpRequest
 from flytest.utils import generate_url
@@ -22,10 +22,7 @@ def apistep_job(pk):
     log.info("测试完成")
 
 
-@celery.task
-def apitest_job(pk):
-    task_id = apitest_job.request.id
-    hostname = apitest_job.request.hostname
+def testcaserunner(pk, task_id):
     apitest = Apitest.query.get_or_404(pk)
     apisteps = Apistep.query.filter_by(apitest=apitest, is_deleted=False)
     for step in apisteps:
@@ -57,5 +54,21 @@ def apitest_job(pk):
     apitest.results = 1 if status else 0
     db.session.commit()
     log.info("测试完成！")
+
+
+@celery.task
+def apitest_job(pk):
+    task_id = apitest_job.request.id
+    hostname = apitest_job.request.hostname
+    testcaserunner(pk, task_id)
+    task_info = celery.control.inspect().active()
+    return task_info[hostname]
+
+
+@celery.task()
+def add_cronjob(pk, **kwargs):
+    task_id = apitest_job.request.id
+    hostname = apitest_job.request.hostname
+    scheduler.add_job(task_id, testcaserunner, args=(pk, task_id), **kwargs)
     task_info = celery.control.inspect().active()
     return task_info[hostname]
