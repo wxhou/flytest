@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+import os
 import logging
 import click
 from flask import Flask, render_template
 
-from flytest import settings
+from flytest.settings import config
 from flytest.extensions import (db, login_manager, avatars, migrate, moment,
                                 toolbar, cache, assets, scheduler, whooshee)
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
@@ -13,7 +14,8 @@ from flytest.utils import make_dir
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(settings)
+    config_name = os.getenv('FLASK_CONFIG', 'development')
+    app.config.from_object(config[config_name])
     register_make_dir(app)
     register_extensions(app)
     register_logger(app)
@@ -28,7 +30,8 @@ def create_app():
 
 def create_celery_app():
     app = Flask(__name__)
-    app.config.from_object(settings)
+    config_name = os.getenv('FLASK_CONFIG', 'development')
+    app.config.from_object(config[config_name])
     register_extensions(app)
     return app
 

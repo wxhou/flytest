@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(128), unique=True)
     username = db.Column(db.String(128))
     password_hash = db.Column(db.String(128))
+    token = db.Column(db.String(256))
     avatar_s = db.Column(db.String(64))
     avatar_m = db.Column(db.String(64))
     avatar_l = db.Column(db.String(64))
