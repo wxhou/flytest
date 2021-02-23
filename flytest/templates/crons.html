@@ -75,3 +75,23 @@
 <br>
 <br>
 {% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function () {
+            $("#testrunner").click(function () {
+                var pk = $(this).val()
+                $.get({
+                    url: "{{ request.host_url }}jobs/{{ product.id}}/" + pk,
+                    dataType: 'json',
+                    success: function (response) {
+                        $(this).removeAttr('disabled')
+                        $(this).text("运行")
+                        alert("任务" + pk + response.errmsg);
+                    }
+                });
+                $(this).text("运行中")
+                $(this).attr("disabled", "disabled")
+            });
+        });
+    </script>
+{% endblock  %}

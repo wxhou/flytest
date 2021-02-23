@@ -63,8 +63,7 @@ class BaseRequest(Session):
         if not result:
             current_app.logger.info("没有需要替换的变量！")
             return raw_str
-        replace = {name: self.get_cache(
-            "%s_%s" % (name, task_id)) for name in result}
+        replace = {name: self.get_cache("%s_%s" % (name, task_id)) for name in result}
         current_app.logger.info("需要替换的变量: {}".format(replace))
         new_str = Template(raw_str).safe_substitute(**replace)
         current_app.logger.info("替换后的文本：{}".format(new_str))
@@ -117,21 +116,17 @@ class HttpRequest(BaseRequest):
             # request_extract
             if extract := case.request_extract:
                 self.get_extract(data, extract, task_id)
-            self.set_cache('request_data_%s' %
-                           task_id, self.deserializer(data))
+            self.set_cache('request_data_%s' % task_id, self.deserializer(data))
         else:
             self.delete_cache('request_data_%s' % task_id)
         # logging
         current_app.logger.info("请求方法：%s" % method)
         current_app.logger.info("请求地址: {}".format(url))
-        current_app.logger.info("请求头: {}".format(
-            self.get_cache('headers_%s' % task_id)))
-        current_app.logger.info("请求内容: {}".format(
-            self.get_cache('request_data_%s' % task_id)))
+        current_app.logger.info("请求头: {}".format(self.get_cache('headers_%s' % task_id)))
+        current_app.logger.info("请求内容: {}".format(self.get_cache('request_data_%s' % task_id)))
         # request
         response = self.dispatch(method.lower(), url,
-                                 headers=self.get_cache(
-                                     'headers_%s' % task_id),
+                                 headers=self.get_cache('headers_%s' % task_id),
                                  **self.get_cache('request_data_%s' % task_id))
         # response
         _text = response.text
@@ -141,8 +136,7 @@ class HttpRequest(BaseRequest):
         expected_result = case.expected_result
         expected_regular = case.expected_regular
         status = self.check_result(_text, expected_result, expected_regular)
-        current_app.logger.info("步骤[{}]测试结果: {}".format(
-            case.name, "通过" if status else "失败"))
+        current_app.logger.info("步骤[{}]测试结果: {}".format(case.name, "通过" if status else "失败"))
         case.status = status
         # response_extract
         if extract := case.response_extract:
@@ -162,8 +156,7 @@ class HttpRequest(BaseRequest):
             current_app.logger.info("获取变量[{}]的值：{}".format(name, result))
             name = "%s_%s" % (name, task_id)
             self.set_cache(name, result[0])
-            current_app.logger.info("变量【%s】值设置结果：%s" %
-                                    (name, self.get_cache(name)))
+            current_app.logger.info("变量【%s】值设置结果：%s" % (name, self.get_cache(name)))
 
     def dispatch(self, method, *args, **kwargs):
         """handler request

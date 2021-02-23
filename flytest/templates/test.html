@@ -92,7 +92,52 @@
                         运行
                     </button>
                 </td>
-                <td><a href="{{ url_for('.crons',pk=test.id) }}"></a></td>
+                <td>    
+                    <button type="button" class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#crontab">添加</button>
+                </td>
+                <div class="modal fade" id="crontab">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                
+                            <!-- 模态框头部 -->
+                            <div class="modal-header">
+                                <h4 class="modal-title">新增定时任务</h4>
+                                <button type="button" class="close" data-dismiss="modal" id="crons2test" value="{{ test.id }}">&times;</button>
+                            </div>
+                
+                            <!-- 模态框主体 -->
+                            <div class="modal-body">
+                                <form action="{{ url_for('.crons2test',pk=test.id) }}" method="post">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">任务类型<label style="color: red;">*</label></label>
+                                        <select class="form-control" id="trigger" name="trigger">
+                                            {% for cron in crontab %}
+                                            <option value="{{ cron[0] }}">{{ cron[1] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="apitestname" class="form-label">定时任务规则<label style="color: red;">*</label></label>
+                                        <input type="text" class="form-control" id="jobsecond" name="jobsecond" placeholder="请输入定时任务名称..." autofocus
+                                            required>
+                                        <div id="namehelp" class="form-text">输入定时任务规则</div>
+                                    </div>
+                                    <br>
+                                    <div class="form-actions well well-sm clearfix">
+                                        <button type="button" class="btn btn-info" data-dismiss="modal">
+                                            <i class="fa fa-undo"></i>
+                                            取消
+                                        </button>
+                                        <button type="submit" class="default btn btn-primary hide-xs">
+                                            <i class="fa fa-save"></i>
+                                            增加
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% if test.results == -1 %}
                 <td><span class="badge badge-warning">未测试</span></td>
                 {% elif test.results == 1 %}

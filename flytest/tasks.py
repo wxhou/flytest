@@ -9,20 +9,9 @@ from flytest.worker import celery
 log = get_task_logger(__name__)
 
 
-@celery.task
-def apistep_job(pk):
-    apistep = Apistep.query.get(pk)
-    task_id = apistep_job.request.id
-    HttpRequest().http_request(apistep, task_id)
-    if Apistep.query.filter_by(apitest_id=apistep.apitest_id).count() == 1:
-        apitest = Apitest.query.get(apistep.apitest_id)
-        apitest.task_id = task_id
-        apitest.results = apistep.status
-        db.session.commit()
-    log.info("测试完成")
-
-
 def testcaserunner(pk, task_id):
+    """运行测试用例"""
+    print("开始测试用例" + str(pk))
     apitest = Apitest.query.get_or_404(pk)
     apisteps = Apistep.query.filter_by(apitest=apitest, is_deleted=False)
     for step in apisteps:
@@ -53,7 +42,37 @@ def testcaserunner(pk, task_id):
     apitest.task_id = task_id
     apitest.results = 1 if status else 0
     db.session.commit()
-    log.info("测试完成！")
+    print("结束测试用例" + str(pk))
+
+
+def testcaserunner_cron(pk, task_id):
+    with scheduler.app.app_context():
+        testcaserunner(pk, task_id)
+
+
+def teststeprunner(pk, task_id):
+    """测试步骤运行"""
+    apistep = Apistep.query.get(pk)
+    HttpRequest().http_request(apistep, task_id)
+    if Apistep.query.filter_by(apitest_id=apistep.apitest_id).count() == 1:
+        apitest = Apitest.query.get(apistep.apitest_id)
+        apitest.task_id = task_id
+        apitest.results = apistep.status
+        db.session.commit()
+
+
+def teststeprunner_cron(pk, task_id):
+    with scheduler.app.app_context():
+        teststeprunner(pk, task_id)
+
+
+@celery.task
+def apistep_job(pk):
+    task_id = apistep_job.request.id
+    hostname = apistep_job.request.hostname
+    teststeprunner(pk, task_id)
+    task_info = celery.control.inspect().active()
+    return task_info[hostname]
 
 
 @celery.task
@@ -65,10 +84,18 @@ def apitest_job(pk):
     return task_info[hostname]
 
 
-@celery.task()
-def add_cronjob(pk, **kwargs):
-    task_id = apitest_job.request.id
-    hostname = apitest_job.request.hostname
-    scheduler.add_job(task_id, testcaserunner, args=(pk, task_id), **kwargs)
-    task_info = celery.control.inspect().active()
-    return task_info[hostname]
+# @celery.task
+# def add_cronjob2test(pk, **kwargs):
+#     task_id = add_cronjob2test.request.id
+#     hostname = add_cronjob2test.request.hostname
+#     scheduler.add_job(task_id, testcaserunner, args=(pk, task_id), **kwargs)
+#     task_info = celery.control.inspect().active()
+#     return task_info[hostname]
+
+
+# @celery.task
+# def add_cronjob2step(pk, **kwargs):
+#     task_id = add_cronjob2step.request.id
+#     hostname = add_cronjob2step.request.hostname
+#     task_info = celery.control.inspect().active()
+#     return task_info[hostname]

@@ -10,7 +10,7 @@ win = sys.platform.startswith('win')
 
 
 class BaseConfig(object):
-    SECRET_KEY = os.getenv('SECRET_KEY', "wxhou")
+    SECRET_KEY = os.getenv('SECRET_KEY', "ahJ#5UoEg9x1T&@n")
     # mysql
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
@@ -23,25 +23,26 @@ class BaseConfig(object):
     MAIL_DEFAULT_SENDER = ('flytest', MAIL_USERNAME)
     PER_PAGE_SIZE = 10
     # flask_avatars
-    AVATARS_SAVE_PATH = os.path.join(BASE_DIR, 'avatar')
-    LOG_FILE = os.path.join(BASE_DIR, 'logs', 'flytest.log')
+    AVATARS_SAVE_PATH = os.path.join(basedir, 'avatar')
+    LOGGER_FILE = os.path.join(basedir, 'logs', 'flytest.log')
 
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
+    DB_SERVER = '127.0.0.1'
     # debugtool
     DEBUG_TB_PROFILER_ENABLED = False
     DEBUG_TB_TEMPLATE_EDITOR_ENABLED = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     # db url
-    SQLALCHEMY_DATABASE_URI = "mysql://root:123456@127.0.0.1:3306/flytest"
+    SQLALCHEMY_DATABASE_URI = "mysql://root:123456@{}:3306/flytest".format(DB_SERVER)
     # celery
-    CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1',
-    CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/2'
+    CELERY_BROKER_URL = 'redis://{}:6379/1'.format(DB_SERVER)
+    CELERY_RESULT_BACKEND = 'redis://{}:6379/2'.format(DB_SERVER)
     # cache
     CACHE_CONFIG = {
         'CACHE_TYPE': "redis",  # Flask-Caching related configs
-        'CACHE_REDIS_HOST': '127.0.0.1',
+        'CACHE_REDIS_HOST': DB_SERVER,
         'CACHE_REDIS_PORT': 6379,
         "CACHE_DEFAULT_TIMEOUT": 600
     }
@@ -64,19 +65,17 @@ class DevelopmentConfig(BaseConfig):
 
 
 class ProductionConfig(BaseConfig):
-    # debugtool
-    DEBUG_TB_PROFILER_ENABLED = False
-    DEBUG_TB_TEMPLATE_EDITOR_ENABLED = False
-    DEBUG_TB_INTERCEPT_REDIRECTS = False
+    DB_SERVER = 1
+    REDIS_SERVER = 2
     # db url
-    SQLALCHEMY_DATABASE_URI = "mysql://root:123456@127.0.0.1:3306/flytest"
+    SQLALCHEMY_DATABASE_URI = "mysql://root:123456@{}:3306/flytest".format(DB_SERVER)
     # celery
-    CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1',
-    CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/2'
+    CELERY_BROKER_URL = 'redis://{}:6379/1'.format(REDIS_SERVER)
+    CELERY_RESULT_BACKEND = 'redis://{}:6379/2'.format(REDIS_SERVER)
     # cache
     CACHE_CONFIG = {
         'CACHE_TYPE': "redis",  # Flask-Caching related configs
-        'CACHE_REDIS_HOST': '127.0.0.1',
+        'CACHE_REDIS_HOST': REDIS_SERVER,
         'CACHE_REDIS_PORT': 6379,
         "CACHE_DEFAULT_TIMEOUT": 600
     }
@@ -98,10 +97,14 @@ class ProductionConfig(BaseConfig):
     SCHEDULER_API_ENABLED = True
 
 
+class TestingConfig(DevelopmentConfig):
+    TESTING = True
+
 config = {
     'development': DevelopmentConfig,
-    'production': ProductionConfig
+    'production': ProductionConfig,
+    'testing':TestingConfig
 }
 
 if __name__ == '__main__':
-    print(BASE_DIR)
+    print(basedir)

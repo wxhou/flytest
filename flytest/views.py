@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-from threading import Thread
-from flask import current_app, jsonify
+from flask import current_app
 from flask import flash, redirect, url_for, request, abort
 from flask import Blueprint, render_template, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
@@ -9,11 +8,11 @@ from .models import (
     User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 )
 from flytest.choices import *
+from flytest.utils import uid_name, response_error, response_success
 from flytest.extensions import db, cache, raw_sql, scheduler
-from flytest.tasks import celery, apistep_job, apitest_job, add_cronjob
+from flytest.tasks import celery, apistep_job, apitest_job, testcaserunner_cron, teststeprunner_cron
 from pyecharts import options as opts
 from pyecharts.charts import Pie, Line
-
 
 fly = Blueprint('', __name__)
 
@@ -70,17 +69,12 @@ def product():
         db.session.add(product)
         db.session.commit()
         return redirect(url_for('.product'))
-    tags = (
-        ('网页端', "网页端"),
-        ('移动端', "移动端"),
-        ('小程序', "小程序")
-    )
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
     pagination = Product.query.with_parent(current_user).order_by(
         Product.created.desc()).paginate(page, per_page)
     products = pagination.items
-    return render_template('product.html', tags=tags, products=products,
+    return render_template('product.html', tags=TAGS, products=products,
                            pagination=pagination, page_name='productpage')
 
 
@@ -137,11 +131,9 @@ def env(pk=None):
 def edit_env(pk):
     env = Apiurl.query.get_or_404(pk)
     if request.method == 'POST':
-        name = request.form.get('name')
-        url = request.form.get('url')
+        env.name = request.form.get('name')
+        env.url = request.form.get('url')
         delete = request.form.get('delete')
-        env.name = name
-        env.url = url
         if delete:
             env.is_deleted = True
         db.session.commit()
@@ -171,7 +163,7 @@ def test(pk=None):
         Apitest.created.desc()).paginate(page, per_page)
     tests = pagination.items
     return render_template('test.html', product=product, pagination=pagination,
-                           tests=tests, page_name='testpage')
+                           tests=tests, crontab=CRONTAB, page_name='testpage')
 
 
 @fly.route('/test/<int:pk>/edit', methods=["GET", "POST"])
@@ -270,7 +262,7 @@ def jobs(pd_id, t_id):
                     )
         db.session.add(work)
     db.session.commit()
-    return jsonify({"product": pd_id, "test": t_id, 'errmsg': '执行完成'})
+    return response_success(data={"product": pd_id, "test": t_id})
 
 
 @fly.route('/job/<int:pk>')
@@ -303,23 +295,25 @@ def report(pk=None):
             "failure": reports.filter_by(status=0).count(),
             "updated": first_report.updated
         }
-        return render_template('report.html', results=[content], first_task=task_id, product=product, page_name='reportpage')
+        return render_template('report.html', results=[content], first_task=task_id, product=product,
+                               page_name='reportpage')
     first_task = None
     results = []
-    raw_result = raw_sql(
-        'SELECT task_id,COUNT(task_id) from report WHERE product_id =%d GROUP BY task_id ORDER BY created desc;' % product.id)
+    raw_result = Report.query.filter(Report.task_id).group_by(Report.task_id).order_by(Report.created.desc())
+    print(raw_result)
+    # raw_result = raw_sql(
+        # 'SELECT task_id,COUNT(task_id) from report WHERE product_id=%d GROUP BY task_id ORDER BY created desc;' % product.id)
     for res in raw_result:
-        reports = Report.query.filter_by(task_id=res[0], is_deleted=False)
-        first_report = reports.first()
+        reports = Report.query.filter_by(task_id=res.task_id, is_deleted=False)
         if first_task is None:
-            first_task = first_report.task_id
+            first_task = res.task_id
         content = {
-            "pk": first_report.id,
-            "task_id": first_report.task_id,
-            "name": first_report.name,
+            "pk": res.id,
+            "task_id": res.task_id,
+            "name": res.name,
             "success": reports.filter_by(status=1).count(),
             "failure": reports.filter_by(status=0).count(),
-            "updated": first_report.updated
+            "updated": res.updated
         }
         results.append(content)
     current_app.logger.info("报告数据：{}".format(results))
@@ -406,7 +400,7 @@ def trending(pk=None):
     if results:
         names, success, failure = zip(*results)
     else:
-        names, success, failure = ['default'], [0], [0]
+        names, success, failure = ['none'], [0], [0]
     current_app.logger.info(
         "名称：{}，通过：{}，失败：{}".format(names, success, failure))
     c = (
@@ -478,8 +472,32 @@ def crons(pk=None):
     apitests = pagination.items
     if request.method == "POST":
         trigger = request.form.get('trigger')
-        jobid = request.form.get('jobid')
         jobsecond = request.form.get('jobsecond')
-        add_cronjob.d
+        add_cronjob2test.delay(pk, trigger=trigger, minute=jobsecond)
         return redirect(url_for('.crons', pk=pk))
     return render_template('crons.html', crontab=CRONTAB, product=product, page_name='cronpage')
+
+
+@fly.route('/crons/test/<int:pk>', methods=['POST'])
+@login_required
+def crons2test(pk):
+    task_id = uid_name()
+    current_app.logger.info('task_id: {}'.format(task_id))
+    trigger = request.form.get('trigger')
+    jobsecond = request.form.get('jobsecond')
+    scheduler.add_job(id=task_id, func=testcaserunner_cron, args=(pk, task_id),
+                      trigger=trigger, minute=jobsecond)
+    flash("添加定时任务成功", "success")
+    return redirect(request.referrer)
+
+
+@fly.route('/crons/step/<int:pk>', methods=['POST'])
+def crons2step(pk):
+    task_id = uid_name()
+    current_app.logger.info('task_id: {}'.format(task_id))
+    trigger = request.form.get('trigger')
+    jobsecond = request.form.get('jobsecond')
+    scheduler.add_job(id=task_id, func=teststeprunner_cron, args=(pk, task_id),
+                      trigger=trigger, minute=jobsecond)
+    flash("添加定时任务成功", "success")
+    return redirect(request.referrer)

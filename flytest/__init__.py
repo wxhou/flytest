@@ -52,7 +52,7 @@ def register_extensions(app):
     avatars.init_app(app)
     migrate.init_app(app=app)
     moment.init_app(app)
-    cache.init_app(app, settings.CACHE_CONFIG)
+    cache.init_app(app, app.config['CACHE_CONFIG'])
     assets.init_app(app)
     whooshee.init_app(app)
     toolbar.init_app(app)
@@ -86,7 +86,9 @@ def register_commands(app):
     @app.cli.command()
     @click.option('--drop', is_flag=True, help='Create after drop.')
     def initdb(drop):
-        """Initialize the database."""
+        """Initialize the database.
+        if you update tables. then delete a table before to create_all.
+        """
         if drop:
             click.confirm(
                 'This operation will delete the database, do you want to continue?',
@@ -122,7 +124,7 @@ def register_commands(app):
 
 
 def register_make_dir(app):
-    make_dir(app.config['LOG_FILE'])
+    make_dir(app.config['LOGGER_FILE'])
     make_dir(app.config['AVATARS_SAVE_PATH'])
 
 
@@ -132,7 +134,7 @@ def register_logger(app):
     app.logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s')
-    file_handler = RotatingFileHandler(filename=app.config['LOG_FILE'],
+    file_handler = RotatingFileHandler(filename=app.config['LOGGER_FILE'],
                                        maxBytes=10 * 1024 * 1024,
                                        backupCount=10)
     file_handler.setFormatter(formatter)

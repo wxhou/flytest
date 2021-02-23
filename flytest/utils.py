@@ -4,7 +4,10 @@ except ImportError:
     from urllib.parse import urlparse, urljoin
 import os
 import json
-from flask import current_app
+import uuid
+import time
+from copy import deepcopy
+from flask import current_app, jsonify
 from flask import request, redirect, url_for
 
 
@@ -71,5 +74,25 @@ def make_dir(dir):
         return dir
 
 
+def response_error(code, msg=None):
+    if msg is None:
+        msg = 'error'
+    return jsonify({'errcode': code, 'errmsg': msg})
+
+
+def response_success(result=None, **kwargs):
+    if result is None:
+        res = {'data': result, 'errcode': 0, 'errmsg': 'success'}
+    else:
+        res = deepcopy(result)
+    for k, v in kwargs.items():
+        res[k] = v
+    return jsonify(res)
+
+
+def uid_name():
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, str(time.time())))
+
+
 if __name__ == '__main__':
-    pass
+    print(uid_name())
