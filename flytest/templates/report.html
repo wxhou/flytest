@@ -29,6 +29,7 @@
                         <th>用例名称</th>
                         <th class="text-success">通过数</th>
                         <th class="text-danger">失败数</th>
+                        <th>任务类型</th>
                         <th>查看BUG</th>
                         <th>执行时间</th>
                     </tr>
@@ -47,6 +48,11 @@
                                 }}</span></td>
                         <td><span {% if report.failure %} class="badge badge-danger" {% endif %}>{{ report.failure
                                 }}</span></td>
+                        {% if report.types == 1 %}
+                        <td>异步任务</td>
+                        {% else %}
+                        <td>定时任务</td>
+                        {% endif %}
                         {% if report.failure %}
                         <td>
                             <button type="button" class="btn btn-outline-info btn-sm">

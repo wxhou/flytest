@@ -47,12 +47,14 @@
                     </div>
                     <div class="mb-3">
                         <label for="url" class="form-label">任务编号<label style="color: red;">*</label></label>
-                        <input type="text" class="form-control" id="jobid" name="jobid" placeholder="请输入任务ID..." required>
+                        <input type="text" class="form-control" id="jobid" name="jobid" placeholder="请输入任务ID..."
+                            required>
                         <div id="url" class="form-text">输入任务编号</div>
                     </div>
                     <div class="mb-3">
                         <label for="url" class="form-label">运行时间<label style="color: red;">*</label></label>
-                        <input type="text" class="form-control" id="jobsecond" name="jobsecond" placeholder="请输入任务运行机制..." required>
+                        <input type="text" class="form-control" id="jobsecond" name="jobsecond"
+                            placeholder="请输入任务运行机制..." required>
                         <div id="url" class="form-text">输入任务运行机制</div>
                     </div>
                     <br>
@@ -73,25 +75,39 @@
 </div>
 <!-- 模态框 -->
 <br>
+<div class="table-responsive">
+    <table id="showtable" class="table table-bordered table-striped table-sm">
+    </table>
+</div>
 <br>
 {% endblock %}
 {% block script %}
-    <script>
-        $(document).ready(function () {
-            $("#testrunner").click(function () {
-                var pk = $(this).val()
-                $.get({
-                    url: "{{ request.host_url }}jobs/{{ product.id}}/" + pk,
-                    dataType: 'json',
-                    success: function (response) {
-                        $(this).removeAttr('disabled')
-                        $(this).text("运行")
-                        alert("任务" + pk + response.errmsg);
-                    }
-                });
-                $(this).text("运行中")
-                $(this).attr("disabled", "disabled")
-            });
+<script type='text/javascript'>
+    $(document).ready(function () {
+        $.get({
+            url: "{{ request.host_url }}scheduler/jobs",
+            success: function (response) {
+                console.log(response);
+                showdata(response);
+            }, error: function (e) {
+                console.log(e);
+            }
         });
-    </script>
-{% endblock  %}
+    });
+    function showdata(data) {
+        var table = $("#showtable")
+        console.log(data)
+        if (data == String([])) {
+            table.append('<p class="text-danger">暂无数据</p>')
+        } else {
+            table.empty()
+            table.append('<thead><tr><th>定时任务ID</th><th>执行方法</th><th>args参数</th><th>kwargs参数</th><th class="bg-info text-white">任务模式</th><th>运行间隔</th><th>失效时间</th><th>最大实例数</th><th>下一次运行时间</th><th>编辑</th></tr></thead>')
+            for (var i = 0; i < data.length; i++) {
+                var str = '<tbody><tr><td><small class="text-muted">' + data[i].id + '</small></td><td>' + data[i].func + '</td><td>' + JSON.stringify(data[i].args) + '</td><td>' + JSON.stringify(data[i].kwargs) + '</td><td>' + data[i].trigger + '</td><td>' + data[i].minute + '</td><td>' + data[i].misfire_grace_time + '</td><td>' + data[i].max_instances + '</td><td>' + data[i].next_run_time + '</td><td><button type="button" id="delete" class="btn btn-outline-info btn-sm">删除</button></td></tr></tbody>'
+                table.append(str)
+            }
+        }
+    };
+    $().click()
+</script>
+{% endblock %}

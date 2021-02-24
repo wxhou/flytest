@@ -299,10 +299,7 @@ def report(pk=None):
                                page_name='reportpage')
     first_task = None
     results = []
-    raw_result = Report.query.filter(Report.task_id).group_by(Report.task_id).order_by(Report.created.desc())
-    print(raw_result)
-    # raw_result = raw_sql(
-        # 'SELECT task_id,COUNT(task_id) from report WHERE product_id=%d GROUP BY task_id ORDER BY created desc;' % product.id)
+    raw_result = Report.query.group_by(Report.task_id).order_by(Report.created.desc())
     for res in raw_result:
         reports = Report.query.filter_by(task_id=res.task_id, is_deleted=False)
         if first_task is None:
@@ -385,22 +382,20 @@ def trend(pk=None):
 @login_required
 def trending(pk=None):
     results = []
-    raw_result = raw_sql(
-        'SELECT task_id,COUNT(task_id) from report WHERE product_id =%d GROUP BY task_id;' % pk)
+    raw_result = Report.query.group_by(Report.task_id).order_by(Report.created.desc())
     for res in raw_result:
-        reports = Report.query.filter_by(task_id=res[0], is_deleted=False)
-        first_report = reports.first()
-        apistep = Apistep.query.with_parent(first_report).first()
+        reports = Report.query.filter_by(task_id=res.id, is_deleted=False)
+        apistep = Apistep.query.with_parent(res).first()
         if apistep:
             test_name = apistep.apitest.name
         else:
-            test_name = 'default'
+            test_name = 'null'
         results.append(
             [test_name, reports.filter_by(status=1).count(), reports.filter_by(status=0).count()])
     if results:
         names, success, failure = zip(*results)
     else:
-        names, success, failure = ['none'], [0], [0]
+        names, success, failure = ['null'], [0], [0]
     current_app.logger.info(
         "名称：{}，通过：{}，失败：{}".format(names, success, failure))
     c = (

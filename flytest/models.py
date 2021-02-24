@@ -148,6 +148,7 @@ class Apistep(db.Model):
 @whooshee.register_model('name')
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    types = db.Column(db.Integer, default=1)  # 1是普通任务 2是定时任务
     task_id = db.Column(db.String(255), index=True)
     name = db.Column(db.String(255), default="NULL")
     result = db.Column(db.String(2048))

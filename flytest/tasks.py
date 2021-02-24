@@ -9,7 +9,7 @@ from flytest.worker import celery
 log = get_task_logger(__name__)
 
 
-def testcaserunner(pk, task_id):
+def testcaserunner(pk, task_id, jobtype=1):
     """运行测试用例"""
     print("开始测试用例" + str(pk))
     apitest = Apitest.query.get_or_404(pk)
@@ -20,7 +20,7 @@ def testcaserunner(pk, task_id):
     results = []
     for i in apisteps:
         report = Report(task_id=task_id, name=apitest.name, product_id=apitest.product_id,
-                        result=i.results, status=i.status, is_deleted=False)
+                        result=i.results, status=i.status, is_deleted=False, types=jobtype)
         db.session.add(report)
         report.apistep = i
         if i.status == 0:
@@ -47,7 +47,7 @@ def testcaserunner(pk, task_id):
 
 def testcaserunner_cron(pk, task_id):
     with scheduler.app.app_context():
-        testcaserunner(pk, task_id)
+        testcaserunner(pk, task_id, jobtype=2)
 
 
 def teststeprunner(pk, task_id):
@@ -82,20 +82,3 @@ def apitest_job(pk):
     testcaserunner(pk, task_id)
     task_info = celery.control.inspect().active()
     return task_info[hostname]
-
-
-# @celery.task
-# def add_cronjob2test(pk, **kwargs):
-#     task_id = add_cronjob2test.request.id
-#     hostname = add_cronjob2test.request.hostname
-#     scheduler.add_job(task_id, testcaserunner, args=(pk, task_id), **kwargs)
-#     task_info = celery.control.inspect().active()
-#     return task_info[hostname]
-
-
-# @celery.task
-# def add_cronjob2step(pk, **kwargs):
-#     task_id = add_cronjob2step.request.id
-#     hostname = add_cronjob2step.request.hostname
-#     task_info = celery.control.inspect().active()
-#     return task_info[hostname]
