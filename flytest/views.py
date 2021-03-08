@@ -82,6 +82,9 @@ def product():
 @login_required
 def edit_product(pk):
     product = Product.query.get_or_404(pk)
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     if request.method == 'POST':
         name = request.form.get('name')
         desc = request.form.get('desc')
@@ -106,6 +109,9 @@ def edit_product(pk):
 @login_required
 def env(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     if request.method == "POST":
         name = request.form.get('name')
         url = request.form.get('url')
@@ -146,6 +152,9 @@ def edit_env(pk):
 @login_required
 def test(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     if request.method == "POST":
         name = request.form.get('name')
         if name:
@@ -279,6 +288,9 @@ def job(pk):
 @login_required
 def report(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     task_id = request.args.get('task_id')
     if task_id:
         reports = Report.query.filter_by(
@@ -299,7 +311,8 @@ def report(pk=None):
                                page_name='reportpage')
     first_task = None
     results = []
-    raw_result = Report.query.group_by(Report.task_id).order_by(Report.created.desc())
+    raw_result = Report.query.group_by(
+        Report.task_id).order_by(Report.created.desc())
     for res in raw_result:
         reports = Report.query.filter_by(task_id=res.task_id, is_deleted=False)
         if first_task is None:
@@ -354,6 +367,9 @@ def pie():
 @login_required
 def bug(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     task_id = request.args.get('task_id')
     if task_id:
         bugs = Bug.query.filter_by(product=product,
@@ -374,6 +390,9 @@ def bug(pk=None):
 @login_required
 def trend(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     return render_template('trending.html', page_name="trendpage", product=product)
 
 
@@ -382,7 +401,8 @@ def trend(pk=None):
 @login_required
 def trending(pk=None):
     results = []
-    raw_result = Report.query.group_by(Report.task_id).order_by(Report.created.desc())
+    raw_result = Report.query.group_by(
+        Report.task_id).order_by(Report.created.desc())
     for res in raw_result:
         reports = Report.query.filter_by(task_id=res.id, is_deleted=False)
         apistep = Apistep.query.with_parent(res).first()
@@ -448,6 +468,9 @@ def trending(pk=None):
 @login_required
 def work(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
     pagination = Work.query.filter_by(product=product).paginate(page, per_page)
@@ -460,6 +483,9 @@ def work(pk=None):
 @login_required
 def crons(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    if product is None:
+        flash("请先创建一个项目",'danger')
+        return redirect(url_for('.product'))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
     pagination = Apitest.query.with_parent(product).filter_by(
