@@ -3,7 +3,6 @@
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
-from flask_whooshee import Whooshee
 from flask_apscheduler import APScheduler
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -21,7 +20,6 @@ naming_convention = {
 }
 
 
-whooshee = Whooshee()
 assets = Environment()
 db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 cache = Cache()

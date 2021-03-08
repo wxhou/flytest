@@ -23,8 +23,9 @@ class BaseConfig(object):
     MAIL_DEFAULT_SENDER = ('flytest', MAIL_USERNAME)
     PER_PAGE_SIZE = 10
     # flask_avatars
-    AVATARS_SAVE_PATH = os.path.join(basedir, 'avatar')
-    LOGGER_FILE = os.path.join(basedir, 'logs', 'flytest.log')
+    MEDIA_PATH = os.path.join(basedir, 'media')
+    AVATARS_SAVE_PATH = os.path.join(MEDIA_PATH, 'avatar')
+    LOGGER_FILE = os.path.join(basedir, 'logs', 'server.log')
 
 
 class DevelopmentConfig(BaseConfig):
@@ -99,6 +100,7 @@ class ProductionConfig(BaseConfig):
 
 class TestingConfig(DevelopmentConfig):
     TESTING = True
+
 
 config = {
     'development': DevelopmentConfig,
