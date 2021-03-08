@@ -5,7 +5,7 @@ import logging
 import click
 from flask import Flask, render_template
 
-from flytest.settings import config
+from flytest.settings import config, win
 from flytest.extensions import (db, login_manager, avatars, migrate, moment,
                                 toolbar, cache, assets, scheduler)
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
@@ -54,7 +54,8 @@ def register_extensions(app):
     moment.init_app(app)
     cache.init_app(app, app.config['CACHE_CONFIG'])
     assets.init_app(app)
-    toolbar.init_app(app)
+    if not win:
+        toolbar.init_app(app)
 
 
 def register_template_context(app):
