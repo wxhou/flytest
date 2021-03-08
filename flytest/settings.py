@@ -66,8 +66,8 @@ class DevelopmentConfig(BaseConfig):
 
 
 class ProductionConfig(BaseConfig):
-    DB_SERVER = 1
-    REDIS_SERVER = 2
+    DB_SERVER = '127.0.0.1'
+    REDIS_SERVER = '127.0.0.1'
     # db url
     SQLALCHEMY_DATABASE_URI = "mysql://root:123456@{}:3306/flytest".format(DB_SERVER)
     # celery

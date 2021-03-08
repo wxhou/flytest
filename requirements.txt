@@ -50,4 +50,5 @@ watchdog==1.0.2
 wcwidth==0.2.5
 webassets==2.0
 Werkzeug==1.0.1
-Whoosh==2.7.4
+gunicorn
+gevent

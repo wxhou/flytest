@@ -12,10 +12,11 @@ from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug,
 from flytest.utils import make_dir
 
 
-def create_app():
+def create_app(env=None):
+    if env is None:
+        env = os.getenv('FLASK_CONFIG', 'development')
     app = Flask(__name__)
-    config_name = os.getenv('FLASK_CONFIG', 'development')
-    app.config.from_object(config[config_name])
+    app.config.from_object(config[env])
     register_make_dir(app)
     register_extensions(app)
     register_logger(app)
@@ -28,10 +29,11 @@ def create_app():
     return app
 
 
-def create_celery_app():
+def create_celery_app(env=None):
+    if env is None:
+        env = os.getenv('FLASK_CONFIG', 'development')
     app = Flask(__name__)
-    config_name = os.getenv('FLASK_CONFIG', 'development')
-    app.config.from_object(config[config_name])
+    app.config.from_object(config[env])
     register_extensions(app)
     return app
 
