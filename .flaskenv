@@ -1,2 +1,1 @@
 FLASK_APP=flytest
-FLASK_ENV=development

@@ -16,6 +16,7 @@ def create_app(env=None):
     if env is None:
         env = os.getenv('FLASK_CONFIG', 'development')
     app = Flask(__name__)
+    app.logger.warning('use env is: {}'.format(env))
     app.config.from_object(config[env])
     register_make_dir(app)
     register_extensions(app)
