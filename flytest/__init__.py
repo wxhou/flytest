@@ -5,37 +5,29 @@ import logging
 import click
 from flask import Flask, render_template
 
-from flytest.settings import config, win
+from settings import BASE_DIR, WIN
 from flytest.extensions import (db, login_manager, avatars, migrate, moment,
                                 toolbar, cache, assets, scheduler)
 from flytest.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
-from flytest.utils import make_dir
 
 
-def create_app(env=None):
+def create_app(env=None, celery=None):
     if env is None:
         env = os.getenv('FLASK_CONFIG', 'development')
     app = Flask(__name__)
-    app.logger.warning('use env is: {}'.format(env))
-    app.config.from_object(config[env])
-    register_make_dir(app)
+    print('use env is: %s' % env)
+    _file = os.path.join(BASE_DIR, 'settings', env + '.py')
+    app.config.from_pyfile(_file)
     register_extensions(app)
     register_logger(app)
+    if celery is not None:
+        return app
     register_blueprints(app)
     register_scheduler(app)
     register_template_context(app)
     register_shell_context(app)
     register_commands(app)
     register_errors(app)
-    return app
-
-
-def create_celery_app(env=None):
-    if env is None:
-        env = os.getenv('FLASK_CONFIG', 'development')
-    app = Flask(__name__)
-    app.config.from_object(config[env])
-    register_extensions(app)
     return app
 
 
@@ -57,7 +49,7 @@ def register_extensions(app):
     moment.init_app(app)
     cache.init_app(app, app.config['CACHE_CONFIG'])
     assets.init_app(app)
-    if not win:
+    if not WIN:
         toolbar.init_app(app)
 
 
@@ -126,18 +118,13 @@ def register_commands(app):
         click.echo('Administrator Created Done.')
 
 
-def register_make_dir(app):
-    make_dir(app.config['LOGGER_FILE'])
-    make_dir(app.config['AVATARS_SAVE_PATH'])
-
-
 def register_logger(app):
     from logging.handlers import RotatingFileHandler
 
     app.logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s:%(lineno)d - %(levelname)s - %(message)s')
-    file_handler = RotatingFileHandler(filename=app.config['LOGGER_FILE'],
+    file_handler = RotatingFileHandler(filename=app.config['FLASK_LOGGER_FILE'],
                                        maxBytes=10 * 1024 * 1024,
                                        backupCount=10)
     file_handler.setFormatter(formatter)
@@ -146,7 +133,7 @@ def register_logger(app):
     app.logger.addHandler(file_handler)
 
 
-def register_errors(app):
+def register_errors(app: Flask):
     @app.errorhandler(400)
     def bad_request(e):
         return render_template('errors/400.html'), 400
@@ -156,7 +143,9 @@ def register_errors(app):
         return render_template('errors/404.html'), 404
 
     @app.errorhandler(500)
+    @app.errorhandler(Exception)
     def internal_server_error(e):
+        app.logger.error(format(e))
         return render_template('errors/500.html'), 500
 
 

@@ -3,7 +3,8 @@ import json
 import uuid
 import time
 from copy import deepcopy
-from flask import jsonify
+from urllib.parse import urljoin
+from flask import jsonify, current_app
 
 
 def generate_url(url, route):
@@ -63,9 +64,7 @@ def make_dir(dir):
         return dir
 
 
-def response_error(code, msg=None):
-    if msg is None:
-        msg = 'error'
+def response_error(code, msg="None"):
     return jsonify({'errcode': code, 'errmsg': msg})
 
 

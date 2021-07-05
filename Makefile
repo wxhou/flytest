@@ -5,10 +5,10 @@
 
 all:
 run: 
-	nohup ./venv/bin/gunicorn -w 4 -k eventlet -b 0.0.0.0:5000 wsgi:app --reload & 
+	nohup ./venv/bin/gunicorn -w 4 -k eventlet -b 0.0.0.0:5000 server:app --reload & 
 
 # reload参数是gunicorn的重新加载命令
 kill: 
-	pkill -f "0.0.0.0:5000 wsgi:app"  
+	pkill -f "0.0.0.0:5000 server:app"  
 
 # pkill -f 查找并杀死所有相关的进程

@@ -1,5 +1,5 @@
 from celery import Celery
-from flytest import create_celery_app
+from flytest import create_app
 
 
 def celery_app(app):
@@ -20,5 +20,5 @@ def celery_app(app):
     return celery
 
 
-flask_app = create_celery_app()
+flask_app = create_app(celery=True)
 celery = celery_app(flask_app)
