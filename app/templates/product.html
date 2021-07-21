@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}
+项目管理
+{% endblock %}
+{% block content %}
+<br>
+<br>
+<div style="float: right">
+    <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#myModal">添加</button>
+</div>
+<!-- 模态框 -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- 模态框头部 -->
+            <div class="modal-header">
+                <h4 class="modal-title">添加项目</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <!-- 模态框主体 -->
+            <div class="modal-body">
+                <form method="post">
+                    <div class="col-md-6 mb-3">
+                        <label for="exampleInputName" class="form-label">产品名称<label
+                                style="color: red;">*</label></label>
+                        <input type="text" name="name" class="form-control" id="name" aria-describedby="namehelp"
+                            required>
+                        <div id="namehelp" class="form-text">输入产品名称</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="exampleInputDesc" class="form-label">产品描述<label
+                                style="color: red;">*</label></label>
+                        <input type="text" class="form-control" id="desc" name="desc">
+                        <div id="deschelp" class="form-text">请添加一个产品的大概介绍</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="method">产品类型</label><label style="color: red;">*</label></label>
+                        <select class="form-control" id="product_type" name="product_type">
+                            <option selected>选择产品类型</option>
+                            {% for name, tag in tags %}
+                            <option value="{{ name }}">{{ tag }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <br>
+                    <div class="form-actions well well-sm clearfix">
+                        <button type="button" class="btn btn-info" data-dismiss="modal">
+                            <i class="fa fa-undo"></i>
+                            取消
+                        </button>
+                        <button type="submit" class="default btn btn-primary hide-xs">
+                            <i class="fa fa-save"></i>
+                            增加
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 模态框 -->
+<br>
+<br>
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <svg class="bd-placeholder-img card-img-top" width="50%" height="100" xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="占位符：缩略图">
+                <title>Placeholder</title>
+                <rect width="100%" height="100%" fill="#55595c"></rect>
+                <text x="50%" y="50%" fill="#eceeef" dy=".3em">{{ product.name }}
+                </text>
+            </svg>
+            <div class="card-body">
+                <p class="card-text">
+                    <font style="vertical-align: inherit;">
+                        <font style="vertical-align: inherit;">{{ product.desc }}</font>
+                    </font>
+                    {% if product.tag %}
+                        <font style="vertical-align: inherit;">
+                            <font style="vertical-align: inherit;">--{{ product.tag }}</font>
+                        </font>
+                    {% endif %}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                        <a href="{{ url_for('.test',pk=product.id ) }}">
+                            <button type="button" class="btn btn-sm btn-outline-primary">
+                                <font style="vertical-align: inherit;">
+                                    <font style="vertical-align: inherit;">进入用例</font>
+                                </font>
+                            </button>
+                        </a>
+                        <a href="{{ url_for('.env',pk=product.id) }}">
+                            <button type="button" class="btn btn-sm btn-outline-info">
+                                <font style="vertical-align: inherit;">
+                                    <font style="vertical-align: inherit;">配置环境</font>
+                                </font>
+                            </button>
+                        </a>
+                        <a href="{{ url_for('.edit_product',pk=product.id) }}">
+                            <button type="button" class="btn btn-sm btn-outline-dark">
+                                <font style="vertical-align: inherit;">
+                                    <font style="vertical-align: inherit;">编辑</font>
+                                </font>
+                            </button>
+                        </a>
+                    </div>
+                    <small class="text-muted">
+                        <font style="vertical-align: inherit;">
+                            <font style="vertical-align: inherit;">更新时间-{{ moment(product.updated).format('lll') }}
+                            </font>
+                        </font>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

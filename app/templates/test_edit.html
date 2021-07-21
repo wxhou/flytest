@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}
+用例编辑
+{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-3"></div>
+    <div class="col-6">
+        <form method="post">
+            <div class="form-group">
+                <label for="apitestname" class="form-label">流程用例名称<label style="color: red;">*</label></label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ apitest.name }}" placeholder="请输入用例名称..." autofocus
+                    required>
+                <div id="namehelp" class="form-text">输入用例名称</div>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="url">是否删除</label></label>
+                <div class="radio">
+                    <label><input type="radio" name="delete">删除勾选框(<font style="color: red;">请谨慎操作</font>)</label>
+                </div>
+            </div>
+            <div class="form-actions well well-sm clearfix">
+                <button type="submit" class="default btn btn-primary hide-xs">
+                    <i class="fa fa-save"></i>
+                    更新
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

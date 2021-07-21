@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}
+环境编辑
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-3"></div>
+    <div class="col-6">
+        <form method="post">
+            <div class="form-group">
+                <label for="name" class="form-label">名称<label style="color: red;">*</label></label>
+                <input type="text" value="{{ env.name }}" class="form-control" id="name" name="name"
+                    placeholder="请输入名称..." autofocus required>
+                <div id="name" class="form-text">输入用例名称</div>
+            </div>
+            <div class="form-group">
+                <label for="url" class="form-label">地址<label style="color: red;">*</label></label>
+                <input type="text" value="{{ env.url }}" class="form-control" id="url" name="url" placeholder="请输入地址..."
+                    required>
+                <div id="url" class="form-text">输入用例名称</div>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="url">是否删除</label></label>
+                <div class="radio">
+                    <label><input type="radio" name="delete">删除勾选框(<font style="color: red;">请谨慎操作</font>)</label>
+                </div>
+            </div>
+            <div class="form-actions well well-sm clearfix">
+                <button type="submit" class="default btn btn-primary hide-xs">
+                    <i class="fa fa-save"></i>
+                    更新
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

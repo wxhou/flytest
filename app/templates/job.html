@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}
+    测试步骤
+{% endblock %}
+
+{% block content %}
+    <br>
+    <br>
+    <h5>任务列表</h5>
+    <br>
+    <br>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-sm">
+            <thead>
+            <tr>
+                <th>任务ID</th>
+                <th class="bg-info text-white">状态</th>
+                <th>content-type</th>
+                <th>content-encoding</th>
+                <th>任务结果</th>
+                <th>执行时间</th>
+                <th>异常信息</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for job in page_obj %}
+                <tr>
+                    <td>{{ job.task_id }}</td>
+                    {% if job.status == 'SUCCESS' %}
+                        <td><span class="badge badge-success">SUCCESS</span></td>
+                    {% elif job.status == 'FAILURE' %}
+                        <td><span class="badge badge-danger">FAILURE</span></td>
+                    {% endif %}
+                    <td>{{ job.content_type }}</td>
+                    <td>{{ job.content_encoding }}</td>
+                    <td>{{ job.result }}</td>
+                    <td>{{ job.date_done }}</td>
+                    <td>{{ job.traceback }}</td>
+                </tr>
+            {% empty %}
+                <p style="color: red">暂无数据</p>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{#{% block script %}#}
+{#    <script language="JavaScript">#}
+{#        function refresh() {#}
+{#            window.location.reload()#}
+{#        }#}
+{##}
+{#        setTimeout('refresh()', 30000)#}
+{#    </script>#}
+{#{% endblock %}#}

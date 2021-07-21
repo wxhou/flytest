@@ -1,0 +1,28 @@
+table {
+    width: 100%;
+    max-width: 100%;
+    max-height: 300px;
+    margin-bottom: 20px;
+    table-layout: fixed;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+th {
+    width: 100%;
+    overflow: hidden;
+    vertical-align: middle!important;
+    text-align: center!important;
+    white-space: nowrap;
+}
+td {
+    vertical-align: middle!important;
+    text-align: center!important;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 50px;
+    width: 100%;
+}
+td:hover {
+    white-space: normal;
+    overflow: auto;
+}
