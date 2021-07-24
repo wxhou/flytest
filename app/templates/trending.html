@@ -13,7 +13,7 @@
     </button>
     <ul class="dropdown-menu" role="menu">
         {% for pd in products %}
-        <li><a href="{{ url_for('.trend',pk=pd.id) }}">{{ pd.name }}</a></li>
+        <li><a href="{{ url_for('wx.job.trend',pk=pd.id) }}">{{ pd.name }}</a></li>
         {% endfor %}
     </ul>
 </div>
@@ -34,7 +34,7 @@
             var chart = echarts.init(document.getElementById('bar'), 'white', { renderer: 'canvas' });
             $.ajax({
                 type: "GET",
-                url: "{{ url_for('.trending',pk=product.id) }}",
+                url: "{{ url_for('wx.job.trending',pk=product.id) }}",
                 dataType: 'json',
                 success: function (result) {
                     chart.setOption(result);

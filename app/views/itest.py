@@ -1,11 +1,11 @@
 from flask import request, current_app, Blueprint
 from flask import flash, url_for , redirect, render_template
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.models import Product, Apitest,Apistep, Apiurl
-from app.choices import METHODS
+from app.choices import METHODS, CRONTAB
+from app.extensions import db
 
-
-bp_test = Blueprint('test', __name__)
+bp_test = Blueprint('itest', __name__)
 
 
 

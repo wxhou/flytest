@@ -159,7 +159,7 @@
                 <td class="text-muted">无</td>
                 {% endif %}
                 <td>
-                    <a href="{{ url_for('.job',pk=step.id) }}">
+                    <a href="{{ url_for('wx.job.job',pk=step.id) }}">
                         <button type="button" class="btn btn-outline-info btn-sm btn-block">
                             运行
                         </button>
@@ -178,7 +178,7 @@
                 <td><span class="badge badge-danger">失败</span></td>
                 {% endif %}
                 <td>{{ moment(step.updated).format('lll') }}</td>
-                <td><a href="{{ url_for('.edit_step',pk=step.id) }}">编辑</a></td>
+                <td><a href="{{ url_for('wx.itest.edit_step',pk=step.id) }}">编辑</a></td>
             </tr>
             {% endfor %}
             {% else %}

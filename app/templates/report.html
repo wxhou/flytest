@@ -11,7 +11,7 @@
     </button>
     <ul class="dropdown-menu" role="menu">
         {% for pd in products %}
-        <li><a href="{{ url_for('.report',pk=pd.id) }}">{{ pd.name }}</a></li>
+        <li><a href="{{ url_for('wx.job.report',pk=pd.id) }}">{{ pd.name }}</a></li>
         {% endfor %}
     </ul>
 </div>
@@ -56,7 +56,7 @@
                         {% if report.failure %}
                         <td>
                             <button type="button" class="btn btn-outline-info btn-sm">
-                                <a href="{{ url_for('.bug') }}?task_id={{ report.task_id }}">点击查看问题</a>
+                                <a href="{{ url_for('wx.job.bug') }}?task_id={{ report.task_id }}">点击查看问题</a>
                             </button>
                         </td>
                         {% else %}
@@ -89,7 +89,7 @@
     );
     function fetchData() {
         $.get({
-            url: "{{ url_for('.pie',task_id=first_task) }}",
+            url: "{{ url_for('wx.job.pie',task_id=first_task) }}",
             dataType: 'json',
             success: function (result) {
                 console.log(result);

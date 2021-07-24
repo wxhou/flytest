@@ -46,12 +46,12 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">测试平台</a>
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
         <ul class="navbar-nav px-3">
-            <img src="{{ url_for('.get_avatar',filename=current_user.avatar_s) }}">
+            <img src="{{ url_for('wx.auth.get_avatar',filename=current_user.avatar_s) }}">
         </ul>
         <span style="color: white">{{ current_user.username }}</span>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="{{ url_for('.logout') }}">Sign out</a>
+                <a class="nav-link" href="{{ url_for('wx.auth.logout') }}">Sign out</a>
             </li>
         </ul>
     </nav>
@@ -65,7 +65,7 @@
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'homepage' %}active{% endif %}"
-                                href="{{ url_for('.index') }}">
+                                href="{{ url_for('wx.home.index') }}">
                                 <span data-feather="home"></span>
                                 控制台 <span class="sr-only">(current)</span>
                             </a>
@@ -79,21 +79,21 @@
                         </h6>
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'productpage' %}active{% endif %}"
-                                href="{{ url_for('.product') }}">
+                                href="{{ url_for('wx.product.product') }}">
                                 <span data-feather="shopping-cart"></span>
                                 项目管理
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'envpage' %}
-                                active{% endif %}" href="{{ url_for('.env') }}">
+                                active{% endif %}" href="{{ url_for('wx.environ.env') }}">
                                 <span data-feather="cloud"></span>
                                 环境配置
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'testpage' %}
-                                active{% endif %}" href="{{ url_for('.test') }}">
+                                active{% endif %}" href="{{ url_for('wx.itest.test') }}">
                                 <i data-feather="send"></i>
                                 测试管理
                             </a>
@@ -117,7 +117,7 @@
                     </h6>
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'jobpage' %}active{% endif %}" href="{{ url_for('.work') }}">
+                            <a class="nav-link {% if page_name == 'jobpage' %}active{% endif %}" href="{{ url_for('wx.job.work') }}">
                                 <span data-feather="trello"></span>
                                 任务列表
                             </a>
@@ -125,7 +125,7 @@
                     </ul>
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'cronpage' %}active{% endif %}" href="{{ url_for('.crons') }}">
+                            <a class="nav-link {% if page_name == 'cronpage' %}active{% endif %}" href="{{ url_for('wx.job.crons') }}">
                                 <span data-feather="truck"></span>
                                 定时任务
                             </a>
@@ -142,14 +142,14 @@
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'reportpage' %}
                             active
-                            {% endif %}" href="{{ url_for('.report') }}">
+                            {% endif %}" href="{{ url_for('wx.job.report') }}">
                                 <span data-feather="file-minus"></span>
                                 最新报告
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'bugpage' %}active{% endif %}"
-                                href="{{ url_for('.bug') }}">
+                                href="{{ url_for('wx.job.bug') }}">
                                 <span data-feather="file-text"></span>
                                 问题管理
                             </a>
@@ -157,7 +157,7 @@
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'trendpage' %}
                             active
-                            {% endif %}" href="{{ url_for('.trend') }}">
+                            {% endif %}" href="{{ url_for('wx.job.trend') }}">
                                 <span data-feather="activity"></span>
                                 结果趋势
                             </a>

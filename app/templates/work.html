@@ -12,7 +12,7 @@
     </button>
     <ul class="dropdown-menu" role="menu">
         {% for pd in products %}
-        <li><a href="{{ url_for('.work',pk=pd.id) }}">{{ pd.name }}</a></li>
+        <li><a href="{{ url_for('wx.job.work',pk=pd.id) }}">{{ pd.name }}</a></li>
         {% endfor %}
     </ul>
 </div>
