@@ -77,21 +77,18 @@ def report(pk=None):
         }
         return render_template('report.html', results=[content], first_task=task_id, product=product,
                                page_name='reportpage')
-    first_task = None
     results = []
-    raw_result = Report.query.group_by(
-        Report.task_id).order_by(Report.created.desc())
-    for res in raw_result:
-        reports = Report.query.filter_by(task_id=res.task_id, is_deleted=False)
-        if first_task is None:
-            first_task = res.task_id
+    raw_result = Report.query.with_entities(Report.task_id).group_by(Report.task_id)
+    for res, id in raw_result:
+        reports = Report.query.filter_by(task_id=res, is_deleted=False).order_by(Report.created.desc())
+        first_task = reports.first()
         content = {
-            "pk": res.id,
-            "task_id": res.task_id,
-            "name": res.name,
+            "pk": first_task.id,
+            "task_id": first_task.task_id,
+            "name": first_task.name,
             "success": reports.filter_by(status=1).count(),
             "failure": reports.filter_by(status=0).count(),
-            "updated": res.updated
+            "updated": first_task.updated
         }
         results.append(content)
     current_app.logger.info("报告数据：{}".format(results))
@@ -169,23 +166,20 @@ def trend(pk=None):
 @login_required
 def trending(pk=None):
     results = []
-    raw_result = Report.query.group_by(
-        Report.task_id).order_by(Report.created.desc())
+    raw_result = Report.query.with_entities(Report.task_id).group_by(Report.task_id)
     for res in raw_result:
-        reports = Report.query.filter_by(task_id=res.id, is_deleted=False)
-        apistep = Apistep.query.with_parent(res).first()
+        reports = Report.query.filter_by(task_id=res, is_deleted=False).order_by(Report.created.desc())
+        first_step = Apistep.query.with_parent(reports.first()).first()
         test_name = 'unknown'
-        if apistep:
-            test_name = apistep.apitest.name
+        if first_step:
+            test_name = first_step.apitest.name
         results.append(
             [test_name, reports.filter_by(status=1).count(), reports.filter_by(status=0).count()])
+    names, success, failure = ['unknown'], [0], [0]
     if results:
         current_app.logger.info(results)
         names, success, failure = zip(*results)
-    else:
-        names, success, failure = ['unknown'], [0], [0]
-    current_app.logger.info(
-        "名称：{}，通过：{}，失败：{}".format(names, success, failure))
+    current_app.logger.info("名称：{}，通过：{}，失败：{}".format(names, success, failure))
     c = (
         Line(init_opts=opts.InitOpts(width="1000px", height="500px"))
         .add_xaxis(xaxis_data=names)
@@ -246,7 +240,7 @@ def work(pk=None):
 @bp_job.route('/crons', methods=['GET', 'POST'])
 @bp_job.route('/crons/<int:pk>', methods=['GET', 'POST'])
 @login_required
-def crons(pk=None):
+def cron_tabs(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if product is None:
         flash("请先创建一个项目", 'danger')
@@ -266,7 +260,7 @@ def crons(pk=None):
 
 @bp_job.route('/crons/test/<int:pk>', methods=['POST'])
 @login_required
-def crons2test(pk):
+def cron_tabs_test(pk):
     task_id = uid_name()
     current_app.logger.info('task_id: {}'.format(task_id))
     trigger = request.form.get('trigger')

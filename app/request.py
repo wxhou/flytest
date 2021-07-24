@@ -155,7 +155,8 @@ class HttpRequest(BaseRequest):
             result = pattern.findall(to_string)
             current_app.logger.info("获取变量[{}]的值：{}".format(name, result))
             name = "%s_%s" % (name, task_id)
-            self.set_cache(name, result[0])
+            if result:
+                self.set_cache(name, result[0])
             current_app.logger.info("变量【%s】值设置结果：%s" % (name, self.get_cache(name)))
 
     def dispatch(self, method, *args, **kwargs):

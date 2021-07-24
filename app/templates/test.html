@@ -107,7 +107,7 @@
                 
                             <!-- 模态框主体 -->
                             <div class="modal-body">
-                                <form action="{{ url_for('wx.job.crons2test',pk=test.id) }}" method="post">
+                                <form action="{{ url_for('wx.job.cron_tabs_test',pk=test.id) }}" method="post">
                                     <div class="mb-3">
                                         <label for="name" class="form-label">任务类型<label style="color: red;">*</label></label>
                                         <select class="form-control" id="trigger" name="trigger">
