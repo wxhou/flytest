@@ -43,7 +43,7 @@
 <body>
     {#导航栏#}
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">测试平台</a>
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">WXTEST测试平台</a>
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
         <ul class="navbar-nav px-3">
             <img src="{{ url_for('wx.auth.get_avatar',filename=current_user.avatar_s) }}">
@@ -125,7 +125,7 @@
                     </ul>
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'cronpage' %}active{% endif %}" href="{{ url_for('wx.job.cron_tabs') }}">
+                            <a class="nav-link {% if page_name == 'cronpage' %}active{% endif %}" href="{{ url_for('wx.job.crontab_view') }}">
                                 <span data-feather="truck"></span>
                                 定时任务
                             </a>
@@ -142,14 +142,14 @@
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'reportpage' %}
                             active
-                            {% endif %}" href="{{ url_for('wx.job.report') }}">
+                            {% endif %}" href="{{ url_for('wx.bp_report.report') }}">
                                 <span data-feather="file-minus"></span>
                                 最新报告
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'bugpage' %}active{% endif %}"
-                                href="{{ url_for('wx.job.bug') }}">
+                                href="{{ url_for('wx.bp_report.bug') }}">
                                 <span data-feather="file-text"></span>
                                 问题管理
                             </a>
@@ -157,7 +157,7 @@
                         <li class="nav-item">
                             <a class="nav-link {% if page_name == 'trendpage' %}
                             active
-                            {% endif %}" href="{{ url_for('wx.job.trend') }}">
+                            {% endif %}" href="{{ url_for('wx.bp_report.trend') }}">
                                 <span data-feather="activity"></span>
                                 结果趋势
                             </a>

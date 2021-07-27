@@ -1,9 +1,7 @@
 import os
-import sys
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 
-WIN = sys.platform.startswith('win32')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 AVATARS_SAVE_PATH = os.path.join(BASE_DIR, 'media', 'avatars')

@@ -3,7 +3,6 @@
 报告
 {% endblock %}
 {% block content %}
-<br>
 <div class="btn-group">
     <button type="button" class="btn btn-info">{{ product.name }}</button>
     <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
@@ -12,7 +11,7 @@
     </button>
     <ul class="dropdown-menu" role="menu">
         {% for pd in products %}
-        <li><a href="{{ url_for('wx.job.bug',pk=pd.id) }}">{{ pd.name }}</a></li>
+        <li><a href="{{ url_for('wx.bp_report.bug',pk=pd.id) }}">{{ pd.name }}</a></li>
         {% endfor %}
     </ul>
 </div>

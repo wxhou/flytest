@@ -2,8 +2,8 @@ from flask import request, current_app, Blueprint, send_from_directory
 from flask import flash, redirect, render_template, url_for
 from flask_login import login_user, logout_user, login_required
 
-from app.models import User
-from app.extensions import db
+from app.models import db, User
+
 
 bp_auth = Blueprint('auth', __name__)
 

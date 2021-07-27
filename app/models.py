@@ -181,6 +181,7 @@ class Bug(db.Model):
 class Work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.String(256), index=True)
+    testname = db.Column(db.String(128))
     name = db.Column(db.String(512))
     hostname = db.Column(db.String(512))
     params = db.Column(db.String(512))
@@ -194,3 +195,21 @@ class Work(db.Model):
 
     def __repr__(self):
         return self.task_id
+
+
+class CronTabTask(db.Model):
+    """定时任务"""
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.String(256), index=True)
+    func_name = db.Column(db.String(256))
+    trigger = db.Column(db.String(64))
+    args = db.Column(db.String(128))
+    kwargs = db.Column(db.String(128))
+    max_instances = db.Column(db.Integer)
+    times = db.Column(db.String(128))
+    misfire_grace_time = db.Column(db.Integer)
+    next_run_time = db.Column(db.String(256))
+    start_date = db.Column(db.String(256))
+
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    product_id = db.Column(db.Integer)

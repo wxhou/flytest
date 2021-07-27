@@ -1,17 +1,44 @@
 import time
+import requests
 from celery.utils.log import get_task_logger
 from .extensions import db, scheduler
-from .models import Apistep, Apitest, Report, Bug
+from .models import Apistep, Apitest, Report, Bug, CronTabTask
 from .request import HttpRequest
 from .utils import generate_url
 from .worker import celery
 
 log = get_task_logger(__name__)
 
+###########
+# Celery任务
+###########
 
-def testcaserunner(pk, task_id, jobtype=1):
-    """运行测试用例"""
-    print("开始测试用例" + str(pk))
+
+@celery.task
+def api_step_job(pk):
+    """单步运行"""
+    task_id = api_step_job.request.id
+    hostname = api_step_job.request.hostname
+    # StepTestJob
+    apistep = Apistep.query.get(pk)
+    HttpRequest().http_request(apistep, task_id)
+    if Apistep.query.filter_by(apitest_id=apistep.apitest_id).count() == 1:
+        apitest = Apitest.query.get(apistep.apitest_id)
+        apitest.task_id = task_id
+        apitest.results = apistep.status
+        db.session.commit()
+    # StepTestJobEnd
+    task_info = celery.control.inspect().active()
+    return task_info[hostname]
+
+
+@celery.task
+def api_test_job(pk, types):
+    """多步运行或场景测试"""
+    task_id = api_test_job.request.id
+    hostname = api_test_job.request.hostname
+    # CeleryCaseTestJob
+    log.info("开始测试用例" + str(pk))
     apitest = Apitest.query.get_or_404(pk)
     apisteps = Apistep.query.filter_by(apitest=apitest, is_deleted=False)
     for step in apisteps:
@@ -20,7 +47,7 @@ def testcaserunner(pk, task_id, jobtype=1):
     results = []
     for i in apisteps:
         report = Report(task_id=task_id, name=apitest.name, product_id=apitest.product_id,
-                        result=i.results, status=i.status, is_deleted=False, types=jobtype)
+                        result=i.results, status=i.status, is_deleted=False, types=types)
         db.session.add(report)
         report.apistep = i
         if i.status == 0:
@@ -42,43 +69,48 @@ def testcaserunner(pk, task_id, jobtype=1):
     apitest.task_id = task_id
     apitest.results = 1 if status else 0
     db.session.commit()
-    print("结束测试用例" + str(pk))
-
-
-def testcaserunner_cron(pk, task_id):
-    with scheduler.app.app_context():
-        testcaserunner(pk, task_id, jobtype=2)
-
-
-def teststeprunner(pk, task_id):
-    """测试步骤运行"""
-    apistep = Apistep.query.get(pk)
-    HttpRequest().http_request(apistep, task_id)
-    if Apistep.query.filter_by(apitest_id=apistep.apitest_id).count() == 1:
-        apitest = Apitest.query.get(apistep.apitest_id)
-        apitest.task_id = task_id
-        apitest.results = apistep.status
-        db.session.commit()
-
-
-def teststeprunner_cron(pk, task_id):
-    with scheduler.app.app_context():
-        teststeprunner(pk, task_id)
-
-
-@celery.task
-def apistep_job(pk):
-    task_id = apistep_job.request.id
-    hostname = apistep_job.request.hostname
-    teststeprunner(pk, task_id)
+    log.info("结束测试用例" + str(pk))
+    # CeleryCaseTestJobEnd
     task_info = celery.control.inspect().active()
     return task_info[hostname]
 
 
+############
+# 定时任务
+############
+# 1、interval
+# 间隔任务
+# 2、cron
+# 定时任务，指定时间触发任务
+# 3、date
+# 一次性任务
+############
+
+
+def crontab_job(pk):
+    """定时任务"""
+    api_test_job.delay(pk, 2)
+
+
 @celery.task
-def apitest_job(pk):
-    task_id = apitest_job.request.id
-    hostname = apitest_job.request.hostname
-    testcaserunner(pk, task_id)
-    task_info = celery.control.inspect().active()
-    return task_info[hostname]
+def saver_crontab(pk, url):
+    """保存定时任务信息"""
+    r = requests.get(url).json()
+    times = f'{r.get("hours", 0)}时{r.get("minutes", 0)}分{r.get("seconds", 0)}秒'
+
+    res = {
+        "task_id": r.get("id"),
+        "func_name": r.get("func"),
+        "trigger": r.get("trigger"),
+        "args": r.get("args"),
+        "kwargs": r.get("kwargs"),
+        "max_instances": r.get("max_instances"),
+        "times": times,
+        "misfire_grace_time": r.get("misfire_grace_time"),
+        "next_run_time": r.get("next_run_time"),
+        "start_date": r.get("start_date"),
+        "product_id": pk
+    }
+    obj = CronTabTask(**res)
+    db.session.add(obj)
+    db.session.commit()

@@ -107,7 +107,7 @@
                 
                             <!-- 模态框主体 -->
                             <div class="modal-body">
-                                <form action="{{ url_for('wx.job.cron_tabs_test',pk=test.id) }}" method="post">
+                                <form action="{{ url_for('wx.job.add_crontab_test',pk=test.id) }}" method="post">
                                     <div class="mb-3">
                                         <label for="name" class="form-label">任务类型<label style="color: red;">*</label></label>
                                         <select class="form-control" id="trigger" name="trigger">
@@ -117,10 +117,13 @@
                                         </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="apitestname" class="form-label">定时任务规则<label style="color: red;">*</label></label>
-                                        <input type="text" class="form-control" id="jobsecond" name="jobsecond" placeholder="请输入定时任务名称..." autofocus
+                                        <label for="apitestname" class="form-label">时间间隔<label style="color: red;">*</label></label>
+                                        <input type="text" class="form-control" id="jobsecond" name="jobsecond" placeholder="请输入时间间隔..." autofocus
                                             required>
-                                        <div id="namehelp" class="form-text">输入定时任务规则</div>
+                                        <div id="namehelp" class="form-text">输入时间间隔</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="rulename" class="form-label">规则说明<label style="color: red;">*</label></label>
                                     </div>
                                     <br>
                                     <div class="form-actions well well-sm clearfix">
@@ -147,7 +150,7 @@
                 {% endif %}
                 <td>{{ moment(test.updated).format('lll') }}</td>
                 <td><small class="text-muted">{% if test.task_id %}
-                        <a href="{{ url_for('wx.job.report') }}?task_id={{ test.task_id }}">
+                        <a href="{{ url_for('wx.bp_report.report') }}?task_id={{ test.task_id }}">
                             {{ test.task_id }}</a>
                         {% else %}
                         暂无
@@ -174,6 +177,7 @@
                     $(this).removeAttr('disabled')
                     $(this).text("运行")
                     alert("任务" + pk + response.errmsg);
+                    location.reload();
                 }
             });
             $(this).text("运行中")

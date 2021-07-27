@@ -11,7 +11,7 @@
     </button>
     <ul class="dropdown-menu" role="menu">
         {% for pd in products %}
-        <li><a href="{{ url_for('wx.job.report',pk=pd.id) }}">{{ pd.name }}</a></li>
+        <li><a href="{{ url_for('wx.bp_report.report',pk=pd.id) }}">{{ pd.name }}</a></li>
         {% endfor %}
     </ul>
 </div>
@@ -25,7 +25,7 @@
             <table class="table table-bordered table-striped table-sm">
                 <thead>
                     <tr>
-                        <th>报告ID</th>
+                        <!-- <th>报告ID</th> -->
                         <th>用例名称</th>
                         <th class="text-success">通过数</th>
                         <th class="text-danger">失败数</th>
@@ -38,7 +38,7 @@
                     {% if results %}
                     {% for report in results %}
                     <tr>
-                        <td><strong class="text-info">{{ report.pk }}</strong></td>
+                        <!-- <td><strong class="text-info">{{ report.pk }}</strong></td> -->
                         {% if report.name %}
                         <td><strong>{{ report.name }}</strong></td>
                         {% else %}
@@ -48,15 +48,11 @@
                                 }}</span></td>
                         <td><span {% if report.failure %} class="badge badge-danger" {% endif %}>{{ report.failure
                                 }}</span></td>
-                        {% if report.types == 1 %}
-                        <td>异步任务</td>
-                        {% else %}
-                        <td>定时任务</td>
-                        {% endif %}
+                        <td>{% if report.types == 1 %} 异步任务{% else %}定时任务{% endif %}</td>
                         {% if report.failure %}
                         <td>
                             <button type="button" class="btn btn-outline-info btn-sm">
-                                <a href="{{ url_for('wx.job.bug') }}?task_id={{ report.task_id }}">点击查看问题</a>
+                                <a href="{{ url_for('wx.bp_report.bug') }}?task_id={{ report.task_id }}">点击查看问题</a>
                             </button>
                         </td>
                         {% else %}
@@ -89,7 +85,7 @@
     );
     function fetchData() {
         $.get({
-            url: "{{ url_for('wx.job.pie',task_id=first_task) }}",
+            url: "{{ url_for('wx.bp_report.pie',task_id=first_task) }}",
             dataType: 'json',
             success: function (result) {
                 console.log(result);

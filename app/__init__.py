@@ -5,9 +5,8 @@ import logging
 import click
 from flask import Flask, render_template
 
-from settings import BASE_DIR, WIN
-from .extensions import (db, login_manager, avatars, migrate, moment,
-                                toolbar, cache, assets, scheduler)
+from settings import BASE_DIR
+from .extensions import (db, login_manager, avatars, migrate, moment, cache, assets, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
@@ -19,9 +18,9 @@ def create_app(env=None, celery=None):
     _file = os.path.join(BASE_DIR, 'settings', env + '.py')
     app.config.from_pyfile(_file)
     register_extensions(app)
-    register_logger(app)
     if celery is not None:
         return app
+    register_logger(app)
     register_blueprints(app)
     register_scheduler(app)
     register_template_context(app)
@@ -49,8 +48,6 @@ def register_extensions(app):
     moment.init_app(app)
     cache.init_app(app, app.config['CACHE_CONFIG'])
     assets.init_app(app)
-    if not WIN:
-        toolbar.init_app(app)
 
 
 def register_template_context(app):
@@ -64,6 +61,7 @@ def register_template_context(app):
 
 
 def register_shell_context(app):
+
     @app.shell_context_processor
     def make_shell_context():
         return dict(db=db,

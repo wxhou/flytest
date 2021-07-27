@@ -32,6 +32,6 @@ LEVELS = (
 
 CRONTAB = (
     ('cron', '定时任务'),
-    ('one', '一次性任务'),
+    ('date', '一次性任务'),
     ('interval', '循环任务')
 )
