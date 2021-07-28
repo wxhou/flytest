@@ -6,7 +6,7 @@ from flask import flash, redirect, url_for, request
 from flask import Blueprint, render_template
 from flask_login import login_required
 from concurrent.futures import ThreadPoolExecutor
-from app.models import Product, Apitest, Work, CronTabTask
+from app.models import Product, Apitest, Apistep, Work, CronTabTask
 
 from app.choices import *
 from app.utils import response_error, response_success, uid_name
@@ -38,6 +38,9 @@ def work(pk=None):
 @login_required
 def jobs(pd_id, t_id):
     """场景测试"""
+    apisteps = Apistep.query.filter_by(apitest_id=int(t_id), is_deleted=False).first()
+    if apisteps is None:
+        return response_error(1, "没有可以运行的步骤，请至少添加一个步骤")
     result = api_test_job.delay(int(t_id), 1)
     res = result.wait()
     for i in res:

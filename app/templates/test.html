@@ -182,9 +182,10 @@
 {% endblock %}
 {% block script %}
 <script>
-    $(document).ready(function () {
+    $(document).ready(function (event) {
         $("#testrunner").click(function () {
             var pk = $(this).val()
+            console.log("测试用例ID" + pk)
             $.get({
                 url: "{{ request.host_url }}jobs/{{ product.id}}/" + pk,
                 dataType: 'json',
