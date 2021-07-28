@@ -13,7 +13,7 @@ bp_test = Blueprint('itest', __name__)
 @bp_test.route('/test/<int:pk>', methods=["GET", "POST"])
 @login_required
 def test(pk=None):
-    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -30,7 +30,7 @@ def test(pk=None):
             return redirect(request.referrer)
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    pagination = Apitest.query.with_parent(product).order_by(
+    pagination = Apitest.query.with_parent(product).filter_by(is_deleted=False).order_by(
         Apitest.created.desc()).paginate(page, per_page)
     tests = pagination.items
     return render_template('test.html', product=product, pagination=pagination,
@@ -40,12 +40,11 @@ def test(pk=None):
 @bp_test.route('/test/<int:pk>/edit', methods=["GET", "POST"])
 @login_required
 def edit_test(pk):
-    apitest = Apitest.query.get_or_404(pk)
+    apitest = Apitest.query.filter_by(id=pk, is_deleted=False).one_or_none()
     if request.method == "POST":
         name = request.form.get('name')
-        delete = request.form.get('delete')
         apitest.name = name
-        if delete:
+        if request.form.get('delete'):
             apitest.is_deleted = True
         db.session.commit()
         return redirect(url_for('.test', pk=apitest.product_id))
@@ -79,9 +78,9 @@ def step(pk):
         return redirect(url_for('.step', pk=pk))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    apiurl = Apiurl.query.filter_by(product_id=apitest.product_id).all()
+    apiurl = Apiurl.query.filter_by(product_id=apitest.product_id, is_deleted=False).all()
     pagination = Apistep.query.filter_by(
-        apitest=apitest).paginate(page, per_page)
+        apitest=apitest, is_deleted=False).paginate(page, per_page)
     apisteps = pagination.items
     return render_template('step.html', apitest=apitest, apiurl=apiurl, methods=METHODS,
                            pagination=pagination, apisteps=apisteps, page_name='testpage')
@@ -105,6 +104,9 @@ def edit_step(pk):
         apistep.request_extract = request.form.get('request_extract')
         apistep.response_extract = request.form.get('response_extract')
         flash("更新步骤【{}】成功".format(name), 'success')
+        if request.form.get("delete"):
+            apistep.is_deleted = True
+            current_app.logger.info("删除步骤： {}".format(apistep.name))
         db.session.commit()
         return redirect(url_for('.step', pk=apistep.apitest_id))
     current_app.logger.info("headers: {}".format(apistep.headers))

@@ -25,7 +25,7 @@ def product():
         return redirect(url_for('wx.product.product'))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    pagination = Product.query.with_parent(current_user).order_by(
+    pagination = Product.query.with_parent(current_user).filter_by(is_deleted=False).order_by(
         Product.created.desc()).paginate(page, per_page)
     products = pagination.items
     return render_template('product.html', tags=TAGS, products=products,
@@ -35,14 +35,13 @@ def product():
 @bp_product.route('/product/<int:pk>/edit', methods=["GET", "POST"])
 @login_required
 def edit_product(pk):
-    product = Product.query.get_or_404(pk)
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
     if request.method == 'POST':
         name = request.form.get('name')
         desc = request.form.get('desc')
-        delete = request.form.get('delete')
         product_type = request.form.get('product_type')
         if not product_type:
             flash("没有产品类型", 'danger')
@@ -50,7 +49,7 @@ def edit_product(pk):
         product.name = name
         product.desc = desc
         product.tag = product_type
-        if delete:
+        if request.form.get('delete'):
             product.is_deleted = True
         db.session.commit()
         flash("更新项目信息成功！", "success")

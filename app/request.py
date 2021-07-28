@@ -58,6 +58,8 @@ class BaseRequest(Session):
         replace
         :return:
         """
+        if raw_str is None:
+            return raw_str
         pattern = self.compiles(r'\${(.*?)}')
         result = pattern.findall(raw_str)
         if not result:
@@ -105,7 +107,9 @@ class HttpRequest(BaseRequest):
         :return:
         """
         method = case.method
-        url = generate_url(case.apiurl.url, case.route)
+        if route := case.route:
+            route = self.substitutions(route.strip(), task_id)
+        url = generate_url(case.apiurl.url, route or '')
         if header := case.headers:
             header = header.strip().replace("：", ": ")
             header = self.substitutions(header, task_id)
