@@ -35,5 +35,6 @@ def logout():
 
 
 @bp_auth.route('/avatars/<path:filename>')
+@login_required
 def get_avatar(filename):
     return send_from_directory(current_app.config['AVATARS_SAVE_PATH'], filename)

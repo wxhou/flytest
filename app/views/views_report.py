@@ -138,11 +138,10 @@ def trending(pk=None):
     """趋势折线图"""
     names, success, failure = ['unknown'], [0], [0]
     results = {}
-    reports = Report.query.order_by(Report.created.desc())
+    reports = Report.query.order_by(Report.created.desc()).limit(10)
     for report in reports:
         if report.task_id not in results:
-            apitest = Apitest.query.filter_by(task_id=report.task_id).first()
-            results[report.task_id] = ["unknown" if apitest is None else apitest.name, 0, 0]
+            results[report.task_id] = [report.name, 0, 0]
         if report.status == 1:
             results[report.task_id][1] += 1
         else:

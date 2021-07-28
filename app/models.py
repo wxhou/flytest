@@ -181,7 +181,6 @@ class Bug(db.Model):
 class Work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.String(256), index=True)
-    testname = db.Column(db.String(128))
     name = db.Column(db.String(512))
     hostname = db.Column(db.String(512))
     params = db.Column(db.String(512))
@@ -201,6 +200,7 @@ class CronTabTask(db.Model):
     """定时任务"""
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.String(256), index=True)
+    test_name = db.Column(db.String(128))
     func_name = db.Column(db.String(256))
     trigger = db.Column(db.String(64))
     args = db.Column(db.String(128))

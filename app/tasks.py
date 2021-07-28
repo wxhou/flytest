@@ -43,7 +43,6 @@ def api_test_job(pk, types):
     apisteps = Apistep.query.filter_by(apitest=apitest, is_deleted=False)
     for step in apisteps:
         HttpRequest().http_request(step, task_id)
-    apisteps = Apistep.query.filter_by(apitest_id=pk)
     results = []
     for i in apisteps:
         report = Report(task_id=task_id, name=apitest.name, product_id=apitest.product_id,
@@ -93,11 +92,10 @@ def crontab_job(pk):
 
 
 @celery.task
-def saver_crontab(pk, url):
+def saver_crontab(pk, t_id, url):
     """保存定时任务信息"""
     r = requests.get(url).json()
     times = f'{r.get("hours", 0)}时{r.get("minutes", 0)}分{r.get("seconds", 0)}秒'
-
     res = {
         "task_id": r.get("id"),
         "func_name": r.get("func"),
@@ -111,6 +109,8 @@ def saver_crontab(pk, url):
         "start_date": r.get("start_date"),
         "product_id": pk
     }
+    if apitest := Apitest.query.get(t_id):
+        res['test_name'] = apitest.name
     obj = CronTabTask(**res)
     db.session.add(obj)
     db.session.commit()

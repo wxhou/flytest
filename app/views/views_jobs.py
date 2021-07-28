@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-import asyncio
-from aiohttp import ClientSession
 from datetime import datetime
 from flask import current_app
 from flask import flash, redirect, url_for, request
@@ -40,12 +38,10 @@ def work(pk=None):
 @login_required
 def jobs(pd_id, t_id):
     """场景测试"""
-    test_obj = Apitest.query.get(id=t_id) 
     result = api_test_job.delay(int(t_id), 1)
     res = result.wait()
     for i in res:
         work = Work(task_id=result.id,
-                    testname=test_obj.name if test_obj is not None else 'unknown',
                     name=api_test_job.name,
                     params="{}&{}".format(i['args'], i['kwargs']),
                     hostname=i['hostname'],
@@ -80,7 +76,7 @@ def crontab_view(pk=None):
         return redirect(url_for('.product'))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    pagination = CronTabTask.query.filter_by(product_id=product.id, is_active=True).paginate(page, per_page)
+    pagination = CronTabTask.query.filter_by(product_id=product.id, is_active=True).order_by(CronTabTask.start_date.desc()).paginate(page, per_page)
     crontabtask = pagination.items
     return render_template('crontab.html', crontab=CRONTAB, product=product, crontabtask=crontabtask, page_name='cronpage')
 
@@ -92,7 +88,7 @@ def add_crontab_test(pk):
     task_id = uid_name()
     trigger = request.form.get('trigger', type=str)
     jobsecond = request.form.get('jobsecond', type=int)
-    product_id = Apitest.query.get_or_404(pk).product_id
+    apitest = Apitest.query.get_or_404(pk)
     if trigger == 'date':
         timesocend = datetime.strptime(jobsecond, "%Y-%m-%d %H:%M:%S")
         scheduler.add_job(id=task_id, func=crontab_job, args=(pk, ), trigger=trigger, run_date=timesocend)
@@ -100,21 +96,23 @@ def add_crontab_test(pk):
         scheduler.add_job(id=task_id, func=crontab_job, args=(pk, ), trigger=trigger, seconds=jobsecond)
     if scheduler.get_job(task_id):
         req_url = request.url_root + "scheduler/jobs/" + task_id
-        saver_crontab.delay(product_id, req_url)
+        saver_crontab.delay(apitest.product_id, apitest.id, req_url)
+    scheduler.state
     flash("添加定时任务成功", "success")
     return redirect(request.referrer)
 
 
 @bp_job.get("/crontab/delete/<string:task_id>")
+@login_required
 def delete_crontab(task_id):
     current_app.logger.info("删除定时： %s成功"%task_id)
+    obj = CronTabTask.query.filter_by(task_id=task_id).one_or_none()
+    if obj is None :
+        flash("任务不存在", 'danger')
+        return redirect(request.referrer)
+    obj.is_active=False
+    db.session.commit()
     if scheduler.get_job(task_id):
         scheduler.remove_job(task_id)
-        obj = CronTabTask.query.filter_by(task_id=task_id).one_or_none()
-        if obj is None:
-            flash("没有可以删除的内容", "warning")
-            return redirect(request.referrer)
-        obj.is_active=False
-        db.session.commit()
     flash("删除任务%s成功"%task_id, "success")
     return redirect(url_for('.crontab_view'))

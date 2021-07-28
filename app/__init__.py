@@ -6,7 +6,7 @@ import click
 from flask import Flask, render_template
 
 from settings import BASE_DIR
-from .extensions import (db, login_manager, avatars, migrate, moment, cache, assets, scheduler)
+from .extensions import (db, login_manager, avatars, migrate, moment, cache, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
@@ -47,7 +47,6 @@ def register_extensions(app):
     migrate.init_app(app=app)
     moment.init_app(app)
     cache.init_app(app, app.config['CACHE_CONFIG'])
-    assets.init_app(app)
 
 
 def register_template_context(app):
@@ -99,9 +98,6 @@ def register_commands(app):
                   confirmation_prompt=True,
                   help='The password used to login.')
     def adminuser(email, password):
-        click.echo('Initializing the database...')
-        db.create_all()
-
         admin = User.query.first()
         if admin is not None:
             click.echo('The administrator already exists, updating...')
@@ -114,6 +110,21 @@ def register_commands(app):
             db.session.add(admin)
         db.session.commit()
         click.echo('Administrator Created Done.')
+
+    @app.cli.command()
+    @click.option('--email', prompt=True, help='The email to login.')
+    @click.option('--password',
+                  prompt=True,
+                  hide_input=True,
+                  confirmation_prompt=True,
+                  help='The password used to login.')
+    def adduser(email, password):
+        click.echo('Creating the temporary user account...')
+        user = User(email=email, username='admin', is_deleted=False)
+        user.password = password
+        db.session.add(user)
+        db.session.commit()
+        click.echo('User Created Done.')
 
 
 def register_logger(app):

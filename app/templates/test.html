@@ -69,10 +69,10 @@
                 <th>执行人</th>
                 <th>所属项目</th>
                 <th class="bg-info text-white">执行测试</th>
-                <th>定时任务</th>
                 <th>测试结果</th>
                 <th>更新时间</th>
                 <td>最后一次运行任务ID</td>
+                <th>定时任务</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -87,29 +87,45 @@
                 <td>{{ test.user }}</td>
                 <td class="bg-light text-dark">{{ test.product.name }}</td>
                 <td>
-                    <button id="testrunner" type="button" value="{{ test.id }}"
-                        class="btn btn-outline-info btn-sm btn-block">
+                    <button id="testrunner" type="button" value="{{ test.id }}" class="btn-warning btn-sm">
                         运行
                     </button>
                 </td>
-                <td>    
-                    <button type="button" class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#crontab">添加</button>
+                {% if test.results == -1 %}
+                <td><span class="badge badge-warning">未测试</span></td>
+                {% elif test.results == 1 %}
+                <td><span class="badge badge-success">成功</span></td>
+                {% elif test.results == 0 %}
+                <td><span class="badge badge-danger">失败</span></td>
+                {% endif %}
+                <td>{{ moment(test.updated).format('lll') }}</td>
+                <td><small class="text-muted">{% if test.task_id %}
+                        <a href="{{ url_for('wx.bp_report.report') }}?task_id={{ test.task_id }}">
+                            {{ test.task_id }}</a>
+                        {% else %}
+                        暂无
+                        {% endif %}</small></td>
+                <td>
+                    <button type="button" class="btn btn-outline-info btn-sm" data-toggle="modal"
+                        data-target="#crontab">添加</button>
                 </td>
                 <div class="modal fade" id="crontab">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
-                
+
                             <!-- 模态框头部 -->
                             <div class="modal-header">
                                 <h4 class="modal-title">新增定时任务</h4>
-                                <button type="button" class="close" data-dismiss="modal" id="crons2test" value="{{ test.id }}">&times;</button>
+                                <button type="button" class="close" data-dismiss="modal" id="crons2test"
+                                    value="{{ test.id }}">&times;</button>
                             </div>
-                
+
                             <!-- 模态框主体 -->
                             <div class="modal-body">
                                 <form action="{{ url_for('wx.job.add_crontab_test',pk=test.id) }}" method="post">
                                     <div class="mb-3">
-                                        <label for="name" class="form-label">任务类型<label style="color: red;">*</label></label>
+                                        <label for="name" class="form-label">任务类型<label
+                                                style="color: red;">*</label></label>
                                         <select class="form-control" id="trigger" name="trigger">
                                             {% for cron in crontab %}
                                             <option value="{{ cron[0] }}">{{ cron[1] }}</option>
@@ -117,13 +133,24 @@
                                         </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="apitestname" class="form-label">时间间隔<label style="color: red;">*</label></label>
-                                        <input type="text" class="form-control" id="jobsecond" name="jobsecond" placeholder="请输入时间间隔..." autofocus
-                                            required>
+                                        <label for="apitestname" class="form-label">时间间隔<label
+                                                style="color: red;">*</label></label>
+                                        <input type="text" class="form-control" id="jobsecond" name="jobsecond"
+                                            placeholder="请输入时间间隔..." autofocus required>
                                         <div id="namehelp" class="form-text">输入时间间隔</div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="rulename" class="form-label">规则说明<label style="color: red;">*</label></label>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                规则说明
+                                            </h4>
+                                        </div>
+                                        <div panel-body>
+                                            <div class="form-text">定时任务：   需要按照crontab语法，例:
+                                                https://www.runoob.com/w3cnote/linux-crontab-tasks.html</div>
+                                            <div class="form-text">一次性任务： 输入格式为: 1990-01-01 00:00:00</div>
+                                            <div class="form-text">循环任务：   输入格式为: 数字，单位是秒</div>
+                                        </div>
                                     </div>
                                     <br>
                                     <div class="form-actions well well-sm clearfix">
@@ -141,20 +168,6 @@
                         </div>
                     </div>
                 </div>
-                {% if test.results == -1 %}
-                <td><span class="badge badge-warning">未测试</span></td>
-                {% elif test.results == 1 %}
-                <td><span class="badge badge-success">成功</span></td>
-                {% elif test.results == 0 %}
-                <td><span class="badge badge-danger">失败</span></td>
-                {% endif %}
-                <td>{{ moment(test.updated).format('lll') }}</td>
-                <td><small class="text-muted">{% if test.task_id %}
-                        <a href="{{ url_for('wx.bp_report.report') }}?task_id={{ test.task_id }}">
-                            {{ test.task_id }}</a>
-                        {% else %}
-                        暂无
-                        {% endif %}</small></td>
                 <td><a href="{{ url_for('wx.itest.edit_test',pk=test.id) }}">编辑</a></td>
             </tr>
             {% endfor %}
