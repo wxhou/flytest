@@ -84,10 +84,8 @@
                 <td><strong>{{ test.id }}
                 </strong></td>
                 <td><strong>{{ test.name }}</strong></td>
-                <td><a href="{{ url_for('wx.itest.step',pk=test.id) }}"></a>
-                    <button type="button" class="btn-info btn-sm">
-                        添加
-                    </button></a></td>
+                <td><a href="{{ url_for('wx.itest.step',pk=test.id) }}">
+                    添加</a></td>
                 <td>{{ test.user }}</td>
                 <td class="bg-light text-dark">{{ test.product.name }}</td>
                 <td>
