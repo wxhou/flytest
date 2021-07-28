@@ -16,7 +16,7 @@ def test(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     if request.method == "POST":
         name = request.form.get('name')
         if name:

@@ -25,7 +25,7 @@ def work(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
     pagination = Work.query.filter_by(product=product).order_by(Work.created.desc()).paginate(page, per_page)
@@ -73,7 +73,7 @@ def crontab_view(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
     pagination = CronTabTask.query.filter_by(product_id=product.id, is_active=True).order_by(CronTabTask.start_date.desc()).paginate(page, per_page)

@@ -22,7 +22,7 @@ def product():
                           user=current_user, is_deleted=False)
         db.session.add(product)
         db.session.commit()
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
     pagination = Product.query.with_parent(current_user).order_by(
@@ -38,7 +38,7 @@ def edit_product(pk):
     product = Product.query.get_or_404(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     if request.method == 'POST':
         name = request.form.get('name')
         desc = request.form.get('desc')
@@ -54,6 +54,6 @@ def edit_product(pk):
             product.is_deleted = True
         db.session.commit()
         flash("更新项目信息成功！", "success")
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     return render_template('product_edit.html', product=product, tags=TAGS, page_name='productpage')
 

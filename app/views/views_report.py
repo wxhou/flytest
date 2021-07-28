@@ -18,7 +18,7 @@ def report(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     task_id = request.args.get('task_id')
     if task_id:
         reports = Report.query.filter_by(product=product, task_id=task_id, is_deleted=False)
@@ -71,7 +71,7 @@ def bug(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     task_id = request.args.get('task_id')
     if task_id:
         bugs = Bug.query.filter_by(product=product,
@@ -127,7 +127,7 @@ def trend(pk=None):
     product = Product.query.get_or_404(pk) if pk else Product.query.first()
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('.product'))
+        return redirect(url_for('wx.product.product'))
     return render_template('trending.html', page_name="trendpage", product=product)
 
 
