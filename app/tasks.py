@@ -64,6 +64,7 @@ def api_test_job(pk, types):
                       is_deleted=False)
             db.session.add(bug)
         results.append(i.status)
+    log.info("测试结果状态results： {}".format(results))
     status = all(results)
     apitest.task_id = task_id
     apitest.results = 1 if status else 0

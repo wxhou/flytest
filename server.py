@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 import os
-from flytest import create_app
+from app import create_app
 from dotenv import load_dotenv
 
 env_path = os.path.join(os.path.dirname(__file__), '.env')

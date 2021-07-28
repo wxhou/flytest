@@ -5,7 +5,7 @@
 
 all:
 run: 
-	nohup ./venv/bin/gunicorn -w 4 -k eventlet -b 0.0.0.0:5000 server:app --reload & 
+	nohup ./env/bin/gunicorn -w 1 -k eventlet -b 0.0.0.0:5000 server:app --reload & 
 
 # reload参数是gunicorn的重新加载命令
 kill: 

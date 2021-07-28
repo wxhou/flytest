@@ -66,6 +66,7 @@
             <tr>
                 <th>ID</th>
                 <th>流程接口测试名称</th>
+                <th>添加测试步骤</th>
                 <th>执行人</th>
                 <th>所属项目</th>
                 <th class="bg-info text-white">执行测试</th>
@@ -80,14 +81,17 @@
             {% if tests %}
             {% for test in tests %}
             <tr>
-                <td><strong><a href="{{ url_for('wx.itest.step',pk=test.id) }}">
-                            {{ test.id }}
-                        </a></strong></td>
+                <td><strong>{{ test.id }}
+                </strong></td>
                 <td><strong>{{ test.name }}</strong></td>
+                <td><a href="{{ url_for('wx.itest.step',pk=test.id) }}"></a>
+                    <button type="button" class="btn-info btn-sm">
+                        添加
+                    </button></a></td>
                 <td>{{ test.user }}</td>
                 <td class="bg-light text-dark">{{ test.product.name }}</td>
                 <td>
-                    <button id="testrunner" type="button" value="{{ test.id }}" class="btn-warning btn-sm">
+                    <button id="testrunner" type="button" value="{{ test.id }}" class="btn-primary btn-sm">
                         运行
                     </button>
                 </td>
