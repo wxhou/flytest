@@ -68,11 +68,8 @@ def response_error(code, msg="None"):
     return jsonify({'errcode': code, 'errmsg': msg})
 
 
-def response_success(result=None, **kwargs):
-    if result is None:
-        res = {'data': result, 'errcode': 0, 'errmsg': 'success'}
-    else:
-        res = deepcopy(result)
+def response_success(**kwargs):
+    res = {'errcode': 0, 'errmsg': '任务执行成功！'}
     for k, v in kwargs.items():
         res[k] = v
     return jsonify(res)

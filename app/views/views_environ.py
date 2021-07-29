@@ -11,7 +11,7 @@ bp_environ = Blueprint('environ', __name__)
 @bp_environ.route('/env/<int:pk>', methods=["GET", "POST"])
 @login_required
 def env(pk=None):
-    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -28,7 +28,7 @@ def env(pk=None):
         return redirect(request.referrer)
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    pagination = Apiurl.query.with_parent(product).order_by(
+    pagination = Apiurl.query.with_parent(product).filter_by(is_deleted=False).order_by(
         Apiurl.created.desc()).paginate(page, per_page)
     envs = pagination.items
     return render_template('env.html', product=product,
@@ -38,12 +38,11 @@ def env(pk=None):
 @bp_environ.route('/env/<int:pk>/edit', methods=["GET", "POST"])
 @login_required
 def edit_env(pk):
-    env = Apiurl.query.get_or_404(pk)
+    env = Apiurl.query.filter_by(id=int(pk), is_deleted=False).one_or_none()
     if request.method == 'POST':
         env.name = request.form.get('name')
         env.url = request.form.get('url')
-        delete = request.form.get('delete')
-        if delete:
+        if request.form.get('delete'):
             env.is_deleted = True
         db.session.commit()
         return redirect(url_for('.env', pk=env.product_id))

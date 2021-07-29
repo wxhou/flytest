@@ -6,7 +6,7 @@ from flask import flash, redirect, url_for, request
 from flask import Blueprint, render_template
 from flask_login import login_required
 from concurrent.futures import ThreadPoolExecutor
-from app.models import Product, Apitest, Work, CronTabTask
+from app.models import Product, Apitest, Apistep, Work, CronTabTask
 
 from app.choices import *
 from app.utils import response_error, response_success, uid_name
@@ -22,7 +22,7 @@ bp_job = Blueprint('job', __name__)
 @login_required
 def work(pk=None):
     """工作视图"""
-    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -38,6 +38,9 @@ def work(pk=None):
 @login_required
 def jobs(pd_id, t_id):
     """场景测试"""
+    apisteps = Apistep.query.filter_by(apitest_id=int(t_id), is_deleted=False).first()
+    if apisteps is None:
+        return response_error(1, "没有可以运行的步骤，请至少添加一个步骤")
     result = api_test_job.delay(int(t_id), 1)
     res = result.wait()
     for i in res:
@@ -70,7 +73,7 @@ def job(pk):
 @login_required
 def crontab_view(pk=None):
     """定时任务视图"""
-    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))

@@ -14,8 +14,7 @@ bp_report = Blueprint('bp_report', __name__)
 @login_required
 def report(pk=None):
     """测试报告"""
-    # TODO:此函数执行SQL很多，需要优化
-    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -68,7 +67,7 @@ def report(pk=None):
 @bp_report.route('/bug/<int:pk>')
 @login_required
 def bug(pk=None):
-    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -124,7 +123,7 @@ def pie():
 @login_required
 def trend(pk=None):
     """趋势视图"""
-    product = Product.query.get_or_404(pk) if pk else Product.query.first()
+    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
