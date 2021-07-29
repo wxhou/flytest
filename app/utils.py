@@ -69,7 +69,7 @@ def response_error(code, msg="None"):
 
 
 def response_success(**kwargs):
-    res = {'errcode': 0, 'errmsg': '任务执行成功！'}
+    res = {'errcode': 0, 'errmsg': '任务正在运行！'}
     for k, v in kwargs.items():
         res[k] = v
     return jsonify(res)

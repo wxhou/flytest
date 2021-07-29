@@ -48,6 +48,8 @@
                         <td><strong class="text-info">{{ work.params }}</strong></td>
                         {% if work.status == 'SUCCESS' %}
                         <td><span class="badge badge-success">{{ work.status }}</span></td>
+                        {% elif work.status == 'PENDING' %}
+                        <td><span class="badge badge-warning">{{ work.status }}</span></td>
                         {% else %}
                         <td><span class="badge badge-danger">{{ work.status }}</span></td>
                         {% endif %}

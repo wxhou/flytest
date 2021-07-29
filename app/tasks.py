@@ -1,11 +1,13 @@
 import time
 import requests
+from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
+from celery.signals import task_success, task_failure
 from .extensions import db, scheduler
-from .models import Apistep, Apitest, Report, Bug, CronTabTask
+from .models import Apistep, Apitest, Work, Report, Bug, CronTabTask
 from .request import HttpRequest
 from .utils import generate_url
-from .worker import celery
+from .worker import celery, flask_app
 
 log = get_task_logger(__name__)
 
@@ -32,14 +34,26 @@ def api_step_job(pk):
     return task_info[hostname]
 
 
-@celery.task
-def api_test_job(pk, types):
+@celery.task(bind=True)
+def api_test_job(self, pk, types):
     """多步运行或场景测试"""
-    task_id = api_test_job.request.id
-    hostname = api_test_job.request.hostname
-    # CeleryCaseTestJob
+    task_id = self.request.id
     log.info("开始测试用例" + str(pk))
-    apitest = Apitest.query.get_or_404(pk)
+    apitest = Apitest.query.filter_by(id=int(pk), is_deleted=False).one_or_none()
+    if apitest is None:
+        return None
+    work = Work(task_id=task_id,
+            name=self.name,
+            params="{}&{}".format(self.request.args, self.request.kwargs),
+            hostname=self.request.hostname,
+            status="PENDING",
+            product_id=apitest.product_id
+            # result=str(result.get(timeout=1)),
+            # traceback=result.traceback,
+            )
+    db.session.add(work)
+    db.session.commit()
+    # CeleryCaseTestJob
     apisteps = Apistep.query.filter_by(apitest=apitest, is_deleted=False)
     for step in apisteps:
         HttpRequest().http_request(step, task_id)
@@ -71,9 +85,36 @@ def api_test_job(pk, types):
     db.session.commit()
     log.info("结束测试用例" + str(pk))
     # CeleryCaseTestJobEnd
-    task_info = celery.control.inspect().active()
-    return task_info[hostname]
+    # task_info = celery.control.inspect().active()
+    # task_info[self.request.hostname]
+    return "{}测试成功！".format(apitest.name)  
 
+
+@task_success.connect(sender=api_test_job)
+def task_success_test(sender=None, result=None, **kwargs):
+    with flask_app.app_context():
+        """任务成功处理"""
+        task_res = AsyncResult(sender.request.id)
+        work = Work.query.filter_by(task_id=task_res.task_id).one_or_none()
+        if work is not None:
+            work.status = task_res.state
+            work.result = task_res.result
+        db.session.add(work)
+        db.session.commit()
+
+
+@task_failure.connect(sender=api_test_job)
+def task_failure_test(sender=None, traceback=None, **kwargs):
+    """任务失败处理"""
+    with flask_app.app_context():
+        task_res = AsyncResult(sender.request.id)
+        work = Work.query.filter_by(task_id=task_res.task_id).one_or_none()
+        if work is not None:
+            work.result = task_res.info
+            work.status = task_res.state
+            work.traceback = task_res.traceback
+        db.session.add(work)
+        db.session.commit()
 
 ############
 # 定时任务

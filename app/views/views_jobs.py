@@ -41,20 +41,7 @@ def jobs(pd_id, t_id):
     apisteps = Apistep.query.filter_by(apitest_id=int(t_id), is_deleted=False).first()
     if apisteps is None:
         return response_error(1, "没有可以运行的步骤，请至少添加一个步骤")
-    result = api_test_job.delay(int(t_id), 1)
-    res = result.wait()
-    for i in res:
-        work = Work(task_id=result.id,
-                    name=api_test_job.name,
-                    params="{}&{}".format(i['args'], i['kwargs']),
-                    hostname=i['hostname'],
-                    status=result.status,
-                    result=str(result.get(timeout=1)),
-                    traceback=result.traceback,
-                    product_id=pd_id
-                    )
-        db.session.add(work)
-    db.session.commit()
+    api_test_job.delay(int(t_id), 1)
     return response_success(data={"product": pd_id, "test": t_id})
 
 
