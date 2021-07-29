@@ -91,7 +91,7 @@ def api_test_job(self, pk, types):
 
 
 @task_success.connect(sender=api_test_job)
-def task_success_test(sender=None, result=None, **kwargs):
+def task_success_test(sender=None, **kwargs):
     with flask_app.app_context():
         """任务成功处理"""
         task_res = AsyncResult(sender.request.id)
@@ -99,12 +99,11 @@ def task_success_test(sender=None, result=None, **kwargs):
         if work is not None:
             work.status = task_res.state
             work.result = task_res.result
-        db.session.add(work)
-        db.session.commit()
+            db.session.commit()
 
 
 @task_failure.connect(sender=api_test_job)
-def task_failure_test(sender=None, traceback=None, **kwargs):
+def task_failure_test(sender=None, **kwargs):
     """任务失败处理"""
     with flask_app.app_context():
         task_res = AsyncResult(sender.request.id)
@@ -113,8 +112,7 @@ def task_failure_test(sender=None, traceback=None, **kwargs):
             work.result = task_res.info
             work.status = task_res.state
             work.traceback = task_res.traceback
-        db.session.add(work)
-        db.session.commit()
+            db.session.commit()
 
 ############
 # 定时任务
