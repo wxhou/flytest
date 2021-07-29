@@ -89,7 +89,7 @@
                 <td>{{ test.user }}</td>
                 <td class="bg-light text-dark">{{ test.product.name }}</td>
                 <td>
-                    <button id="testrunner" type="button" value="{{ test.id }}" class="btn-primary btn-sm">
+                    <button type="button" value="{{ test.id }}" class="testrunner btn-primary btn-sm">
                         运行
                     </button>
                 </td>
@@ -183,7 +183,7 @@
 {% block script %}
 <script>
     $(document).ready(function () {
-        $("#testrunner").click(function () {
+        $(".testrunner").click(function () {
             var pk = $(this).val()
             $.get({
                 url: "{{ request.host_url }}jobs/{{ product.id}}/" + pk,
