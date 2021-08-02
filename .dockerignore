@@ -1,0 +1,18 @@
+# dockerfile构建时的忽略文件
+*.md
+env
+venv
+.git
+**/__pycache__
+.vscode
+docs
+*.log
+*.png
+*.jpg
+*.mp3
+*.mp4
+*.obj
+migrates.sh
+Makefile
+version
+**/migrations
