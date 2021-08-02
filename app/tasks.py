@@ -111,7 +111,7 @@ def task_failure_test(sender=None, **kwargs):
         if work is not None:
             work.result = task_res.info
             work.status = task_res.state
-            work.traceback = task_res.traceback
+            work.traceback = task_res.traceback[:512] if len(task_res.traceback) > 512 else task_res.traceback
             db.session.commit()
 
 ############

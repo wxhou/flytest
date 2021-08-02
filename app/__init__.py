@@ -120,7 +120,7 @@ def register_commands(app):
                   help='The password used to login.')
     def adduser(email, password):
         click.echo('Creating the temporary user account...')
-        user = User(email=email, username='admin', is_deleted=False)
+        user = User(email=email, username='user', is_deleted=False)
         user.password = password
         db.session.add(user)
         db.session.commit()
