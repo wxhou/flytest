@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}
+注册
+{% endblock %}
+{% block head %}
+<style>
+  .bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  @media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+      font-size: 3.5rem;
+    }
+  }
+</style>
+
+<!-- Custom styles for this template -->
+
+{% endblock %}
+
+
+{% block body %}
+
+<body class="bg-light">
+
+  <div class="container">
+    <div class="py-5 text-center">
+      <img class="d-block mx-auto mb-4" src="{{ url_for('static',filename='images/t.svg') }}" alt="" width="72"
+        height="72">
+      <h2>注册一个新账号</h2>
+      <p class="lead">欢迎注册wxtest测试平台！</p>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 order-md-2 mb-4">
+      </div>
+      <div class="col-md-8 order-md-1">
+        <form class="needs-validation" novalidate>
+          <div class="mb-3">
+            <label for="username">输入用户名：</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="username" placeholder="Username" required>
+              <div class="invalid-feedback" style="width: 100%;">
+                Your username is required.
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email">输入邮箱地址：<span class="text-muted">(Optional)</span></label>
+            <input type="email" class="form-control" id="email" placeholder="you@example.com">
+            <div class="invalid-feedback">
+              Please enter a valid email address for shipping updates.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="address">输入密码：</label>
+            <input type="text" class="form-control" id="address" placeholder="********" required>
+            <div class="invalid-feedback">
+              Please enter your shipping address.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="address2">确认密码： <span class="text-muted">(Optional)</span></label>
+            <input type="text" class="form-control" id="address2" placeholder="********">
+          </div>
+          <hr class="mb-4">
+          <button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>
+        </form>
+      </div>
+    </div>
+
+    <footer class="my-5 pt-5 text-muted text-center text-small">
+      <p class="mb-1">&copy; 2017-2021 wxhou</p>
+      <ul class="list-inline">
+        <li class="list-inline-item"><a href="https://www.cnblogs.com/wxhou">博客园</a></li>
+      </ul>
+    </footer>
+  </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
+  <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+
+
+  <script src="form-validation.js"></script>
+</body>
+
+{% endblock %}

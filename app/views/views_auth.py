@@ -34,6 +34,13 @@ def logout():
     return redirect(url_for('wx.auth.login'))
 
 
+@bp_auth.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        pass
+    return render_template('register.html')
+
+
 @bp_auth.route('/avatars/<path:filename>')
 @login_required
 def get_avatar(filename):
