@@ -21,46 +21,43 @@
 {% block body %}
 
 <body class="text-center">
-    <div class="container">
-        <form class="form-signin" method="POST">
-            <h1 class="h3 mb-3 font-weight-normal">测试平台V1.0</h1>
-            <img class="mb-4" src="{{ url_for('static',filename='images/login.jpg') }}" alt="" width="180" height="110">
-            <h1 class="h3 mb-3 font-weight-normal">请登录</h1>
-            <label for="inputEmail" class="sr-only">邮箱地址：</label>
-            <input type="text" name="username" id="inputEmail" class="form-control" placeholder="请输入用户名..." required
-                autofocus>
-            <label for="inputPassword" class="sr-only">密 码：</label>
-            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="请输入密码..."
-                required>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>
-                        <input type="checkbox" name="remember" value="remember-me"> 记住我
-                    </label>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <a href="{{ url_for('wx.auth.register') }}">注册</a>
-                </div>
+    <form class="form-signin" method="POST">
+        <h1 class="h3 mb-3 font-weight-normal">测试平台V1.0</h1>
+        <img class="mb-4" src="{{ url_for('static',filename='images/login.jpg') }}" alt="" width="180" height="110">
+        <h1 class="h3 mb-3 font-weight-normal">请登录</h1>
+        <label for="inputEmail" class="sr-only">邮箱地址：</label>
+        <input type="text" name="username" id="inputEmail" class="form-control" placeholder="请输入用户名..." required
+            autofocus>
+        <label for="inputPassword" class="sr-only">密 码：</label>
+        <input type="password" name="password" id="inputPassword" class="form-control" placeholder="请输入密码..." required>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>
+                    <input type="checkbox" name="remember" value="remember-me"> 记住我
+                </label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {{ message }}
+            <div class="col-md-6 mb-3">
+                <a href="{{ url_for('wx.auth.register') }}">注册</a>
             </div>
-            {% endfor %}
-            {% endif %}
-            {% endwith %}
-        </form>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
         <footer class="my-5 pt-5 text-muted text-center text-small">
             <p class="mt-5 mb-3 text-muted">&copy; 2018-2021</p>
             <ul class="list-inline">
                 <li class="list-inline-item"><a href="https://www.cnblogs.com/wxhou">博客园</a></li>
             </ul>
         </footer>
-    </div>
+    </form>
 </body>
 
 {% endblock %}
