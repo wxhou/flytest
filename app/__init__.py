@@ -6,7 +6,7 @@ import click
 from flask import Flask, render_template
 
 from settings import BASE_DIR
-from .extensions import (db, login_manager, avatars, migrate, moment, cache, scheduler)
+from .extensions import (db, login_manager, avatars, migrate, moment, cache, whooshee, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
@@ -30,26 +30,27 @@ def create_app(env=None, celery=None):
     return app
 
 
-def register_blueprints(app):
+def register_blueprints(app: Flask):
     from .views import bp_views  # 防止celery循环导入
     app.register_blueprint(bp_views, url_prefix='/')
 
 
-def register_scheduler(app):
+def register_scheduler(app: Flask):
     scheduler.init_app(app)
     scheduler.start()
 
 
-def register_extensions(app):
+def register_extensions(app: Flask):
     db.init_app(app)
     login_manager.init_app(app)
     avatars.init_app(app)
     migrate.init_app(app=app)
     moment.init_app(app)
     cache.init_app(app, app.config['CACHE_CONFIG'])
+    whooshee.init_app(app)
 
 
-def register_template_context(app):
+def register_template_context(app: Flask):
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
 
@@ -59,7 +60,7 @@ def register_template_context(app):
         return dict(products=products)
 
 
-def register_shell_context(app):
+def register_shell_context(app: Flask):
 
     @app.shell_context_processor
     def make_shell_context():
@@ -74,7 +75,7 @@ def register_shell_context(app):
                     Work=Work)
 
 
-def register_commands(app):
+def register_commands(app: Flask):
     @app.cli.command()
     @click.option('--drop', is_flag=True, help='Create after drop.')
     def initdb(drop):
@@ -127,7 +128,7 @@ def register_commands(app):
         click.echo('User Created Done.')
 
 
-def register_logger(app):
+def register_logger(app: Flask):
     from logging.handlers import RotatingFileHandler
 
     app.logger.setLevel(logging.DEBUG)

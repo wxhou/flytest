@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from flask_avatars import Avatars
 from flask_moment import Moment
 from flask_caching import Cache
+from flask_whooshee import Whooshee
 
 
 db = SQLAlchemy()
@@ -16,6 +17,7 @@ avatars = Avatars()
 migrate = Migrate(db=db, render_as_batch=True)
 login_manager = LoginManager()
 scheduler = APScheduler()
+whooshee = Whooshee()
 
 
 @login_manager.user_loader

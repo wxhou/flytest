@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import UserMixin
 from flask_avatars import Identicon
-from .extensions import db
+from .extensions import db, whooshee
 
 
 class User(db.Model, UserMixin):
@@ -51,6 +51,7 @@ class User(db.Model, UserMixin):
         return self.username
 
 
+@whooshee.register_model("name")
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
@@ -74,6 +75,7 @@ class Product(db.Model):
         return '<Product %s>' % self.name
 
 
+@whooshee.register_model("name")
 class Apiurl(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
@@ -91,6 +93,7 @@ class Apiurl(db.Model):
         return '<Url %s>' % self.name
 
 
+@whooshee.register_model("name")
 class Apitest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
@@ -110,7 +113,7 @@ class Apitest(db.Model):
     def __repr__(self):
         return '<ApiTest %s>' % self.name
 
-
+@whooshee.register_model("name")
 class Apistep(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))

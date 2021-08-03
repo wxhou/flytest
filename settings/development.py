@@ -6,11 +6,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', "ahJ#5UoEg9x1T&@n")
 
 PER_PAGE_SIZE = 10
 
-DB_SERVER = '127.0.0.1'
+DB_SERVER = os.getenv("DB_SERVER", "127.0.0.1")
 SQLALCHEMY_ECHO = True
 SQLALCHEMY_RECORD_QUERIES = True
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_DATABASE_URI = "mysql://root:root1234@{}:3306/flytest".format(DB_SERVER)
+SQLALCHEMY_DATABASE_URI = "mysql://root:root1234@%s:3306/flytest" % DB_SERVER
 
 # email
 MAIL_SERVER = os.getenv('MAIL_SERVER')
@@ -21,8 +21,8 @@ MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 MAIL_DEFAULT_SENDER = ('wxtest', MAIL_USERNAME)
 
 # celery
-CELERY_BROKER_URL = 'redis://{}:6379/1'.format(DB_SERVER)
-CELERY_RESULT_BACKEND = 'redis://{}:6379/2'.format(DB_SERVER)
+CELERY_BROKER_URL = 'redis://%s:6379/1' % DB_SERVER
+CELERY_RESULT_BACKEND = 'redis://%s:6379/2' % DB_SERVER
 # cache
 CACHE_CONFIG = {
     'CACHE_TYPE': "redis",  # Flask-Caching related configs
@@ -46,4 +46,3 @@ SCHEDULER_JOB_DEFAULTS = {
     'coalesce': False,
     'max_instances': 3
 }
-
