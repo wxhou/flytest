@@ -37,7 +37,26 @@ def logout():
 @bp_auth.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        pass
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password1 = request.form.get("password1")
+        password2 = request.form.get("password2")
+        if not all([username, email, password1, password2]):
+            flash("请输入完整的注册信息！", 'danger')
+            return redirect(request.referrer)
+        if password1 != password2:
+            flash("两次输入密码不相同", 'danger')
+            return redirect(request.referrer)
+        user = User.query.filter_by(email=email).one_or_none()
+        if user is not None:
+            flash("该用户已存在，请登录", "warning")
+            return redirect(url_for('wx.auth.login'))
+        user = User(email=email, username=username, is_deleted=False)
+        user.password = password1
+        db.session.add(user)
+        db.session.commit()
+        flash("注册成功请登录", "success")
+        return redirect(url_for('wx.auth.login'))
     return render_template('register.html')
 
 

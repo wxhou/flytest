@@ -27,25 +27,25 @@
 
 {% block body %}
 
-<body class="bg-light">
+<body class="bg-light text-center">
 
   <div class="container">
-    <div class="py-5 text-center">
-      <img class="d-block mx-auto mb-4" src="{{ url_for('static',filename='images/t.svg') }}" alt="" width="72"
-        height="72">
-      <h2>注册一个新账号</h2>
-      <p class="lead">欢迎注册wxtest测试平台！</p>
-    </div>
-
-    <div class="row">
+    <br>
+    <br>
+    <div class="row order-md-2">
       <div class="col-md-4 order-md-2 mb-4">
+        <div class="py-5 text-center">
+          <img class="d-block mx-auto mb-4" src="{{ url_for('static',filename='images/t.svg') }}" alt="" width="72"
+            height="72">
+          <h2>注册一个新账号</h2>
+        </div>
       </div>
-      <div class="col-md-8 order-md-1">
-        <form class="needs-validation" novalidate>
+      <div class="col-md-3 order-md-2">
+        <form action="{{ url_for('wx.auth.register') }}" method="POST" class="needs-validation" novalidate>
           <div class="mb-3">
             <label for="username">输入用户名：</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="username" placeholder="Username" required>
+              <input type="text" class="form-control" name="username" placeholder="请输入用户名" required>
               <div class="invalid-feedback" style="width: 100%;">
                 Your username is required.
               </div>
@@ -53,48 +53,47 @@
           </div>
 
           <div class="mb-3">
-            <label for="email">输入邮箱地址：<span class="text-muted">(Optional)</span></label>
-            <input type="email" class="form-control" id="email" placeholder="you@example.com">
+            <label for="email">输入邮箱地址：</label>
+            <input type="email" class="form-control" name="email" placeholder="xx@xx.com">
             <div class="invalid-feedback">
               Please enter a valid email address for shipping updates.
             </div>
           </div>
-
           <div class="mb-3">
             <label for="address">输入密码：</label>
-            <input type="text" class="form-control" id="address" placeholder="********" required>
+            <input type="text" class="form-control" name="password1" placeholder="********" required>
             <div class="invalid-feedback">
               Please enter your shipping address.
             </div>
           </div>
-
           <div class="mb-3">
-            <label for="address2">确认密码： <span class="text-muted">(Optional)</span></label>
-            <input type="text" class="form-control" id="address2" placeholder="********">
+            <label for="address2">确认密码：</label>
+            <input type="text" class="form-control" name="password2" placeholder="********">
           </div>
           <hr class="mb-4">
-          <button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>
+          <button class="btn btn-primary btn-lg" type="submit">提交</button>
         </form>
+        <div class="mb-3">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+        </div>
       </div>
     </div>
-
     <footer class="my-5 pt-5 text-muted text-center text-small">
-      <p class="mb-1">&copy; 2017-2021 wxhou</p>
+      <p class="mt-5 mb-3 text-muted">&copy; 2018-2021</p>
       <ul class="list-inline">
         <li class="list-inline-item"><a href="https://www.cnblogs.com/wxhou">博客园</a></li>
       </ul>
     </footer>
   </div>
-
-
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-    crossorigin="anonymous"></script>
-  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
-  <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
-
-
-  <script src="form-validation.js"></script>
 </body>
 
 {% endblock %}
