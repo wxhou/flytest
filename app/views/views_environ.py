@@ -11,7 +11,7 @@ bp_environ = Blueprint('environ', __name__)
 @bp_environ.route('/env/<int:pk>', methods=["GET", "POST"])
 @login_required
 def env(pk=None):
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
+    product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))

@@ -4,9 +4,11 @@ import os
 import logging
 import click
 from flask import Flask, render_template
+from flask_login import current_user
 
 from settings import BASE_DIR
-from .extensions import (db, login_manager, avatars, migrate, moment, cache, whooshee, scheduler)
+from .extensions import (db, login_manager, avatars,
+                         migrate, moment, cache, whooshee, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
@@ -56,8 +58,12 @@ def register_template_context(app: Flask):
 
     @app.context_processor
     def make_template_context():
-        products = Product.query.filter_by(is_deleted=False)
-        return dict(products=products)
+        result = {}
+        if current_user.is_authenticated:
+            products = Product.query.filter_by(
+                user=current_user, is_deleted=False)
+            result['products'] = products
+        return result
 
 
 def register_shell_context(app: Flask):
@@ -144,9 +150,6 @@ def register_logger(app: Flask):
 
 
 def register_errors(app: Flask):
-    @app.errorhandler(400)
-    def bad_request(e):
-        return render_template('errors/400.html'), 400
 
     @app.errorhandler(404)
     def page_not_found(e):
@@ -155,7 +158,8 @@ def register_errors(app: Flask):
     @app.errorhandler(500)
     @app.errorhandler(Exception)
     def internal_server_error(e):
-        app.logger.error(format(e))
+        import traceback
+        app.logger.critical(traceback.format_exc())
         return render_template('errors/500.html'), 500
 
 

@@ -87,7 +87,7 @@ def api_test_job(self, pk, types):
     # CeleryCaseTestJobEnd
     # task_info = celery.control.inspect().active()
     # task_info[self.request.hostname]
-    return "{}测试成功！".format(apitest.name)  
+    return "用例`{}`本次任务执行完毕！".format(apitest.name)  
 
 
 @task_success.connect(sender=api_test_job)
@@ -111,7 +111,7 @@ def task_failure_test(sender=None, **kwargs):
         if work is not None:
             work.result = task_res.info
             work.status = task_res.state
-            work.traceback = task_res.traceback[:512] if len(task_res.traceback) > 512 else task_res.traceback
+            work.traceback = task_res.traceback
             db.session.commit()
 
 ############

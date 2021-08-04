@@ -66,9 +66,11 @@
             <div class="mb-3">
                 <label for="request_data">请求内容</label>
                 <textarea class="form-control" id="request_data1" name="request_data"
-                    placeholder='输入json格式的字符串，键名称必须符合requests库的相应参数规范; 示例：{"json":{"username":"admin","password":"admin"}}'>{{ apistep.request_data }}</textarea>
+                    placeholder='{"json":{"username":"admin","password":"admin"}}'>{{ apistep.request_data }}</textarea>
+                <p>输入json格式的字符串，键名称必须符合requests库的相应参数规范; 示例：</p>
                 <a href="https://requests.readthedocs.io/zh_CN/latest/user/quickstart.html#url">requests官方文档</a>
             </div>
+            
             <div class="mb-3">
                 <label for="expected_result">预期结果<label style="color: red;">*</label></label>
                 <input type="text" class="form-control" id="expected_result" value="{{ apistep.expected_result }}"

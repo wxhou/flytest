@@ -1,6 +1,6 @@
 from flask import request, current_app, Blueprint, send_from_directory
 from flask import flash, redirect, render_template, url_for
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 from app.models import db, User
 

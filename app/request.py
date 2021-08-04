@@ -134,7 +134,7 @@ class HttpRequest(BaseRequest):
                                  **self.get_cache('request_data_%s' % task_id))
         # response
         _text = response.text
-        case.results = _text
+        case.results = str(_text)[:2048]
         current_app.logger.info("响应内容: {}".format(_text))
         # check_result
         expected_result = case.expected_result

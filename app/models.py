@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
 from flask_avatars import Identicon
 from .extensions import db, whooshee
 
@@ -74,6 +74,10 @@ class Product(db.Model):
     def __repr__(self):
         return '<Product %s>' % self.name
 
+    @staticmethod
+    def get_product(pk):
+        product = Product.query.filter_by(id=pk, user=current_user, is_deleted=False).one_or_none() or Product.query.filter_by(user=current_user, is_deleted=False).first()
+        return product
 
 @whooshee.register_model("name")
 class Apiurl(db.Model):
@@ -126,7 +130,7 @@ class Apistep(db.Model):
     request_extract = db.Column(db.String(512))
     response_extract = db.Column(db.String(512))
     status = db.Column(db.Integer, default=-1)
-    results = db.Column(db.Text, nullable=True)
+    results = db.Column(db.Text(2048), nullable=True)
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)

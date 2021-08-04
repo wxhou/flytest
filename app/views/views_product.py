@@ -35,7 +35,7 @@ def product():
 @bp_product.route('/product/<int:pk>/edit', methods=["GET", "POST"])
 @login_required
 def edit_product(pk):
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none()
+    product = Product.query.filter_by(id=pk, user=current_user, is_deleted=False).one_or_none()
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))

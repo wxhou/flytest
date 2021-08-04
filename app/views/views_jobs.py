@@ -22,7 +22,7 @@ bp_job = Blueprint('job', __name__)
 @login_required
 def work(pk=None):
     """工作视图"""
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
+    product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -60,7 +60,7 @@ def job(pk):
 @login_required
 def crontab_view(pk=None):
     """定时任务视图"""
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
+    product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))

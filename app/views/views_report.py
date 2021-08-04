@@ -14,7 +14,7 @@ bp_report = Blueprint('bp_report', __name__)
 @login_required
 def report(pk=None):
     """测试报告"""
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
+    product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -39,7 +39,7 @@ def report(pk=None):
     per_page = current_app.config['PER_PAGE_SIZE']
     results = {}
     first_task = None
-    pagination = Report.query.order_by(Report.created.desc()).paginate(page, per_page)
+    pagination = Report.query.with_parent(product).order_by(Report.created.desc()).paginate(page, per_page)
     reports = pagination.items
     for report in reports:
         current_app.logger.info(report.created)
@@ -67,7 +67,7 @@ def report(pk=None):
 @bp_report.route('/bug/<int:pk>')
 @login_required
 def bug(pk=None):
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
+    product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
@@ -123,7 +123,7 @@ def pie():
 @login_required
 def trend(pk=None):
     """趋势视图"""
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
+    product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
