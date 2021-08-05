@@ -77,19 +77,30 @@ def add_crontab_test(pk):
     """添加定时任务"""
     task_id = uid_name()
     trigger = request.form.get('trigger', type=str)
-    jobsecond = request.form.get('jobsecond', type=int)
+    jobsecond = request.form.get('jobsecond', type=str)
+    current_app.logger.info("crontab params is : {}".format(request.form))
     apitest = Apitest.query.get_or_404(pk)
-    if trigger == 'date':
-        timesocend = datetime.strptime(jobsecond, "%Y-%m-%d %H:%M:%S")
-        scheduler.add_job(id=task_id, func=crontab_job, args=(pk, ), trigger=trigger, run_date=timesocend)
-    else:
-        scheduler.add_job(id=task_id, func=crontab_job, args=(pk, ), trigger=trigger, seconds=jobsecond)
-    if scheduler.get_job(task_id):
-        req_url = request.url_root + "scheduler/jobs/" + task_id
-        saver_crontab.delay(apitest.product_id, apitest.id, req_url)
-    scheduler.state
-    flash("添加定时任务成功", "success")
-    return redirect(request.referrer)
+    try:
+        if trigger == 'date':
+            timesocend = datetime.strptime(jobsecond, "%Y-%m-%d %H:%M:%S")
+            scheduler.add_job(id=task_id, func=crontab_job, args=(pk, ), trigger=trigger, run_date=timesocend)
+        if trigger == 'interval':
+            scheduler.add_job(id=task_id, func=crontab_job, args=(pk, ), trigger=trigger, seconds=int(jobsecond))
+        if trigger == 'cron':
+            scheduler.add_job(id=task_id, func=crontab_job, args=(pk, ), trigger=trigger, start_date=jobsecond)
+        if scheduler.get_job(task_id):
+            req_url = request.url_root + "scheduler/jobs/" + task_id
+            saver_crontab.delay(apitest.product_id, apitest.id, req_url)
+            flash("添加定时任务成功", "success")
+            return redirect(request.referrer)
+        else:
+            flash("定时任务添加失败！", 'danger')
+            return redirect(request.referrer)
+    except:
+        import traceback
+        current_app.logger.critical(traceback.format_exc())
+        flash("定时任务添加失败！", 'danger')
+        return redirect(request.referrer)
 
 
 @bp_job.get("/crontab/delete/<string:task_id>")
