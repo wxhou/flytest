@@ -51,7 +51,7 @@
 
           <div class="mb-3">
             <label for="email">输入邮箱地址：</label>
-            <input type="email" class="form-control" name="email" required>
+            <input type="text" class="form-control" name="email" required>
           </div>
           <div class="mb-3">
             <label for="address">输入密码：</label>
@@ -61,13 +61,23 @@
             <label for="address2">确认密码：</label>
             <input type="password" class="form-control" name="password2" required>
           </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="captcha1">验证码：</label>
+              <input type="text" class="form-control" name="captcha1" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label></label>
+              <img src="data:image/png;base64,{{ captcha }}">             
+            </div>
+          </div>
           <hr class="mb-4">
           <div class="row">
             <div class="col-md-6 mb-3">
               <a href="{{ url_for('wx.auth.login') }}">去登录</a>
             </div>
             <div class="col-md-6 mb-3">
-              <button class="btn btn-primary btn-lg" type="submit">提交</button>
+              <button class="btn btn-primary btn-lg" type="submit">提交</button>              
             </div>
           </div>
         </form>

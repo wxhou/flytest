@@ -1,12 +1,13 @@
-import time
 import requests
+from io import BytesIO
+from base64 import b64encode
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 from celery.signals import task_success, task_failure
-from .extensions import db, scheduler
+from .extensions import db, cache
 from .models import Apistep, Apitest, Work, Report, Bug, CronTabTask
 from .request import HttpRequest
-from .utils import generate_url
+from .utils import generate_url, get_captcha
 from .worker import celery, flask_app
 
 log = get_task_logger(__name__)
@@ -87,7 +88,7 @@ def api_test_job(self, pk, types):
     # CeleryCaseTestJobEnd
     # task_info = celery.control.inspect().active()
     # task_info[self.request.hostname]
-    return "{}测试成功！".format(apitest.name)  
+    return "用例`{}`本次任务执行完毕！".format(apitest.name)  
 
 
 @task_success.connect(sender=api_test_job)
@@ -111,7 +112,7 @@ def task_failure_test(sender=None, **kwargs):
         if work is not None:
             work.result = task_res.info
             work.status = task_res.state
-            work.traceback = task_res.traceback[:512] if len(task_res.traceback) > 512 else task_res.traceback
+            work.traceback = task_res.traceback
             db.session.commit()
 
 ############
@@ -154,3 +155,13 @@ def saver_crontab(pk, t_id, url):
     obj = CronTabTask(**res)
     db.session.add(obj)
     db.session.commit()
+
+
+@celery.task
+def generate_captcha():
+    code, image = get_captcha(width=120, height=40)
+    cache.set("captcha_%s" % code, code)
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG")
+    img_str = b64encode(buffer.getvalue()).decode()
+    return img_str

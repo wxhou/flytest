@@ -13,7 +13,7 @@ bp_test = Blueprint('itest', __name__)
 @bp_test.route('/test/<int:pk>', methods=["GET", "POST"])
 @login_required
 def test(pk=None):
-    product = Product.query.filter_by(id=pk, is_deleted=False).one_or_none() or Product.query.filter_by(is_deleted=False).first()
+    product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))

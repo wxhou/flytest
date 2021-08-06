@@ -102,12 +102,23 @@
                         <td><small class="text-muted">{{ task.task_id }}</small></td>
                         <td><small class="text-info">{{ task.args }}</small></td>
                         <td><small class="text-info">{{ task.kwargs }}</small></td>
-                        <td><small class="text-info">{{ task.trigger }}</small></td>
+                        {% if task.trigger == "cron" %}
+                            <td><small class="text-primary">定时任务</small></td>
+                        {% elif task.trigger == "date" %}
+                            <td><small class="text-primary">一次性任务</small></td>
+                        {% elif task.trigger == "interval" %}
+                            <td><small class="text-primary">循环任务</small></td>
+                        {% else %}
+                            <td><small class="text-warning">{{ task.trigger }}</small></td>
+                        {% endif %}
                         <td><small class="text-info">{{ task.times }}</small></td>
                         <td><small class="text-info">{{ task.max_instances }}</small></td>
                         <td><small class="text-info">{{ task.next_run_time }}</small></td>
                         <td><small class="text-info">{{ task.start_date }}</small></td>
+                        {% if task.task_id %}
                         <td><small class="text-info"><a href="{{ url_for('wx.job.delete_crontab', task_id=task.task_id) }}">删除</a></small></td>
+                        {% endif %}
+                        <td><small class="text-info"><a href="#">删除</a></small></td>
                     </tr>
                     {% endfor %}
                     {% else %}

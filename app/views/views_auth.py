@@ -1,9 +1,10 @@
 from flask import request, current_app, Blueprint, send_from_directory
 from flask import flash, redirect, render_template, url_for
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 from app.models import db, User
-
+from app.extensions import cache
+from app.tasks import generate_captcha
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -41,11 +42,15 @@ def register():
         email = request.form.get("email")
         password1 = request.form.get("password1")
         password2 = request.form.get("password2")
-        if not all([username, email, password1, password2]):
+        captcha1 = request.form.get("captcha1")
+        if not all([username, email, password1, password2, captcha1]):
             flash("请输入完整的注册信息！", 'danger')
             return redirect(request.referrer)
         if password1 != password2:
             flash("两次输入密码不相同", 'danger')
+            return redirect(request.referrer)
+        if cache.get("captcha_%s" % captcha1.strip()) is None:
+            flash("验证码错误！", "danger")
             return redirect(request.referrer)
         user = User.query.filter_by(email=email).one_or_none()
         if user is not None:
@@ -57,7 +62,8 @@ def register():
         db.session.commit()
         flash("注册成功请登录", "success")
         return redirect(url_for('wx.auth.login'))
-    return render_template('register.html')
+    res = generate_captcha.delay()
+    return render_template('register.html', captcha=res.wait())
 
 
 @bp_auth.route('/avatars/<path:filename>')

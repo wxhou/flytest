@@ -2,9 +2,13 @@ import os
 import json
 import uuid
 import time
-from copy import deepcopy
+import string
+import random
+from itertools import product
 from urllib.parse import urljoin
 from flask import jsonify, current_app
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from settings import BASE_DIR
 
 
 def generate_url(url, route):
@@ -79,5 +83,33 @@ def uid_name():
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, str(time.time())))
 
 
+def random_code(length=4):
+    """随机验证码"""
+    return "".join(random.sample(string.ascii_letters+string.digits, length))
+
+
+def random_color(s=1, e=255):
+    """随机颜色"""
+    return (random.randint(s, e), random.randint(s, e), random.randint(s, e))
+
+
+def get_captcha(length=4, width=120, height=40):
+    """生成验证码"""
+    font_file = os.path.join(BASE_DIR, 'font', 'arial.ttf')
+    image = Image.new('RGB', (width, height), (255, 255, 255))  # 创建Image对象
+    font = ImageFont.truetype(font_file, 32)    # 创建Font对象
+    draw = ImageDraw.Draw(image)    # 创建Draw对象
+    for x, y in product(range(width), range(height)):
+        draw.point((x, y), fill=random_color(128, 255))  # 随机颜色填充每个像素
+    code = random_code(length)    # 验证码
+    for t in range(length):
+        draw.text((30*t+5, 1), code[t], font=font,
+                  fill=random_color(0, 127))    # 写到图片上
+    image = image.filter(ImageFilter.BoxBlur(1))    # 模糊图像
+    # image.save(f"{code}.png", )  # 保存图片
+    # image.show()
+    return code, image
+
+
 if __name__ == '__main__':
-    print(uid_name())
+    print(get_captcha())

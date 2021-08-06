@@ -18,7 +18,6 @@
 
     {% endblock %}
     <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static',filename='js/echarts.min.js') }}"></script>
     <style>
         .bd-placeholder-img {
             font-size: 1.125rem;
@@ -48,7 +47,11 @@
         <ul class="navbar-nav px-3">
             <img src="{{ url_for('wx.auth.get_avatar',filename=current_user.avatar_s) }}">
         </ul>
-        <small><span style="color: white">{{ current_user.username }}</span></small>
+        <small><span style="color: white">
+                {% if current_user.is_authenticated %}
+                {{ current_user.username }}
+                {% endif %}
+            </span></small>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
                 <a class="nav-link" href="{{ url_for('wx.auth.logout') }}">Sign out</a>
@@ -117,7 +120,8 @@
                     </h6>
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'jobpage' %}active{% endif %}" href="{{ url_for('wx.job.work') }}">
+                            <a class="nav-link {% if page_name == 'jobpage' %}active{% endif %}"
+                                href="{{ url_for('wx.job.work') }}">
                                 <span data-feather="trello"></span>
                                 任务列表
                             </a>
@@ -125,7 +129,8 @@
                     </ul>
                     <ul class="nav flex-column mb-2">
                         <li class="nav-item">
-                            <a class="nav-link {% if page_name == 'cronpage' %}active{% endif %}" href="{{ url_for('wx.job.crontab_view') }}">
+                            <a class="nav-link {% if page_name == 'cronpage' %}active{% endif %}"
+                                href="{{ url_for('wx.job.crontab_view') }}">
                                 <span data-feather="truck"></span>
                                 定时任务
                             </a>
@@ -199,8 +204,7 @@
                             <li class="page-item"><a class="page-link" href="?page={{ pagination.next_num }}">下一页</a>
                             </li>
                             {% endif %}
-                            <li class="page-item"><a class="page-link"
-                                    href="?page={{ pagination.pages }}">末页</a>
+                            <li class="page-item"><a class="page-link" href="?page={{ pagination.pages }}">末页</a>
                             </li>
                         </ul>
                     </div>

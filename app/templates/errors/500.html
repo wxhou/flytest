@@ -1,0 +1,27 @@
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>内部错误 - 500</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/500.css') }}">
+</head>
+
+<body>
+	<img src="{{ url_for('static', filename='images/500.png') }}" class="top-500" />
+	<div class="main-500">
+		<div class="main-in-500">
+			<div class="main-prompt">
+				<p>很抱歉，服务器发生了未知的错误...</p>
+			</div>
+			<div class="main-link">
+				<a href="javascript:history.go(-1);">返回上一页</a>
+				<a href="{{ url_for('wx.home.index') }}">首页</a>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

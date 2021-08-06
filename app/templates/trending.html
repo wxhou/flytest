@@ -2,8 +2,6 @@
 {% block title %}
 趋势
 {% endblock %}
-{% block head %}
-{% endblock head %}
 {% block content %}
 <div class="btn-group">
     <button type="button" class="btn btn-info">{{ product.name }}</button>
@@ -24,24 +22,7 @@
 
     </div>
 </div> -->
-<div id="bar" style="width:1000px; height:600px;">
-</div>
-{% endblock %}
-{% block script %}
-<script>
-    $(
-        function () {
-            var chart = echarts.init(document.getElementById('bar'), 'white', { renderer: 'canvas' });
-            $.ajax({
-                type: "GET",
-                url: "{{ url_for('wx.bp_report.trending',pk=product.id) }}",
-                dataType: 'json',
-                success: function (result) {
-                    chart.setOption(result);
-                    setInterval(fetchData, 2000);
-                }
-            });
-        }
-    )
-</script>
+<div id="chart">
+    <embed type="image/svg+xml" src= {{ chart|safe }} />
+ </div>
 {% endblock %}
