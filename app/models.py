@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask import session, current_app
 from flask_login import UserMixin, current_user
 from flask_avatars import Identicon
 from .extensions import db, whooshee
@@ -76,8 +77,12 @@ class Product(db.Model):
 
     @staticmethod
     def get_product(pk):
+        if pk is not None:
+            session["current_product"] = pk
+        pk = session.get("current_product", None)
         product = Product.query.filter_by(id=pk, user=current_user, is_deleted=False).one_or_none() or Product.query.filter_by(user=current_user, is_deleted=False).first()
         return product
+
 
 @whooshee.register_model("name")
 class Apiurl(db.Model):
