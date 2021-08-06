@@ -69,29 +69,10 @@
         </div>
     </div>
     <div class="col-sm-4">
-        <div id="pie" style="width: 400px;height: 400px;margin: 20px auto"></div>
+        <div id="chart">
+            <embed type="image/svg+xml" src={{ chart|safe }} />
+        </div>
     </div>
 </div>
 
-{% endblock %}
-{% block script %}
-<script>
-    var chart = echarts.init(document.getElementById('pie'), 'white', { renderer: 'canvas' });
-    $(
-        function () {
-            fetchData(chart);
-            setInterval(fetchData, 50000);
-        }
-    );
-    function fetchData() {
-        $.get({
-            url: "{{ url_for('wx.bp_report.pie',task_id=first_task) }}",
-            dataType: 'json',
-            success: function (result) {
-                console.log(result);
-                chart.setOption(result);
-            }
-        });
-    }
-</script>
 {% endblock %}
