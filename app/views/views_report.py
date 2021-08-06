@@ -16,35 +16,18 @@ def report(pk=None):
     product = Product.get_product(pk)
     if product is None:
         flash("请先创建一个项目", 'danger')
-        return redirect(url_for('wx.product.product'))
-    task_id = request.args.get('task_id')
-    if task_id:
-        reports = Report.query.filter_by(
-            product=product, task_id=task_id, is_deleted=False)
-        content = {}
-        for report in reports:
-            if report.task_id not in content:
-                content["task_id"] = report.task_id
-                content["name"] = report.name
-                content["success"] = 0
-                content["failure"] = 0
-                content["updated"] = report.updated
-            if report.status == 1:
-                content['success'] += 1
-            else:
-                content['failure'] += 1
-        return render_template('report.html', results=[content], first_task=task_id, product=product,
-                               page_name='reportpage')
+        return redirect(url_for('wx.product.product'))    
     page = request.args.get("page", 1, type=int)
     per_page = current_app.config['PER_PAGE_SIZE']
-    results = {}
-    first_task_id = None
-    pagination = Report.query.with_parent(product).order_by(
+    task_id = request.args.get('task_id')
+    query_filter = [Report.is_deleted==False]
+    if task_id := request.args.get('task_id'):
+        query_filter.append(Report.task_id==task_id)
+    pagination = Report.query.with_parent(product).filter(*query_filter).order_by(
         Report.created.desc()).paginate(page, per_page)
     reports = pagination.items
+    results = {}
     for report in reports:
-        if first_task_id is None:
-            first_task_id = report.task_id
         if report.task_id not in results:
             results[report.task_id] = {
                 "pk": report.id,
@@ -59,14 +42,13 @@ def report(pk=None):
             results[report.task_id]['success'] += 1
         else:
             results[report.task_id]['failure'] += 1
-    reports = Report.query.filter_by(task_id=first_task_id, is_deleted=False)
-    pie_chart = pygal.Pie(style=Style(colors=('green', 'red')))
-    pie_chart.title = "最新运行结果"
-    pie_chart.add("成功", reports.filter_by(status=1).count())
-    pie_chart.add("失败", reports.filter_by(status=0).count())
-    chart = pie_chart.render_data_uri()
-    return render_template('report.html', results=results.values(), product=product, 
-                pagination=pagination, chart=chart, page_name='reportpage')
+    if not results:
+        flash("没有找到对应的报告！", "danger")
+        return redirect(request.referrer)
+    report_result = dict(results=results.values(), product=product, page_name='reportpage')
+    if pagination.pages > 1:
+        report_result["pagination"] = pagination
+    return render_template('report.html', **report_result)
 
 
 @bp_report.route('/bug')
