@@ -1,6 +1,5 @@
-from pyecharts import options as opts
-from pyecharts.charts import Pie, Line
-from flask import Blueprint, flash, redirect, url_for, render_template, current_app, request, abort
+import pygal
+from flask import Blueprint, Markup, flash, redirect, url_for, render_template, current_app, request, abort
 from flask_login import login_required
 from app.models import db, Product, Report, Apitest, Bug
 
@@ -127,14 +126,6 @@ def trend(pk=None):
     if product is None:
         flash("请先创建一个项目", 'danger')
         return redirect(url_for('wx.product.product'))
-    return render_template('trending.html', page_name="trendpage", product=product)
-
-
-@bp_report.route('/trending')
-@bp_report.route('/trending/<int:pk>')
-@login_required
-def trending(pk=None):
-    """趋势折线图"""
     names, success, failure = ['unknown'], [0], [0]
     results = {}
     reports = Report.query.order_by(Report.created.desc()).limit(10)
@@ -147,43 +138,10 @@ def trending(pk=None):
             results[report.task_id][2] += 1
     if results:
         names, success, failure = zip(*results.values())
-    c = (
-        Line(init_opts=opts.InitOpts(width="1000px", height="500px"))
-        .add_xaxis(xaxis_data=names)
-        .add_yaxis(
-            series_name="失败数",
-            y_axis=failure,
-            is_smooth=True,
-            is_connect_nones=True,
-            markpoint_opts=opts.MarkPointOpts(
-                data=[
-                    opts.MarkPointItem(type_="max", name="最大值"),
-                    opts.MarkPointItem(type_="min", name="最小值"),
-                ]
-            ),
-            markline_opts=opts.MarkLineOpts(
-                data=[opts.MarkLineItem(type_="average", name="平均值")]
-            ),
-        )
-        .add_yaxis(
-            series_name="通过数",
-            y_axis=success,
-            is_smooth=True,
-            is_connect_nones=True,
-            markline_opts=opts.MarkLineOpts(
-                data=[
-                    opts.MarkLineItem(type_="average", name="平均值"),
-                    opts.MarkLineItem(symbol="none", x="90%", y="max"),
-                    opts.MarkLineItem(
-                        symbol="circle", type_="max", name="最高点"),
-                ]
-            ),
-        )
-        .set_global_opts(
-            title_opts=opts.TitleOpts(title="趋势图"),
-            tooltip_opts=opts.TooltipOpts(trigger="axis"),
-            toolbox_opts=opts.ToolboxOpts(is_show=True),
-            xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
-        )
-    ).dump_options_with_quotes()
-    return c
+    line_chart = pygal.Line(x_label_rotation=20, interpolate='hermite')
+    line_chart.title = "测试结果趋势图"
+    line_chart.x_labels = names
+    line_chart.add("通过数", success)
+    line_chart.add("失败数", failure)
+    chart = line_chart.render_data_uri()
+    return render_template('trending.html', chart=chart, page_name="trendpage", product=product)
