@@ -30,9 +30,10 @@ def env(pk=None):
     per_page = current_app.config['PER_PAGE_SIZE']
     pagination = Apiurl.query.with_parent(product).filter_by(is_deleted=False).order_by(
         Apiurl.created.desc()).paginate(page, per_page)
-    envs = pagination.items
-    return render_template('env.html', product=product,
-                           envs=envs, pagination=pagination, page_name='envpage')
+    env_res = dict(product=product,envs=pagination.items, page_name='envpage')
+    if pagination.pages > 1:
+        env_res['pagination']=pagination
+    return render_template('env.html', **env_res)
 
 
 @bp_environ.route('/env/<int:pk>/edit', methods=["GET", "POST"])
