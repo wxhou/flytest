@@ -64,9 +64,9 @@
 <br>
 <div class="row">
     {% for product in products %}
-    <div class="col-md-4">
-        <div class="card mb-4 shadow-sm">
-            <svg class="bd-placeholder-img card-img-top" width="50%" height="100" xmlns="http://www.w3.org/2000/svg"
+    <div class="col-md-3">
+        <div class="card mb-3 shadow-sm">
+            <svg class="bd-placeholder-img card-img-top" width="40%" height="100" xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="占位符：缩略图">
                 <title>Placeholder</title>
                 <rect width="100%" height="100%" fill="#55595c"></rect>
@@ -74,7 +74,7 @@
                 </text>
             </svg>
             <div class="card-body">
-                <p class="card-text">
+                <h6 class="card-text">
                     <font style="vertical-align: inherit;">
                         <font style="vertical-align: inherit;">{{ product.desc }}</font>
                     </font>
@@ -83,7 +83,13 @@
                             <font style="vertical-align: inherit;">--{{ product.tag }}</font>
                         </font>
                     {% endif %}
-                </p>
+                </h6>
+                <small class="text-muted">
+                    <font style="vertical-align: inherit;">
+                        <font style="vertical-align: inherit;">更新时间-{{ moment(product.updated).format('lll') }}
+                        </font>
+                    </font>
+                </small>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
                         <a href="{{ url_for('wx.itest.test',pk=product.id ) }}">
@@ -108,12 +114,6 @@
                             </button>
                         </a>
                     </div>
-                    <small class="text-muted">
-                        <font style="vertical-align: inherit;">
-                            <font style="vertical-align: inherit;">更新时间-{{ moment(product.updated).format('lll') }}
-                            </font>
-                        </font>
-                    </small>
                 </div>
             </div>
         </div>
