@@ -8,7 +8,7 @@ from app.extensions import db
 bp_product = Blueprint('product', __name__)
 
 
-@bp_product.route('/product', methods=["GET", "POST"])
+@bp_product.route('/product/', methods=["GET", "POST"])
 @login_required
 def product():
     if request.method == "POST":

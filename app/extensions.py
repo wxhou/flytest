@@ -20,6 +20,17 @@ scheduler = APScheduler()
 whooshee = Whooshee()
 
 
+def register_celery(celery, app):
+    celery.flaskapp = app.app_context()
+    class ContextTask(celery.Task):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with celery.flaskapp:
+                return self.run(*args, **kwargs)
+    celery.Task = ContextTask
+
+
 @login_manager.user_loader
 def load_user(user_id):
     from app.models import User

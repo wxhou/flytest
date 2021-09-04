@@ -4,5 +4,5 @@
 ### Celery
 
 ```shell
-celery worker -A app.worker.celery -l info -P eventlet
+celery worker -A server.my_celery -l info -P eventlet
 ```

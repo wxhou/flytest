@@ -95,9 +95,8 @@ def random_color(s=1, e=255):
 
 def get_captcha(length=4, width=120, height=40):
     """生成验证码"""
-    font_file = os.path.join(BASE_DIR, 'font', 'arial.ttf')
     image = Image.new('RGB', (width, height), (255, 255, 255))  # 创建Image对象
-    font = ImageFont.truetype(font_file, 32)    # 创建Font对象
+    font = ImageFont.truetype(current_app.config['CAPTCHA_FONT_FILE'], 32)    # 创建Font对象
     draw = ImageDraw.Draw(image)    # 创建Draw对象
     for x, y in product(range(width), range(height)):
         draw.point((x, y), fill=random_color(128, 255))  # 随机颜色填充每个像素

@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 import requests
 from io import BytesIO
 from base64 import b64encode
@@ -8,7 +9,8 @@ from .extensions import db, cache
 from .models import Apistep, Apitest, Work, Report, Bug, CronTabTask
 from .request import HttpRequest
 from .utils import generate_url, get_captcha
-from .worker import celery, flask_app
+from server import my_celery as celery
+
 
 log = get_task_logger(__name__)
 
@@ -44,14 +46,14 @@ def api_test_job(self, pk, types):
     if apitest is None:
         return None
     work = Work(task_id=task_id,
-            name=self.name,
-            params="{}&{}".format(self.request.args, self.request.kwargs),
-            hostname=self.request.hostname,
-            status="PENDING",
-            product_id=apitest.product_id
-            # result=str(result.get(timeout=1)),
-            # traceback=result.traceback,
-            )
+                name=self.name,
+                params="{}&{}".format(self.request.args, self.request.kwargs),
+                hostname=self.request.hostname,
+                status="PENDING",
+                product_id=apitest.product_id
+                # result=str(result.get(timeout=1)),
+                # traceback=result.traceback,
+                )
     db.session.add(work)
     db.session.commit()
     # CeleryCaseTestJob
@@ -88,13 +90,13 @@ def api_test_job(self, pk, types):
     # CeleryCaseTestJobEnd
     # task_info = celery.control.inspect().active()
     # task_info[self.request.hostname]
-    return "用例`{}`本次任务执行完毕！".format(apitest.name)  
+    return "用例`{}`本次任务执行完毕！".format(apitest.name)
 
 
 @task_success.connect(sender=api_test_job)
 def task_success_test(sender=None, **kwargs):
-    with flask_app.app_context():
-        """任务成功处理"""
+    """任务成功处理"""
+    with celery.flaskapp:
         task_res = AsyncResult(sender.request.id)
         work = Work.query.filter_by(task_id=task_res.task_id).one_or_none()
         if work is not None:
@@ -102,11 +104,10 @@ def task_success_test(sender=None, **kwargs):
             work.result = task_res.result
             db.session.commit()
 
-
 @task_failure.connect(sender=api_test_job)
 def task_failure_test(sender=None, **kwargs):
     """任务失败处理"""
-    with flask_app.app_context():
+    with celery.flaskapp:
         task_res = AsyncResult(sender.request.id)
         work = Work.query.filter_by(task_id=task_res.task_id).one_or_none()
         if work is not None:

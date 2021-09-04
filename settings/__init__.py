@@ -9,6 +9,7 @@ IMAGES_PATH = os.path.join(BASE_DIR, 'media', 'images')
 VIDEOS_PATH = os.path.join(BASE_DIR, 'media', 'videos')
 AUDIOS_PATH = os.path.join(BASE_DIR, 'media', 'audios')
 FLASK_LOGGER_FILE = os.path.join(BASE_DIR, 'logs', 'server.log')
+CAPTCHA_FONT_FILE = os.path.join(BASE_DIR, 'media', 'fonts', 'arial.ttf')
 
 
 if __name__=='__main__':

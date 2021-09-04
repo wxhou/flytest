@@ -7,21 +7,19 @@ from flask import Flask, render_template
 from flask_login import current_user
 
 from settings import BASE_DIR
-from .extensions import (db, login_manager, avatars,
+from .extensions import (db, login_manager, avatars, register_celery,
                          migrate, moment, cache, whooshee, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
-def create_app(env=None, celery=None):
-    if env is None:
-        env = os.getenv('FLASK_ENV', 'development')
+def create_app(**kwargs):
+    env = os.getenv('FLASK_ENV') or 'development'
     app = Flask(__name__)
     print('use env is: %s' % env)
     _file = os.path.join(BASE_DIR, 'settings', env + '.py')
     app.config.from_pyfile(_file)
     register_extensions(app)
-    if celery is not None:
-        return app
+    register_celery(celery=kwargs.get('celery'), app=app)
     register_logger(app)
     register_blueprints(app)
     register_scheduler(app)

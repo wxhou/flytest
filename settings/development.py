@@ -20,9 +20,6 @@ MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 MAIL_DEFAULT_SENDER = ('wxtest', MAIL_USERNAME)
 
-# celery
-CELERY_BROKER_URL = 'redis://%s:6379/1' % DB_SERVER
-CELERY_RESULT_BACKEND = 'redis://%s:6379/2' % DB_SERVER
 # cache
 CACHE_CONFIG = {
     'CACHE_TYPE': "redis",  # Flask-Caching related configs
