@@ -45,7 +45,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">WXTEST测试平台</a>
         <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
         <ul class="navbar-nav px-3">
-            <img src="{{ url_for('wx.auth.get_avatar',filename=current_user.avatar_s) }}">
+            <img src="/media/avatars/{{ current_user.avatar_s }}">
         </ul>
         <small><span style="color: white">
                 {% if current_user.is_authenticated %}

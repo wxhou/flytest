@@ -7,7 +7,7 @@ from flask import Flask, render_template
 from flask_login import current_user
 
 from settings import BASE_DIR
-from .extensions import (db, login_manager, avatars, register_celery,
+from .extensions import (db, login_manager, avatars, register_celery, limiter,
                          migrate, moment, cache, whooshee, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
@@ -48,6 +48,7 @@ def register_extensions(app: Flask):
     moment.init_app(app)
     cache.init_app(app, app.config['CACHE_CONFIG'])
     whooshee.init_app(app)
+    limiter.init_app(app)
 
 
 def register_template_context(app: Flask):

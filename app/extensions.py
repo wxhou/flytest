@@ -8,6 +8,8 @@ from flask_avatars import Avatars
 from flask_moment import Moment
 from flask_caching import Cache
 from flask_whooshee import Whooshee
+from flask_limiter import Limiter
+from flask_limiter.util import get_ipaddr, get_remote_address
 
 
 db = SQLAlchemy()
@@ -18,10 +20,13 @@ migrate = Migrate(db=db, render_as_batch=True)
 login_manager = LoginManager()
 scheduler = APScheduler()
 whooshee = Whooshee()
+limiter = Limiter(key_func=get_ipaddr, default_limits=[
+                  "100/hour", "1000/day"])
 
 
 def register_celery(celery, app):
     celery.flaskapp = app.app_context()
+
     class ContextTask(celery.Task):
         abstract = True
 
