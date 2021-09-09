@@ -8,7 +8,7 @@ from flask_login import current_user
 
 from settings import BASE_DIR
 from .extensions import (db, login_manager, avatars, register_celery, limiter,
-                         migrate, moment, cache, whooshee, scheduler)
+                         migrate, moment, cache, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
@@ -47,7 +47,6 @@ def register_extensions(app: Flask):
     migrate.init_app(app=app)
     moment.init_app(app)
     cache.init_app(app, app.config['CACHE_CONFIG'])
-    whooshee.init_app(app)
     limiter.init_app(app)
 
 

@@ -27,3 +27,5 @@ def search():
     if q == '':
         flash("请输入要搜索的内容！")
         return redirect(request.referrer)
+    flash("该功能未开发！", "danger")
+    return redirect(request.referrer)
