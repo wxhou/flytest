@@ -18,6 +18,7 @@ def make_celery(app_name):
                     broker=celeryconfig.broker_url,
                     backend=celeryconfig.result_backend)
     celery.config_from_object(celeryconfig)
+    celery.autodiscover_tasks(['app'])
     return celery
 
 
