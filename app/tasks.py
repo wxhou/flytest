@@ -35,18 +35,18 @@ def api_step_job(pk):
     return task_info[hostname]
 
 
-@celery.task(bind=True)
-def api_test_job(self, pk, types):
+@celery.task
+def api_test_job(pk, types):
     """多步运行或场景测试"""
-    task_id = self.request.id
+    task_id = api_test_job.request.id
     log.info("开始测试用例" + str(pk))
     apitest = Apitest.query.filter_by(id=int(pk), is_deleted=False).one_or_none()
     if apitest is None:
         return None
     work = Work(task_id=task_id,
-                name=self.name,
-                params="{}&{}".format(self.request.args, self.request.kwargs),
-                hostname=self.request.hostname,
+                name=api_test_job.name,
+                params="{}&{}".format(api_test_job.request.args, api_test_job.request.kwargs),
+                hostname=api_test_job.request.hostname,
                 status="PENDING",
                 product_id=apitest.product_id
                 # result=str(result.get(timeout=1)),
