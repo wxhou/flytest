@@ -1,14 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 import requests
-from io import BytesIO
-from base64 import b64encode
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 from celery.signals import task_success, task_failure
-from .extensions import db, cache
+from .extensions import db
 from .models import Apistep, Apitest, Work, Report, Bug, CronTabTask
 from .request import HttpRequest
-from .utils import generate_url, get_captcha
+from .utils import generate_url
 from server import my_celery as celery
 
 
@@ -156,13 +154,3 @@ def saver_crontab(pk, t_id, url):
     obj = CronTabTask(**res)
     db.session.add(obj)
     db.session.commit()
-
-
-@celery.task
-def generate_captcha():
-    code, image = get_captcha(width=120, height=40)
-    cache.set("captcha_%s" % code, code)
-    buffer = BytesIO()
-    image.save(buffer, format="JPEG")
-    img_str = b64encode(buffer.getvalue()).decode()
-    return img_str

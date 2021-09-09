@@ -68,7 +68,7 @@
             </div>
             <div class="col-md-6 mb-3">
               <label></label>
-              <img src="data:image/png;base64,{{ captcha }}">             
+              <img src="{{ url_for('wx.auth.captcha') }}">             
             </div>
           </div>
           <hr class="mb-4">

@@ -1,10 +1,12 @@
-from flask import request, current_app, Blueprint, send_from_directory
+from io import BytesIO
+from base64 import b64encode
+from flask import request, current_app, Blueprint, send_from_directory, Response
 from flask import flash, redirect, render_template, url_for
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, login_required
 
 from app.models import db, User
 from app.extensions import cache
-from app.tasks import generate_captcha
+from app.utils import get_captcha
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -62,8 +64,19 @@ def register():
         db.session.commit()
         flash("注册成功请登录", "success")
         return redirect(url_for('wx.auth.login'))
-    res = generate_captcha.delay()
-    return render_template('register.html', captcha=res.get())
+    return render_template('register.html')
+
+
+@bp_auth.get("/captcha.png")
+def captcha():
+    code, image = get_captcha(width=120, height=40)
+    cache.set("captcha_%s" % code, code)
+    buffer = BytesIO()
+    image.save(buffer, format="png")
+    resp = Response(buffer.getvalue(), mimetype="image/png")
+    return resp
+    # img_str = b64encode(buffer.getvalue()).decode()
+    # return "data:image/png;base64," + img_str
 
 
 @bp_auth.route('/avatars/<path:filename>')
