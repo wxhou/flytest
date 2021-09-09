@@ -5,6 +5,7 @@ from datetime import datetime
 from flask import session, current_app
 from flask_login import UserMixin, current_user
 from flask_avatars import Identicon
+from app.extensions import db
 
 
 class User(db.Model, UserMixin):
