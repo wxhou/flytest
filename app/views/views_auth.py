@@ -63,7 +63,7 @@ def register():
         flash("注册成功请登录", "success")
         return redirect(url_for('wx.auth.login'))
     res = generate_captcha.delay()
-    return render_template('register.html', captcha=res.wait())
+    return render_template('register.html', captcha=res.get())
 
 
 @bp_auth.route('/avatars/<path:filename>')

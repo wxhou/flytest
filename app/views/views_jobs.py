@@ -50,7 +50,7 @@ def jobs(pd_id, t_id):
 def job(pk):
     """单步运行"""
     result = api_step_job.delay(int(pk))
-    current_app.logger.info(result.wait())
+    current_app.logger.info(result.get())
     flash("正在运行测试步骤：%s" % pk, "info")
     return redirect(request.referrer)
 
