@@ -3,7 +3,8 @@ import requests
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 from celery.signals import task_success, task_failure
-from .extensions import db
+from flask_mail import Message
+from .extensions import db, mail
 from .models import Apistep, Apitest, Work, Report, Bug, CronTabTask
 from .request import HttpRequest
 from .utils import generate_url
@@ -15,6 +16,18 @@ log = get_task_logger(__name__)
 ###########
 # Celery任务
 ###########
+
+@celery.task
+def send_register_email(register_url, email):
+    message = Message(subject="WXTEST激活链接",
+                      recipients=[email],
+                      html="""
+        <p>New User is register, click the link to check:</p>
+        <p><a href="%s">%s</a></P>        
+        <p><small style="color: #868e96">Do not reply this email.</small></p>
+        """ % (register_url, register_url))
+    mail.send(message)
+
 
 
 @celery.task

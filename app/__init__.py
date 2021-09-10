@@ -8,7 +8,7 @@ from flask_login import current_user
 
 from settings import BASE_DIR
 from .extensions import (db, login_manager, avatars, register_celery, limiter,
-                         migrate, moment, cache, scheduler)
+                         migrate, moment, mail, cache, scheduler)
 from .models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
@@ -42,6 +42,7 @@ def register_scheduler(app: Flask):
 
 def register_extensions(app: Flask):
     db.init_app(app)
+    mail.init_app(app)
     login_manager.init_app(app)
     avatars.init_app(app)
     migrate.init_app(app=app)

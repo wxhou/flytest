@@ -7,6 +7,8 @@ from flask_login import login_user, logout_user, login_required
 from app.models import db, User
 from app.extensions import cache
 from app.utils import get_captcha
+from app.tasks import send_register_email
+
 
 bp_auth = Blueprint('auth', __name__)
 
@@ -19,7 +21,10 @@ def login():
         remember = request.form.get("remember")
         if username and password:
             user = User.query.filter_by(email=username).first()
-            if user and user.verify_password(password):
+            if user and (not user.is_active):
+                flash('账户未激活！请先在邮箱中激活账户！', 'danger')
+                return redirect(request.referrer)
+            if user.verify_password(password):                    
                 login_user(user, remember)
                 next_url = request.args.get('next', url_for('wx.home.index'))
                 flash("登录成功！", 'success')
@@ -62,9 +67,25 @@ def register():
         user.password = password1
         db.session.add(user)
         db.session.commit()
-        flash("注册成功请登录", "success")
+        token = user.generate_token()
+        register_url = url_for('wx.auth.active_user', token=token, _external=True)
+        send_register_email.delay(register_url, user.email)
+        flash("注册成功，请先在邮箱中激活用户后登陆！", "success")
         return redirect(url_for('wx.auth.login'))
     return render_template('register.html')
+
+
+@bp_auth.get('/active/<token>')
+def active_user(token):
+    """激活用户"""
+    if user := User.validate_token(token):
+        user.is_active = True
+        user.token = ''
+        db.session.commit()
+        flash("激活用户成功，请登录！", "success")
+        return redirect(url_for('wx.auth.login'))
+    flash("验证已过期，请重新注册！", "danger")
+    return redirect(url_for('wx.auth.register'))
 
 
 @bp_auth.get("/captcha.png")

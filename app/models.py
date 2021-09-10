@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-from werkzeug.security import generate_password_hash, check_password_hash
+import uuid
+import hashlib
 from datetime import datetime
+
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session, current_app
 from flask_login import UserMixin, current_user
 from flask_avatars import Identicon
@@ -21,7 +24,8 @@ class User(db.Model, UserMixin):
     updated = db.Column(db.DateTime, onupdate=datetime.utcnow,
                         default=datetime.utcnow)
     is_deleted = db.Column(db.Boolean, default=False, nullable=False)
-
+    is_active = db.Column(db.Boolean, default=False, nullable=False)
+    
     products = db.relationship('Product', back_populates='user')
     apitests = db.relationship('Apitest', back_populates='user')
 
@@ -48,8 +52,23 @@ class User(db.Model, UserMixin):
     def verify_password(self, pwd):
         return check_password_hash(self.password_hash, pwd)
 
+    def generate_token(self):
+        token = uuid.uuid4().hex
+        obj = hashlib.md5(token.encode())
+        obj.update(str(self.id).encode())
+        self.token = obj.hexdigest()
+        db.session.commit()
+        return self.token
+
+    @staticmethod
+    def validate_token(token):
+        user = User.query.filter_by(token=token).one_or_none()
+        if user is not None:
+            return user
+        return False
+
     def __repr__(self):
-        return self.username
+        return "<User %s>" % self.username
 
 
 class Product(db.Model):

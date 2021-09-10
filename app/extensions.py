@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_avatars import Avatars
 from flask_moment import Moment
+from flask_mail import Mail
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_ipaddr, get_remote_address
@@ -13,6 +14,7 @@ from flask_limiter.util import get_ipaddr, get_remote_address
 
 db = SQLAlchemy()
 cache = Cache()
+mail = Mail()
 moment = Moment()
 avatars = Avatars()
 migrate = Migrate(db=db, render_as_batch=True)
