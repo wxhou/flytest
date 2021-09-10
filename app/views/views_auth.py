@@ -20,7 +20,7 @@ def login():
         password = request.form.get("password")
         remember = request.form.get("remember")
         if username and password:
-            user = User.query.filter_by(email=username).first()
+            user = User.query.filter_by(email=username, is_deleted=False).one_or_none()
             if user and (not user.is_active):
                 flash('账户未激活！请先在邮箱中激活账户！', 'danger')
                 return redirect(request.referrer)
