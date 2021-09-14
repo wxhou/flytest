@@ -8,7 +8,7 @@ from .extensions import db, mail
 from .models import Apistep, Apitest, Work, Report, Bug, CronTabTask
 from .request import HttpRequest
 from .utils import generate_url
-from server import my_celery as celery
+from server import flytest_celery as celery
 
 
 log = get_task_logger(__name__)

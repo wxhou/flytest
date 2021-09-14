@@ -23,8 +23,8 @@ def make_celery(app_name):
 
 
 init_env()
-my_celery = make_celery(__name__)
-app = create_app(celery=my_celery)
+flytest_celery = make_celery(__name__)
+app = create_app(celery=flytest_celery)
 
 
 
