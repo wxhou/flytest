@@ -21,7 +21,10 @@ def login():
         remember = request.form.get("remember")
         if username and password:
             user = User.query.filter_by(email=username, is_deleted=False).one_or_none()
-            if user and (not user.is_active):
+            if not user:
+                flash('账户不存在', 'danger')
+                return redirect(request.referrer)
+            if not user.is_active:
                 flash('账户未激活！请先在邮箱中激活账户！', 'danger')
                 return redirect(request.referrer)
             if user.verify_password(password):                    
@@ -29,7 +32,6 @@ def login():
                 next_url = request.args.get('next', url_for('wx.home.index'))
                 flash("登录成功！", 'success')
                 return redirect(next_url)
-        flash('账户不存在', 'danger')
         return redirect(request.referrer)
     return render_template('login.html')
 
