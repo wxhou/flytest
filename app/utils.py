@@ -4,11 +4,21 @@ import uuid
 import time
 import string
 import random
+import hashlib
 from itertools import product
 from urllib.parse import urljoin
 from flask import jsonify, current_app
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from settings import BASE_DIR
+
+
+
+def generate_token(obj_id):
+    token = uuid.uuid4().hex
+    obj = hashlib.md5(token.encode())
+    obj.update(str(obj_id).encode())
+    token = obj.hexdigest()
+    return token
 
 
 def generate_url(url, route):

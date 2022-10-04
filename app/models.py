@@ -1,14 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding:utf-8 -*-
-import uuid
-import hashlib
 from datetime import datetime
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session, current_app
 from flask_login import UserMixin, current_user
 from flask_avatars import Identicon
-from app.extensions import db
+from app.extensions import db, cache
 
 
 class User(db.Model, UserMixin):
@@ -16,7 +12,6 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(128), unique=True)
     username = db.Column(db.String(128))
     password_hash = db.Column(db.String(128))
-    token = db.Column(db.String(256))
     avatar_s = db.Column(db.String(64))
     avatar_m = db.Column(db.String(64))
     avatar_l = db.Column(db.String(64))
@@ -25,7 +20,7 @@ class User(db.Model, UserMixin):
                         default=datetime.utcnow)
     is_deleted = db.Column(db.Boolean, default=False, nullable=False)
     is_active = db.Column(db.Boolean, default=False, nullable=False)
-    
+
     products = db.relationship('Product', back_populates='user')
     apitests = db.relationship('Apitest', back_populates='user')
 
@@ -52,23 +47,11 @@ class User(db.Model, UserMixin):
     def verify_password(self, pwd):
         return check_password_hash(self.password_hash, pwd)
 
-    def generate_token(self):
-        token = uuid.uuid4().hex
-        obj = hashlib.md5(token.encode())
-        obj.update(str(self.id).encode())
-        self.token = obj.hexdigest()
-        db.session.commit()
-        return self.token
-
-    @staticmethod
-    def validate_token(token):
-        user = User.query.filter_by(token=token).one_or_none()
-        if user is not None:
-            return user
-        return False
-
     def __repr__(self):
-        return "<User %s>" % self.username
+        return self.username
+
+    def __str__(self) -> str:
+        return self.username
 
 
 class Product(db.Model):
@@ -171,8 +154,8 @@ class Apistep(db.Model):
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     types = db.Column(db.Integer, default=1)  # 1是普通任务 2是定时任务
-    task_id = db.Column(db.String(255), index=True)
-    name = db.Column(db.String(255), default="NULL")
+    task_id = db.Column(db.String(256), index=True)
+    name = db.Column(db.String(256), default="NULL")
     result = db.Column(db.String(2048))
     status = db.Column(db.Integer, default=-1)
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -187,7 +170,7 @@ class Report(db.Model):
 
 class Bug(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    task_id = db.Column(db.String(255), index=True)
+    task_id = db.Column(db.String(256), index=True)
     casename = db.Column(db.String(256))
     stepname = db.Column(db.String(512))
     request = db.Column(db.Text)
