@@ -2,7 +2,7 @@ from flask import request, current_app, Blueprint, url_for
 from flask import flash, redirect, render_template
 from flask_login import login_required
 from app.models import Product, Apiurl
-from app.extensions import db
+from app.core.extensions import db
 
 bp_environ = Blueprint('environ', __name__)
 

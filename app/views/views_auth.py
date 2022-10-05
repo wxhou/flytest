@@ -5,9 +5,9 @@ from flask import flash, redirect, render_template, url_for
 from flask_login import login_user, logout_user, login_required
 
 from app.models import db, User
-from app.extensions import cache
+from app.core.extensions import cache
 from app.utils import get_captcha, generate_token
-from app.tasks import send_register_email
+from app.views.tasks import send_register_email
 
 
 bp_auth = Blueprint('auth', __name__)

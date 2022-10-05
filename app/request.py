@@ -4,8 +4,8 @@ from string import Template
 from requests.sessions import Session
 from flask import current_app
 
-from .extensions import db, cache
-from .utils import header_to_dict, params2dict, generate_url, is_json_str
+from app.core.extensions import db, cache
+from app.utils import header_to_dict, params2dict, generate_url, is_json_str
 
 
 class BaseRequest(Session):

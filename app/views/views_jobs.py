@@ -10,8 +10,8 @@ from app.models import Product, Apitest, Apistep, Work, CronTabTask
 
 from app.choices import *
 from app.utils import response_error, response_success, uid_name
-from app.extensions import db, cache, raw_sql, scheduler
-from app.tasks import api_step_job, api_test_job, crontab_job, saver_crontab
+from app.core.extensions import db, cache, raw_sql, scheduler
+from app.views.tasks import api_step_job, api_test_job, crontab_job, saver_crontab
 
 
 bp_job = Blueprint('job', __name__)

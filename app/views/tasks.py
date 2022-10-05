@@ -4,11 +4,11 @@ from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
 from celery.signals import task_success, task_failure
 from flask_mail import Message
-from .extensions import db, mail
-from .models import Apistep, Apitest, Work, Report, Bug, CronTabTask
-from .request import HttpRequest
-from .utils import generate_url
-from server import flytest_celery as celery
+from app.core.extensions import db, mail
+from app.models import Apistep, Apitest, Work, Report, Bug, CronTabTask
+from app.request import HttpRequest
+from app.utils import generate_url
+from app.core.celery_app import celery
 
 
 log = get_task_logger(__name__)

@@ -3,7 +3,7 @@ from flask import url_for, flash, redirect, render_template
 from flask_login import login_required, current_user
 from app.choices import *
 from app.models import Product
-from app.extensions import db
+from app.core.extensions import db
 
 bp_product = Blueprint('product', __name__)
 

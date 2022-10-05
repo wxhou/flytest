@@ -9,7 +9,6 @@ from itertools import product
 from urllib.parse import urljoin
 from flask import jsonify, current_app
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from settings import BASE_DIR
 
 
 

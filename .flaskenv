@@ -1,1 +1,1 @@
-FLASK_APP=server.py
+FLASK_APP=flytest.py
