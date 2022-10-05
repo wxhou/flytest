@@ -1,4 +1,6 @@
-from app.settings import *
+import os
+from flytest import BASE_DIR
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 
 DEBUG = True
@@ -26,6 +28,14 @@ CACHE_CONFIG = {
     'CACHE_REDIS_PORT': 6379,
     "CACHE_DEFAULT_TIMEOUT": 600
 }
+
+AVATARS_SAVE_PATH = os.path.join(BASE_DIR, 'media', 'avatars')
+IMAGES_PATH = os.path.join(BASE_DIR, 'media', 'images')
+VIDEOS_PATH = os.path.join(BASE_DIR, 'media', 'videos')
+AUDIOS_PATH = os.path.join(BASE_DIR, 'media', 'audios')
+FLASK_LOGGER_FILE = os.path.join(BASE_DIR, 'logs', 'server.log')
+CAPTCHA_FONT_FILE = os.path.join(BASE_DIR, 'media', 'fonts', 'arial.ttf')
+
 
 # crontab-config
 SCHEDULER_API_ENABLED = True

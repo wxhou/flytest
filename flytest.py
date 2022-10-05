@@ -1,5 +1,7 @@
 import os
 import logging
+import platform
+import atexit
 import click
 from flask import Flask, render_template
 from flask_login import current_user
@@ -8,6 +10,9 @@ from app.core.extensions import (db, login_manager, avatars, register_celery, li
                          migrate, moment, mail, cache, scheduler)
 from app.core.celery_app import celery
 from app.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
+
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def create_app(**kwargs):
@@ -34,8 +39,46 @@ def register_blueprints(app: Flask):
 
 
 def register_scheduler(app: Flask):
-    scheduler.init_app(app)
-    scheduler.start()
+    """
+    保证系统只启动一次定时任务
+    :param app:
+    :return:
+    """
+    if platform.system() != 'Windows':
+        fcntl = __import__("fcntl")
+        f = open('scheduler.lock', 'wb')
+        try:
+            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            scheduler.init_app(app)
+            scheduler.start()
+            app.logger.debug('Scheduler Started,---------------')
+        except:
+            pass
+
+        def unlock():
+            fcntl.flock(f, fcntl.LOCK_UN)
+            f.close()
+
+        atexit.register(unlock)
+    else:
+        msvcrt = __import__('msvcrt')
+        f = open('scheduler.lock', 'wb')
+        try:
+            msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+            scheduler.init_app(app)
+            scheduler.start()
+            app.logger.debug('Scheduler Started,----------------')
+        except:
+            pass
+
+        def _unlock_file():
+            try:
+                f.seek(0)
+                msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+            except:
+                pass
+
+        atexit.register(_unlock_file)
 
 
 def register_extensions(app: Flask):
