@@ -1,6 +1,5 @@
 import os
 from flytest import BASE_DIR
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 
 DEBUG = True
@@ -40,9 +39,6 @@ CAPTCHA_FONT_FILE = os.path.join(BASE_DIR, 'media', 'fonts', 'arial.ttf')
 # crontab-config
 SCHEDULER_API_ENABLED = True
 SCHEDULER_TIMEZONE = 'Asia/Shanghai'
-SCHEDULER_JOBSTORES = {
-    'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI)
-}
 
 SCHEDULER_EXECUTORS = {
     'default': {'type': 'threadpool', 'max_workers': 20}

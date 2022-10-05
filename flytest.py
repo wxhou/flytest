@@ -5,6 +5,7 @@ import atexit
 import click
 from flask import Flask, render_template
 from flask_login import current_user
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 from app.core.extensions import (db, login_manager, avatars, register_celery, limiter,
                          migrate, moment, mail, cache, scheduler)
@@ -17,7 +18,9 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 def create_app(**kwargs):
     env = os.getenv('FLASK_ENV') or 'development'
-    app = Flask(__name__)
+    app = Flask(__name__,
+                template_folder='app/templates',
+                static_folder='app/static')
     print('use env is: %s' % env)
     _file = os.path.join(app.root_path, 'app', 'settings', env + '.py')
     app.config.from_pyfile(_file)
@@ -34,7 +37,7 @@ def create_app(**kwargs):
 
 
 def register_blueprints(app: Flask):
-    from app.views import bp_views  # 防止celery循环导入
+    from app.views import bp_views
     app.register_blueprint(bp_views, url_prefix='/')
 
 
@@ -44,6 +47,9 @@ def register_scheduler(app: Flask):
     :param app:
     :return:
     """
+    app.config['SCHEDULER_JOBSTORES'] = {
+            'default': SQLAlchemyJobStore(url=app.config['SQLALCHEMY_DATABASE_URI'])
+        }
     if platform.system() != 'Windows':
         fcntl = __import__("fcntl")
         f = open('scheduler.lock', 'wb')
