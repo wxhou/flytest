@@ -4,7 +4,7 @@ from string import Template
 from requests.sessions import Session
 from flask import current_app
 
-from app.core.extensions import db, cache
+from app.extensions import db, cache
 from app.utils import header_to_dict, params2dict, generate_url, is_json_str
 
 

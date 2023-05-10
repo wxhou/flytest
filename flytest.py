@@ -3,13 +3,14 @@ import logging
 import platform
 import atexit
 import click
+from celery import Celery
 from flask import Flask, render_template
 from flask_login import current_user
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
-from app.core.extensions import (db, login_manager, avatars, register_celery, limiter,
+from app.extensions import (db, login_manager, avatars, register_celery, limiter,
                          migrate, moment, mail, cache, scheduler)
-from app.core.celery_app import celery
+from app import celeryconfig
 from app.models import User, Product, Apiurl, Apitest, Apistep, Report, Bug, Work
 
 
@@ -209,6 +210,15 @@ def register_errors(app: Flask):
         return render_template('errors/500.html'), 500
 
 
+def make_celery(app_name):
+    _celery = Celery(app_name,
+                    broker=celeryconfig.broker_url,
+                    backend=celeryconfig.result_backend)
+    _celery.config_from_object(celeryconfig)
+    _celery.autodiscover_tasks(['app'])
+    return _celery
+
+celery = make_celery(__name__)
 app = create_app(celery=celery)
 if __name__ == "__main__":
     app.run(debug=True)

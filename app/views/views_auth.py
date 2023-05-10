@@ -5,7 +5,7 @@ from flask import flash, redirect, render_template, url_for
 from flask_login import login_user, logout_user, login_required
 
 from app.models import db, User
-from app.core.extensions import cache
+from app.extensions import cache
 from app.utils import get_captcha, generate_token
 from app.views.tasks import send_register_email
 

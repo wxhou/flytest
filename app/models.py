@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session, current_app
 from flask_login import UserMixin, current_user
 from flask_avatars import Identicon
-from app.core.extensions import db, cache
+from app.extensions import db, cache
 
 
 class User(db.Model, UserMixin):
